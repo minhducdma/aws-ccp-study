@@ -1,0 +1,154 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-aws: #ff9900;
+  --color-aws-dark: #ec7211;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html {
+  color-scheme: dark;
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-slate-950 text-slate-200 antialiased;
+  font-family: var(--font-sans);
+}
+
+::selection {
+  @apply bg-amber-500/30;
+}
+
+/* Thanh cuộn mảnh cho vùng nội dung dài */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme(colors.slate.700) transparent;
+}
+
+/* ---------- Nội dung markdown ---------- */
+.md {
+  @apply text-[15px] leading-relaxed text-slate-300;
+}
+
+.md > * + * {
+  @apply mt-4;
+}
+
+.md h1 {
+  @apply mt-0 mb-6 text-2xl font-bold text-white;
+}
+
+.md h2 {
+  @apply mt-10 mb-3 scroll-mt-24 border-b border-slate-800 pb-2 text-xl font-bold text-white;
+}
+
+.md h3 {
+  @apply mt-7 mb-2 scroll-mt-24 text-base font-bold text-amber-300;
+}
+
+.md h4 {
+  @apply mt-5 mb-2 text-sm font-bold tracking-wide text-slate-200 uppercase;
+}
+
+.md p {
+  @apply text-slate-300;
+}
+
+.md strong {
+  @apply font-semibold text-white;
+}
+
+.md em {
+  @apply text-amber-200/90 not-italic;
+}
+
+.md a {
+  @apply text-sky-400 underline decoration-sky-400/40 underline-offset-2 hover:decoration-sky-400;
+}
+
+.md ul {
+  @apply list-disc space-y-1.5 pl-6;
+}
+
+.md ol {
+  @apply list-decimal space-y-1.5 pl-6;
+}
+
+.md li::marker {
+  @apply text-slate-500;
+}
+
+.md li > ul,
+.md li > ol {
+  @apply mt-1.5;
+}
+
+.md code {
+  @apply rounded bg-slate-800/80 px-1.5 py-0.5 text-[0.85em] font-medium text-amber-200;
+}
+
+.md pre {
+  @apply overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/80 p-4;
+}
+
+.md pre code {
+  @apply bg-transparent p-0 text-slate-300;
+}
+
+.md blockquote {
+  @apply rounded-r-lg border-l-3 border-amber-500/60 bg-amber-500/5 py-3 pr-4 pl-4;
+}
+
+.md blockquote > * + * {
+  @apply mt-2;
+}
+
+.md blockquote p {
+  @apply text-slate-300;
+}
+
+.md hr {
+  @apply my-8 border-slate-800;
+}
+
+.md table {
+  @apply my-5 w-full border-collapse overflow-hidden text-left text-[13.5px];
+}
+
+.md thead {
+  @apply bg-slate-800/70;
+}
+
+.md th {
+  @apply border border-slate-700/70 px-3 py-2 font-semibold text-white;
+}
+
+.md td {
+  @apply border border-slate-800 px-3 py-2 align-top text-slate-300;
+}
+
+.md tbody tr:nth-child(even) {
+  @apply bg-slate-900/40;
+}
+
+.md table code {
+  @apply whitespace-nowrap;
+}
+
+.md details {
+  @apply rounded-xl border border-slate-800 bg-slate-900/60 p-4;
+}
+
+.md summary {
+  @apply cursor-pointer font-semibold text-amber-300;
+}
+
+.md input[type='checkbox'] {
+  @apply mr-1 accent-amber-500;
+}
+
+/* Bảng có nhiều cột trong notes: cho phép cuộn ngang */
+.md-scroll table {
+  @apply block max-w-full overflow-x-auto whitespace-normal;
+}

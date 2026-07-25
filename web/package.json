@@ -1,0 +1,33 @@
+{
+  "name": "aws-ccp-study-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "content": "node scripts/build-content.mjs",
+    "predev": "npm run content",
+    "dev": "vite",
+    "prebuild": "npm run content",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview",
+    "check": "node scripts/build-content.mjs --verbose",
+    "smoke": "node scripts/build-content.mjs && node scripts/smoke.mjs",
+    "verify": "node scripts/build-content.mjs && node scripts/verify-answers.mjs"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.9.1",
+    "remark-gfm": "^4.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/react": "^19.1.13",
+    "@types/react-dom": "^19.1.9",
+    "@vitejs/plugin-react": "^5.0.2",
+    "tailwindcss": "^4.1.13",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}
