@@ -105,7 +105,7 @@ Firebase access is split by responsibility:
 | `src/services/firebase/collections/userProgress.ts` | Reads, writes and subscribes to progress documents |
 | `src/features/auth/provider.tsx` | `AuthProvider` and `useAuth()`: sign up, sign in, Google sign-in, sign out |
 
-`AuthProvider` sits in `main.tsx`, above the router, so `useAuth()` works on every screen. `AuthWidget` is the sign-in link or account initial used by the app shell. `AuthForm` is the shared component behind `/login` and `/signup`; both live in `src/features/auth/components/`.
+`AuthProvider` sits in `main.tsx`, above the router, so `useAuth()` works on every screen. For guests, `AuthWidget` opens `AuthDialog` in sign-in or sign-up mode without leaving the current course page. `AuthForm` supplies the shared form body; `/login` and `/signup` retain standalone fallbacks for old bookmarks and direct links. These components live in `src/features/auth/components/`.
 
 `AuthProvider` calls `bindProgressUser(uid | null)` whenever the signed-in user changes. The UI still reads one in-memory course object, but Firestore stores each independently changing part separately:
 

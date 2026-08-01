@@ -147,14 +147,13 @@ export default function AppHeader({
             open={utilityMenuOpen}
             onOpenChange={setUtilityMenuOpen}
             title={t('nav.settings')}
-            variant="compact"
           >
             <div className="space-y-5 px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
               <div>
                 <p className="mb-2 text-xs font-bold tracking-wide text-slate-500 uppercase">
                   {t('locale.label')}
                 </p>
-                <LocaleSwitch className="w-full" />
+                <LocaleSwitch />
               </div>
               <div className="border-t border-line pt-4">
                 <AuthWidget className="w-full justify-between" />

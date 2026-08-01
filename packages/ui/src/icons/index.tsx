@@ -1,5 +1,16 @@
 import type { SVGProps } from 'react';
 
+export {
+  Eye as EyeIcon,
+  EyeOff as EyeOffIcon,
+  LockKeyhole as LockKeyholeIcon,
+  LogIn as LogInIcon,
+  LogOut as LogOutIcon,
+  Mail as MailIcon,
+  UserPlus as UserPlusIcon,
+  UserRound as UserRoundIcon,
+} from 'lucide-react';
+
 /**
  * A small stroke icon set drawn on a 24-unit grid.
  *

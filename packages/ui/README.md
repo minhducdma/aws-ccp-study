@@ -57,7 +57,7 @@ The rule we follow: animation that loops for ever, and small feedback like hover
 
 This is the main reason we chose Radix. The parts that are easy to get wrong by hand are already correct:
 
-- `ConfirmDialog` replaces `window.confirm`. It keeps the focus inside the dialog, gives it back to the old button on close, closes on Escape, and joins `aria-labelledby` and `aria-describedby` for you.
+- `Dialog` and `ConfirmDialog` keep focus inside the overlay, give it back on close, close on Escape, and join `aria-labelledby` and `aria-describedby` for you.
 - `Sheet` is the phone menu. It keeps the focus inside the panel and turns off the page behind it.
 - `Progress` sends `role="progressbar"` with `aria-valuenow`. The `label` prop is required, because a progress bar read out as a bare number means nothing.
 - `Switch` sends `role="switch"` with `aria-checked`, which a normal button cannot do.

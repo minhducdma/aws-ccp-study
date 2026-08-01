@@ -1,7 +1,10 @@
 import {
+  browserLocalPersistence,
+  browserSessionPersistence,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   onAuthStateChanged,
+  setPersistence,
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
@@ -22,9 +25,9 @@ import { bindProgressUser } from '../course/progress';
 export interface AuthValue {
   /** Undefined while Firebase has not resolved the initial session yet. */
   user: User | null | undefined;
-  signUp: (email: string, password: string, displayName?: string) => Promise<void>;
-  signIn: (email: string, password: string) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signUp: (email: string, password: string, displayName: string | undefined, remember: boolean) => Promise<void>;
+  signIn: (email: string, password: string, remember: boolean) => Promise<void>;
+  signInWithGoogle: (remember: boolean) => Promise<void>;
   logOut: () => Promise<void>;
 }
 
@@ -37,6 +40,10 @@ export function useAuth(): AuthValue {
 }
 
 const googleProvider = new GoogleAuthProvider();
+
+function setAuthPersistence(remember: boolean) {
+  return setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null | undefined>(undefined);
@@ -53,14 +60,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthValue>(
     () => ({
       user,
-      signUp: async (email, password, displayName) => {
+      signUp: async (email, password, displayName, remember) => {
+        await setAuthPersistence(remember);
         const credential = await createUserWithEmailAndPassword(auth, email, password);
         if (displayName) await updateProfile(credential.user, { displayName });
       },
-      signIn: async (email, password) => {
+      signIn: async (email, password, remember) => {
+        await setAuthPersistence(remember);
         await signInWithEmailAndPassword(auth, email, password);
       },
-      signInWithGoogle: async () => {
+      signInWithGoogle: async (remember) => {
+        await setAuthPersistence(remember);
         await signInWithPopup(auth, googleProvider);
       },
       logOut: async () => {

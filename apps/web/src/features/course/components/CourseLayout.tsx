@@ -90,9 +90,9 @@ function CourseShell({
 
   const sidebar = (
     <nav className="space-y-6 p-4" aria-label={t('nav.courseContents')}>
-      <div className="flex items-center gap-2 border-b border-line pb-4 lg:hidden">
+      <div className="space-y-4 border-b border-line pb-4 lg:hidden">
         <LocaleSwitch />
-        <AuthWidget className="ml-auto" />
+        <AuthWidget className="w-full" />
       </div>
       <div className="space-y-1">
         <NavItem to="/" end>

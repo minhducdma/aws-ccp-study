@@ -13,7 +13,7 @@ export default function LocaleSwitch({ className }: { className?: string }) {
       role="group"
       aria-label={t('locale.label')}
       className={[
-        'flex items-center gap-1 rounded-lg border border-line bg-surface/60 p-1',
+        'inline-flex items-center gap-1 rounded-lg border border-line bg-surface/60 p-1',
         className ?? '',
       ].join(' ')}
     >
