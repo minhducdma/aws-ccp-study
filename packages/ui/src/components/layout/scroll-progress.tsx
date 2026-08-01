@@ -1,6 +1,6 @@
 import { useScroll, useSpring } from 'motion/react';
 import * as m from 'motion/react-m';
-import { cn } from '../lib/cn';
+import { cn } from '../../utils/cn';
 
 /**
  * Thin bar showing how far down the page the reader is.

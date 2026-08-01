@@ -1,7 +1,7 @@
 import * as ProgressPrimitive from '@radix-ui/react-progress';
 import * as m from 'motion/react-m';
-import { cn } from '../lib/cn';
-import { transition } from '../motion/presets';
+import { cn } from '../../utils/cn';
+import { transition } from '../../motion/presets';
 
 const tones = {
   amber: 'bg-brand-500',

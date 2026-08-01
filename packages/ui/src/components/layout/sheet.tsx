@@ -2,8 +2,8 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { AnimatePresence } from 'motion/react';
 import * as m from 'motion/react-m';
 import type { ReactNode } from 'react';
-import { XIcon } from '../illustrations/icons';
-import { transition } from '../motion/presets';
+import { XIcon } from '../../icons';
+import { transition } from '../../motion/presets';
 
 export interface SheetProps {
   open: boolean;

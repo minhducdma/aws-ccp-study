@@ -9,9 +9,14 @@ This package ships TypeScript source and has no build step of its own. Vite comp
 | Folder | What is inside |
 |---|---|
 | `src/tokens.css` | Design tokens in a Tailwind v4 `@theme` block, plus the `prefers-reduced-motion` rule and the `focus-ring` utility |
-| `src/primitives/` | The reusable parts: `Button`, `Card`, `Badge`, `Progress`, `Switch`, `Tabs`, `ConfirmDialog`, `Sheet` and more |
+| `src/components/controls/` | Interactive controls such as `Button`, `Switch` and `Tabs` |
+| `src/components/data-display/` | Components that present values and status, such as `Badge`, `Progress` and `StatTile` |
+| `src/components/feedback/` | Loading, empty and confirmation states |
+| `src/components/layout/` | Reusable containers and overlays such as `Card` and `Sheet` |
+| `src/icons/` | Small interface icons that inherit `currentColor` |
+| `src/illustrations/` | Larger, domain-specific SVG artwork |
 | `src/motion/` | The animation provider and the shared variant presets |
-| `src/illustrations/` | Hand written SVG icons and pictures |
+| `src/utils/` | Framework-independent helpers shared by components |
 
 ## Setup in an app
 
@@ -80,7 +85,9 @@ npx esbuild /tmp/probe.js --bundle --minify --format=esm --external:react --exte
 
 ## Add a component
 
-Put the file in `src/primitives/`. Use `cva` for the variants and `cn()` to join the classes. `cn()` runs through `tailwind-merge`, so a class passed from outside beats the default class of the same group, which is why `className="px-8"` can override the `px-4` of a variant. Export it again from `src/index.ts` at the end.
+Put the file in the `src/components/` group that owns its role, and export it from that group's `index.ts`. The root barrel already re-exports every group, so consumers continue to import from `@study/ui`.
+
+Use `cva` for variants and `cn()` to join classes. `cn()` runs through `tailwind-merge`, so a class passed from outside beats the default class of the same group, which is why `className="px-8"` can override the `px-4` of a variant. Keep small interface symbols in `src/icons/`; reserve `src/illustrations/` for larger artwork.
 
 ## Related docs
 

@@ -2,9 +2,9 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { AnimatePresence } from 'motion/react';
 import * as m from 'motion/react-m';
 import { useState, type ReactNode } from 'react';
-import { cn } from '../lib/cn';
-import { fadeIn, scaleIn } from '../motion/presets';
-import { Button, type ButtonVariants } from './button';
+import { cn } from '../../utils/cn';
+import { fadeIn, scaleIn } from '../../motion/presets';
+import { Button, type ButtonVariants } from '../controls/button';
 
 export interface ConfirmDialogProps {
   /** Any element; it receives the open handler through Radix's `asChild`. */

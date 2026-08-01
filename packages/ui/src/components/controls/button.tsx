@@ -1,8 +1,8 @@
 import { cva, type VariantProps } from 'class-variance-authority';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
-import { cn } from '../lib/cn';
-import { Spinner } from './spinner';
+import { cn } from '../../utils/cn';
+import { Spinner } from '../feedback/spinner';
 
 /**
  * Press and hover feedback is plain CSS rather than Motion: buttons are the most numerous

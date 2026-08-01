@@ -1,4 +1,4 @@
-import { cn } from '../lib/cn';
+import { cn } from '../../utils/cn';
 
 /**
  * Placeholder block with a travelling highlight. The gradient is twice the element's width and

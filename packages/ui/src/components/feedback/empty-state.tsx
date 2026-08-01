@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { cn } from '../lib/cn';
-import { Card } from './card';
+import { cn } from '../../utils/cn';
+import { Card } from '../layout/card';
 
 export interface EmptyStateProps {
   title: string;

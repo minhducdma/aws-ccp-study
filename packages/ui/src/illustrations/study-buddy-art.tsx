@@ -1,6 +1,6 @@
 import * as m from 'motion/react-m';
 import { useId } from 'react';
-import { cn } from '../lib/cn';
+import { cn } from '../utils/cn';
 
 export function StudyBuddyArt({ className, label }: { className?: string; label: string }) {
   const uid = useId().replace(/:/g, '');

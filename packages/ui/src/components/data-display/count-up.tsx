@@ -1,7 +1,7 @@
 import { animate, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
 import * as m from 'motion/react-m';
 import { useEffect } from 'react';
-import { easeOutExpo } from '../motion/presets';
+import { easeOutExpo } from '../../motion/presets';
 
 export interface CountUpProps {
   value: number;
