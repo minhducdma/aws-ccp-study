@@ -1,8 +1,22 @@
+import {
+  Badge,
+  Card,
+  ChevronRightIcon,
+  ClockIcon,
+  LevelGlyph,
+  LockIcon,
+  Progress,
+  ProgressRing,
+  RoadmapArt,
+  fadeUp,
+  m,
+  stagger,
+  type CourseLevel,
+} from '@study/ui';
 import { Link } from 'react-router-dom';
 import { content, courses } from '../lib/content';
 import { courseUrl } from '../lib/course';
 import { emptyCourseProgress, hasPassed, useAllProgress } from '../lib/progress';
-import { Badge, Card, ProgressBar } from '../components/ui';
 import type { Course, CourseProgress } from '../types';
 
 const LEVEL_BLURB: Record<string, string> = {
@@ -11,6 +25,13 @@ const LEVEL_BLURB: Record<string, string> = {
   Professional: 'Dành cho người đã có hai năm trở lên vận hành hệ thống lớn trên AWS.',
   Specialty: 'Đi sâu vào một lĩnh vực hẹp, thường học sau khi đã có chứng chỉ Associate.',
 };
+
+function levelKey(level: string): CourseLevel {
+  const key = level.toLowerCase();
+  return (['foundational', 'associate', 'professional', 'specialty'].includes(key)
+    ? key
+    : 'foundational') as CourseLevel;
+}
 
 function courseStats(course: Course, progress: CourseProgress) {
   const passed = course.phases.filter((p) => hasPassed(progress, p.gateQuiz?.id));
@@ -30,59 +51,107 @@ function AvailableCard({ course, progress }: { course: Course; progress: CourseP
   const stats = courseStats(course, progress);
 
   return (
-    <Link
-      to={courseUrl(course.id)}
-      className="group block rounded-2xl border border-amber-500/30 bg-amber-500/5 p-5 transition-colors hover:border-amber-500/60 hover:bg-amber-500/10"
-    >
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge tone="amber">{course.code}</Badge>
-        <Badge tone="sky">{course.level}</Badge>
-        {stats.started ? (
-          <Badge tone="green">Đang học</Badge>
-        ) : (
-          <Badge tone="slate">Sẵn sàng</Badge>
-        )}
-      </div>
+    <m.li variants={fadeUp} whileHover={{ y: -4 }} whileTap={{ scale: 0.99 }} className="list-none">
+      <Link
+        to={courseUrl(course.id)}
+        className={[
+          'group focus-ring relative block h-full overflow-hidden rounded-2xl border border-brand-500/30 p-5',
+          'bg-gradient-to-br from-brand-500/10 via-surface/40 to-surface/40',
+          'transition-colors duration-200 hover:border-brand-500/60',
+        ].join(' ')}
+      >
+        {/* Sheen that sweeps across on hover */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/[0.06] to-transparent transition-transform duration-700 ease-out-expo group-hover:translate-x-full"
+        />
 
-      <h3 className="mt-3 font-semibold text-white group-hover:text-amber-200">{course.title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{course.summary}</p>
-
-      <div className="mt-4 space-y-2">
-        <div className="flex items-center justify-between text-xs text-slate-500">
-          <span>
-            {stats.passedPhases}/{stats.totalPhases} phase đã pass
-          </span>
-          <span>{stats.readiness}% đề thi đã nắm</span>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="amber">{course.code}</Badge>
+            <Badge tone="sky" className="gap-1.5">
+              <LevelGlyph level={levelKey(course.level)} />
+              {course.level}
+            </Badge>
+            {stats.started ? (
+              <Badge tone="green" dot>
+                Đang học
+              </Badge>
+            ) : (
+              <Badge tone="slate">Sẵn sàng</Badge>
+            )}
+          </div>
+          {stats.readiness > 0 && (
+            <ProgressRing
+              value={stats.readiness}
+              max={100}
+              size={52}
+              label={`Mức sẵn sàng ${course.code}`}
+            />
+          )}
         </div>
-        <ProgressBar value={stats.readiness} max={100} tone="amber" />
-      </div>
 
-      <p className="mt-4 text-xs text-slate-500">
-        {course.questionCount} câu hỏi · {course.mockExams.length} đề thi thử · ~
-        {course.estimatedHours} giờ
-      </p>
-    </Link>
+        <h3 className="mt-3 font-semibold text-white transition-colors group-hover:text-brand-200">
+          {course.title}
+        </h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{course.summary}</p>
+
+        <div className="mt-4 space-y-2">
+          <div className="flex items-center justify-between text-xs text-slate-500">
+            <span>
+              {stats.passedPhases}/{stats.totalPhases} phase đã pass
+            </span>
+            <span>{stats.readiness}% đề thi đã nắm</span>
+          </div>
+          <Progress
+            value={stats.readiness}
+            max={100}
+            tone="amber"
+            label={`Mức sẵn sàng cho ${course.title}`}
+          />
+        </div>
+
+        <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
+          <span className="inline-flex items-center gap-1.5">
+            <ClockIcon width={14} height={14} />
+            {course.questionCount} câu · {course.mockExams.length} đề thử · ~{course.estimatedHours} giờ
+          </span>
+          <ChevronRightIcon
+            width={16}
+            height={16}
+            className="text-slate-600 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-brand-400"
+          />
+        </div>
+      </Link>
+    </m.li>
   );
 }
 
 function PlannedCard({ course }: { course: Course }) {
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-5 opacity-70">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge tone="slate">{course.code}</Badge>
-        <Badge tone="slate">{course.level}</Badge>
-        <span className="ml-auto text-slate-600" aria-label="Chưa mở">
-          🔒
-        </span>
-      </div>
+    <m.li variants={fadeUp} className="list-none">
+      <Card variant="muted" inset="md" className="h-full">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge tone="slate">{course.code}</Badge>
+          <Badge tone="slate" className="gap-1.5">
+            <LevelGlyph level={levelKey(course.level)} />
+            {course.level}
+          </Badge>
+          <span className="ml-auto text-slate-600">
+            <LockIcon width={16} height={16} />
+            <span className="sr-only">Chưa mở</span>
+          </span>
+        </div>
 
-      <h3 className="mt-3 font-semibold text-slate-300">{course.title}</h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{course.summary}</p>
+        <h3 className="mt-3 font-semibold text-slate-300">{course.title}</h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{course.summary}</p>
 
-      <p className="mt-4 text-xs text-slate-600">
-        Chưa có nội dung · {course.exam.totalQuestions} câu · {course.exam.durationMin} phút
-      </p>
-    </div>
+        <p className="mt-4 text-xs text-slate-600">
+          Chưa mở vì nội dung đang được soạn · {course.exam.totalQuestions} câu ·{' '}
+          {course.exam.durationMin} phút
+        </p>
+      </Card>
+    </m.li>
   );
 }
 
@@ -99,22 +168,37 @@ export default function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-8 sm:py-14">
-      <header className="mb-10">
-        <p className="text-xs font-semibold tracking-widest text-amber-500 uppercase">
-          Lộ trình chứng chỉ AWS
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Chọn chứng chỉ để bắt đầu</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">
-          Mỗi chứng chỉ là một khoá học độc lập: chia phase theo đúng trọng số domain của kỳ thi, có
-          notes, ngân hàng câu hỏi lấy từ đề gốc, gate quiz chặn giữa các phase và đề thi thử bấm giờ.
-          Tiến độ được lưu riêng cho từng chứng chỉ.
-        </p>
-      </header>
+      <m.header
+        className="mb-12 grid items-center gap-8 md:grid-cols-[1.1fr_0.9fr]"
+        variants={stagger(0.08)}
+        initial="hidden"
+        animate="visible"
+      >
+        <div>
+          <m.p
+            variants={fadeUp}
+            className="text-xs font-semibold tracking-widest text-brand-500 uppercase"
+          >
+            Lộ trình chứng chỉ AWS
+          </m.p>
+          <m.h1 variants={fadeUp} className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+            Chọn chứng chỉ để bắt đầu
+          </m.h1>
+          <m.p variants={fadeUp} className="mt-3 text-sm leading-relaxed text-slate-400">
+            Mỗi chứng chỉ là một khoá học độc lập: chia phase theo đúng trọng số domain của kỳ thi, có
+            notes, ngân hàng câu hỏi lấy từ đề gốc, gate quiz chặn giữa các phase và đề thi thử bấm giờ.
+            Tiến độ được lưu riêng cho từng chứng chỉ.
+          </m.p>
+        </div>
+        <m.div variants={fadeUp} className="hidden md:block">
+          <RoadmapArt />
+        </m.div>
+      </m.header>
 
       {available.length === 0 && (
-        <Card className="mb-10 border-rose-500/30 bg-rose-500/5 p-5 text-sm text-slate-300">
-          Chưa có khoá học nào sẵn sàng. Thêm nội dung vào <code>courses/&lt;id&gt;/</code> rồi chạy
-          lại <code className="text-amber-300">npm run build</code>.
+        <Card inset="md" className="mb-10 border-rose-500/30 bg-rose-500/5 text-sm text-slate-300">
+          Chưa có khoá học nào sẵn sàng. Thêm nội dung vào <code>courses/&lt;id&gt;/</code> rồi chạy lại{' '}
+          <code className="text-brand-300">npm run build</code>.
         </Card>
       )}
 
@@ -122,15 +206,24 @@ export default function CatalogPage() {
         {levels.map((level) => {
           const group = courses.filter((c) => c.level === level);
           return (
-            <section key={level}>
+            <section key={level} aria-labelledby={`level-${level}`}>
               <div className="mb-4">
-                <h2 className="text-lg font-bold text-white">{level}</h2>
+                <h2 id={`level-${level}`} className="flex items-center gap-2 text-lg font-bold text-white">
+                  <LevelGlyph level={levelKey(level)} />
+                  {level}
+                </h2>
                 {LEVEL_BLURB[level] && (
                   <p className="mt-0.5 text-sm text-slate-500">{LEVEL_BLURB[level]}</p>
                 )}
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <m.ul
+                className="grid gap-4 sm:grid-cols-2"
+                variants={stagger(0.06)}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.15 }}
+              >
                 {group.map((course) =>
                   course.status === 'available' ? (
                     <AvailableCard
@@ -142,14 +235,14 @@ export default function CatalogPage() {
                     <PlannedCard key={course.id} course={course} />
                   ),
                 )}
-              </div>
+              </m.ul>
             </section>
           );
         })}
       </div>
 
       {content.warnings.length > 0 && (
-        <Card className="mt-10 border-rose-500/30 bg-rose-500/5 p-5">
+        <Card inset="md" className="mt-10 border-rose-500/30 bg-rose-500/5">
           <p className="text-sm font-semibold text-rose-300">
             {content.warnings.length} cảnh báo khi đọc nội dung markdown
           </p>

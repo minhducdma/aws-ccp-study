@@ -1,3 +1,4 @@
+import { MotionProvider } from '@study/ui';
 import { renderToString } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../src/App';
@@ -23,10 +24,13 @@ export function routes(): string[] {
   return list;
 }
 
+/** Mirrors the provider stack in main.tsx, otherwise the `m` components throw. */
 export function render(route: string): string {
   return renderToString(
-    <MemoryRouter initialEntries={[route]}>
-      <App />
-    </MemoryRouter>,
+    <MotionProvider>
+      <MemoryRouter initialEntries={[route]}>
+        <App />
+      </MemoryRouter>
+    </MotionProvider>,
   );
 }

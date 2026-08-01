@@ -1,6 +1,17 @@
+import {
+  AllClearArt,
+  Badge,
+  Button,
+  ButtonLink,
+  CheckIcon,
+  EmptyState,
+  RotateIcon,
+  fadeUp,
+  m,
+  stagger,
+} from '@study/ui';
 import { useMemo, useState } from 'react';
 import QuestionCard from '../components/QuestionCard';
-import { Badge, Button, ButtonLink, EmptyState } from '../components/ui';
 import { isCorrect, lookupQuestion } from '../lib/content';
 import { useCourse } from '../lib/course';
 import { useProgress } from '../lib/progress';
@@ -25,16 +36,10 @@ export default function ReviewPage() {
     return (
       <div className="mx-auto max-w-2xl">
         <EmptyState
+          illustration={<AllClearArt />}
           title="Chưa có câu sai nào"
-          description={
-            <>
-              Mỗi khi bạn trả lời sai ở phần luyện tập, Gate Quiz hay thi thử, câu đó sẽ tự động xuất hiện ở
-              đây để ôn lại. Trả lời đúng lần nữa thì câu được xoá khỏi danh sách.
-              <div className="mt-5">
-                <ButtonLink to={url()}>Về tổng quan</ButtonLink>
-              </div>
-            </>
-          }
+          description="Mỗi khi bạn trả lời sai ở phần luyện tập, Gate Quiz hay thi thử, câu đó sẽ tự động xuất hiện ở đây để ôn lại. Trả lời đúng lần nữa thì câu được xoá khỏi danh sách."
+          action={<ButtonLink to={url()}>Về tổng quan</ButtonLink>}
         />
       </div>
     );
@@ -58,19 +63,25 @@ export default function ReviewPage() {
         <Badge tone="red">Sổ tay câu sai</Badge>
         <h1 className="mt-3 text-2xl font-bold text-white">{items.length} câu cần ôn lại</h1>
         <p className="mt-2 max-w-2xl text-sm text-slate-400">
-          Đây là những câu bạn từng trả lời sai, xếp theo số lần sai nhiều nhất. Trả lời đúng một lần nữa thì
-          câu sẽ được xoá khỏi danh sách. Đọc lại danh sách này ngay trước khi thi thật.
+          Đây là những câu bạn từng trả lời sai, xếp theo số lần sai nhiều nhất. Trả lời đúng một lần
+          nữa thì câu sẽ được xoá khỏi danh sách. Đọc lại danh sách này ngay trước khi thi thật.
         </p>
       </header>
 
-      <div className="space-y-4">
+      <m.div
+        className="space-y-4"
+        variants={stagger(0.05)}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.02 }}
+      >
         {items.map((item) => {
           const question = item.question!;
           const selected = attempts[item.id] ?? [];
           const isRevealed = revealed.has(item.id);
 
           return (
-            <div key={item.id} className="space-y-2">
+            <m.div key={item.id} variants={fadeUp} className="space-y-2">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="text-slate-500">{item.context}</span>
                 <Badge tone="red">Sai {item.times} lần</Badge>
@@ -86,13 +97,13 @@ export default function ReviewPage() {
               <div className="flex flex-wrap gap-2">
                 {!isRevealed ? (
                   <Button
+                    size="sm"
                     disabled={selected.length === 0}
                     onClick={() => {
                       setRevealed((prev) => new Set(prev).add(item.id));
                       if (isCorrect(question, selected)) clearWrong(item.id);
                       else recordWrong([item.id]);
                     }}
-                    className="text-xs"
                   >
                     Kiểm tra
                   </Button>
@@ -100,6 +111,8 @@ export default function ReviewPage() {
                   <>
                     <Button
                       tone="secondary"
+                      size="sm"
+                      icon={<RotateIcon width={14} height={14} />}
                       onClick={() =>
                         setRevealed((prev) => {
                           const next = new Set(prev);
@@ -107,20 +120,24 @@ export default function ReviewPage() {
                           return next;
                         })
                       }
-                      className="text-xs"
                     >
                       Thử lại
                     </Button>
-                    <Button tone="ghost" onClick={() => clearWrong(item.id)} className="text-xs">
+                    <Button
+                      tone="ghost"
+                      size="sm"
+                      icon={<CheckIcon width={14} height={14} />}
+                      onClick={() => clearWrong(item.id)}
+                    >
                       Đánh dấu đã thuộc
                     </Button>
                   </>
                 )}
               </div>
-            </div>
+            </m.div>
           );
         })}
-      </div>
+      </m.div>
     </div>
   );
 }

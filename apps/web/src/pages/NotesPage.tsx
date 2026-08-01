@@ -1,7 +1,15 @@
+import {
+  ArrowRightIcon,
+  Button,
+  ButtonLink,
+  CheckIcon,
+  EmptyState,
+  MissingArt,
+  ScrollProgress,
+} from '@study/ui';
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import Markdown from '../components/Markdown';
-import { Button, ButtonLink, EmptyState } from '../components/ui';
 import { getPhase } from '../lib/content';
 import { useCourse } from '../lib/course';
 import { useProgress } from '../lib/progress';
@@ -38,8 +46,9 @@ export default function NotesPage() {
   if (!phase || !note) {
     return (
       <EmptyState
+        illustration={<MissingArt />}
         title="Chưa có nội dung"
-        description="Phần notes của phase này chưa được soạn xong. Chạy lại npm run content sau khi file markdown xuất hiện."
+        description="Phần notes của phase này chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện."
       />
     );
   }
@@ -48,24 +57,30 @@ export default function NotesPage() {
 
   return (
     <div className="mx-auto flex max-w-6xl gap-10">
+      <ScrollProgress />
+
       <article className="min-w-0 flex-1">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <div>
-            <p className="text-xs font-semibold tracking-wide text-amber-500 uppercase">
+            <p className="text-xs font-semibold tracking-wide text-brand-500 uppercase">
               Phase {phase.order} · {phase.weight}% đề thi
             </p>
             <h1 className="mt-1 text-xl font-bold text-white">
               {phase.title} — {note.title}
             </h1>
           </div>
-          <Button tone={read ? 'secondary' : 'primary'} onClick={() => markNoteRead(note.id, !read)}>
-            {read ? '✓ Đã đọc' : 'Đánh dấu đã đọc'}
+          <Button
+            tone={read ? 'pass' : 'primary'}
+            icon={read ? <CheckIcon width={16} height={16} /> : undefined}
+            onClick={() => markNoteRead(note.id, !read)}
+          >
+            {read ? 'Đã đọc' : 'Đánh dấu đã đọc'}
           </Button>
         </div>
 
         <Markdown className="md-scroll">{note.markdown}</Markdown>
 
-        <div className="mt-10 flex flex-wrap gap-3 border-t border-slate-800 pt-6">
+        <div className="mt-10 flex flex-wrap gap-3 border-t border-line pt-6">
           {phase.notes
             .filter((n) => n.id !== note.id)
             .map((other) => (
@@ -79,21 +94,25 @@ export default function NotesPage() {
             ))}
           {phase.practice && (
             <ButtonLink to={url(`/phase/${phase.id}/practice`)}>
-              Sang luyện tập ({phase.practice.questions.length} câu) →
+              Sang luyện tập ({phase.practice.questions.length} câu)
+              <ArrowRightIcon width={16} height={16} />
             </ButtonLink>
           )}
         </div>
       </article>
 
       {outline.length > 2 && (
-        <nav className="sticky top-[89px] hidden h-fit max-h-[calc(100vh-140px)] w-56 shrink-0 overflow-y-auto xl:block">
+        <nav
+          aria-label="Mục lục bài viết"
+          className="sticky top-[89px] hidden h-fit max-h-[calc(100vh-140px)] w-56 shrink-0 overflow-y-auto xl:block"
+        >
           <p className="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">Trong bài</p>
-          <ul className="space-y-1 border-l border-slate-800">
+          <ul className="space-y-1 border-l border-line">
             {outline.map((item) => (
               <li key={item.slug}>
                 <a
                   href={`#${item.slug}`}
-                  className="block border-l-2 border-transparent py-1 pl-3 text-xs text-slate-400 transition-colors hover:border-amber-500 hover:text-amber-300"
+                  className="focus-ring block border-l-2 border-transparent py-1 pl-3 text-xs text-slate-400 transition-all duration-200 hover:border-brand-500 hover:pl-4 hover:text-brand-300"
                 >
                   {item.text}
                 </a>

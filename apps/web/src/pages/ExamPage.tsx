@@ -1,7 +1,28 @@
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  Badge,
+  Button,
+  ButtonLink,
+  Card,
+  ConfirmDialog,
+  EmptyState,
+  MissingArt,
+  Progress,
+  RetryArt,
+  StatTile,
+  SummitArt,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+  fadeUp,
+  m,
+  stagger,
+} from '@study/ui';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QuestionCard from '../components/QuestionCard';
-import { Badge, Button, ButtonLink, Card, EmptyState, ProgressBar, StatTile } from '../components/ui';
 import { domainLabel, formatDuration, getExam, isCorrect } from '../lib/content';
 import { useCourse } from '../lib/course';
 import { attemptsFor, hasPassed, useProgress } from '../lib/progress';
@@ -62,8 +83,9 @@ export default function ExamPage() {
   if (!exam) {
     return (
       <EmptyState
+        illustration={<MissingArt />}
         title="Chưa có bài thi này"
-        description="Nội dung đề chưa được soạn xong. Chạy lại npm run content sau khi file markdown xuất hiện."
+        description="Nội dung đề chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện."
       />
     );
   }
@@ -107,6 +129,7 @@ export default function ExamPage() {
   const question = questions[index];
   const selected = answers[question.id] ?? [];
   const answeredCount = questions.filter((q) => (answers[q.id]?.length ?? 0) > 0).length;
+  const unanswered = questions.length - answeredCount;
   const remaining = deadline - now;
   const urgent = remaining < 5 * 60_000;
 
@@ -131,41 +154,55 @@ export default function ExamPage() {
     });
   };
 
-  const confirmSubmit = () => {
-    const unanswered = questions.length - answeredCount;
-    const message =
-      unanswered > 0
-        ? `Còn ${unanswered} câu chưa trả lời (tính là sai). Nộp bài luôn?`
-        : 'Nộp bài và xem kết quả?';
-    if (confirm(message)) submit(answers);
-  };
+  const submitDialog = (trigger: React.ReactNode) => (
+    <ConfirmDialog
+      trigger={trigger}
+      title="Nộp bài và xem kết quả?"
+      description={
+        unanswered > 0
+          ? `Còn ${unanswered} câu chưa trả lời và sẽ được tính là sai. Bạn vẫn muốn nộp bài chứ?`
+          : 'Bạn đã trả lời hết các câu. Sau khi nộp sẽ không sửa được nữa.'
+      }
+      confirmLabel="Nộp bài"
+      tone={unanswered > 0 ? 'danger' : 'primary'}
+      onConfirm={() => submit(answers)}
+    />
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
-      <header className="sticky top-[57px] z-10 -mx-4 border-b border-slate-800 bg-slate-950/95 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8">
+      <header className="sticky top-[57px] z-10 -mx-4 border-b border-line bg-canvas/95 px-4 py-3 backdrop-blur sm:-mx-8 sm:px-8">
         <div className="flex flex-wrap items-center gap-3">
           <Badge tone={kind === 'mock' ? 'sky' : 'amber'}>{label}</Badge>
           <span
-            className={`ml-auto font-mono text-lg font-bold tabular-nums ${
-              urgent ? 'text-rose-400' : 'text-white'
+            role="timer"
+            aria-live={urgent ? 'polite' : 'off'}
+            aria-label={`Thời gian còn lại ${formatDuration(remaining)}`}
+            className={`ml-auto font-mono text-lg font-bold tabular-nums transition-colors ${
+              urgent ? 'animate-pulse text-rose-400' : 'text-white'
             }`}
           >
             {formatDuration(remaining)}
           </span>
-          <Button tone="secondary" onClick={confirmSubmit} className="text-xs">
-            Nộp bài
-          </Button>
+          {submitDialog(
+            <Button tone="secondary" size="sm">
+              Nộp bài
+            </Button>,
+          )}
         </div>
         <div className="mt-2 flex items-center gap-3">
-          <ProgressBar value={answeredCount} max={questions.length} />
+          <Progress value={answeredCount} max={questions.length} label="Số câu đã trả lời" />
           <span className="shrink-0 text-xs text-slate-500">
             {answeredCount}/{questions.length} đã trả lời
           </span>
         </div>
       </header>
 
-      <Card className="p-4">
-        <div className="grid grid-cols-8 gap-1.5 sm:grid-cols-12 lg:grid-cols-[repeat(15,minmax(0,1fr))]">
+      <Card inset="sm">
+        <nav
+          aria-label="Danh sách câu hỏi"
+          className="grid grid-cols-8 gap-1.5 sm:grid-cols-12 lg:grid-cols-[repeat(15,minmax(0,1fr))]"
+        >
           {questions.map((q, i) => {
             const answered = (answers[q.id]?.length ?? 0) > 0;
             const isFlagged = flagged.has(q.id);
@@ -173,13 +210,17 @@ export default function ExamPage() {
               <button
                 key={q.id}
                 type="button"
+                aria-current={i === index ? 'true' : undefined}
+                aria-label={`Câu ${i + 1}${answered ? ', đã trả lời' : ', chưa trả lời'}${
+                  isFlagged ? ', đã đánh dấu' : ''
+                }`}
                 onClick={() => {
                   setIndex(i);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                className={`relative h-8 rounded-md text-xs font-semibold transition-colors ${
+                className={`focus-ring relative h-8 rounded-md text-xs font-semibold transition-all duration-200 hover:scale-105 ${
                   i === index
-                    ? 'bg-amber-500 text-slate-950'
+                    ? 'bg-brand-500 text-slate-950'
                     : answered
                       ? 'bg-slate-700 text-white hover:bg-slate-600'
                       : 'bg-slate-800/60 text-slate-500 hover:bg-slate-800'
@@ -187,33 +228,55 @@ export default function ExamPage() {
               >
                 {i + 1}
                 {isFlagged && (
-                  <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-sky-400" />
+                  <span className="absolute top-0.5 right-0.5 size-1.5 rounded-full bg-sky-400" />
                 )}
               </button>
             );
           })}
-        </div>
+        </nav>
       </Card>
 
       <div className="flex items-center justify-between text-sm">
         <span className="text-slate-400">
           Câu {index + 1} / {questions.length}
         </span>
-        <Button tone="ghost" onClick={toggleFlag} className="text-xs">
+        <Button
+          tone="ghost"
+          size="sm"
+          onClick={toggleFlag}
+          title="Câu được đánh dấu hiện chấm xanh trên lưới để bạn quay lại nhanh."
+        >
           {flagged.has(question.id) ? '● Bỏ đánh dấu' : '○ Đánh dấu xem lại'}
         </Button>
       </div>
 
-      <QuestionCard question={question} selected={selected} onToggle={toggle} />
+      {/* Keyed on the question so each one slides in; no exit animation, which would
+          add a delay to every navigation in a timed exam. */}
+      <m.div
+        key={question.id}
+        initial={{ opacity: 0, x: 16 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.22 }}
+      >
+        <QuestionCard question={question} selected={selected} onToggle={toggle} />
+      </m.div>
 
       <div className="flex items-center justify-between gap-3">
-        <Button tone="secondary" onClick={() => setIndex((i) => Math.max(0, i - 1))} disabled={index === 0}>
-          ← Câu trước
+        <Button
+          tone="secondary"
+          icon={<ArrowLeftIcon width={16} height={16} />}
+          onClick={() => setIndex((i) => Math.max(0, i - 1))}
+          disabled={index === 0}
+        >
+          Câu trước
         </Button>
         {index < questions.length - 1 ? (
-          <Button onClick={() => setIndex((i) => i + 1)}>Câu tiếp →</Button>
+          <Button onClick={() => setIndex((i) => i + 1)}>
+            Câu tiếp
+            <ArrowRightIcon width={16} height={16} />
+          </Button>
         ) : (
-          <Button onClick={confirmSubmit}>Nộp bài</Button>
+          submitDialog(<Button>Nộp bài</Button>)
         )}
       </div>
     </div>
@@ -240,69 +303,82 @@ function ExamIntro({
   onStart: () => void;
 }) {
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
-      <header>
-        <Badge tone={kind === 'mock' ? 'sky' : 'amber'}>{kind === 'mock' ? 'Thi thử' : 'Gate Quiz'}</Badge>
+    <m.div
+      className="mx-auto max-w-2xl space-y-6"
+      variants={stagger(0.07)}
+      initial="hidden"
+      animate="visible"
+    >
+      <m.header variants={fadeUp}>
+        <Badge tone={kind === 'mock' ? 'sky' : 'amber'}>
+          {kind === 'mock' ? 'Thi thử' : 'Gate Quiz'}
+        </Badge>
         <h1 className="mt-3 text-2xl font-bold text-white">{label}</h1>
         {previousPass && (
           <p className="mt-2 text-sm text-emerald-400">Bạn đã pass bài này. Có thể làm lại để ôn.</p>
         )}
-      </header>
+      </m.header>
 
-      <div className="grid gap-3 sm:grid-cols-3">
-        <StatTile label="Số câu" value={total} />
+      <m.div variants={fadeUp} className="grid gap-3 sm:grid-cols-3">
+        <StatTile label="Số câu" value={total} animate />
         <StatTile label="Thời gian" value={`${timeLimitMin}′`} />
         <StatTile
           label="Cần đúng"
           value={`≥${passScore}`}
           hint={`${Math.round((passScore / total) * 100)}%`}
         />
-      </div>
+      </m.div>
 
-      <Card className="p-5">
-        <p className="mb-3 text-sm font-semibold text-white">Luật làm bài</p>
-        <ul className="space-y-2 text-sm text-slate-400">
-          <li>· Đồng hồ chạy liên tục, hết giờ hệ thống tự nộp bài.</li>
-          <li>· Không có phản hồi đúng/sai trong lúc làm — chỉ xem kết quả sau khi nộp.</li>
-          <li>· Câu chưa trả lời tính là sai, không bị trừ điểm thêm nên hãy đoán hết.</li>
-          <li>· Câu nhiều đáp án phải chọn đúng tất cả mới được tính điểm.</li>
-          <li>· Đóng tab giữa bài sẽ mất bài làm, hãy chuẩn bị đủ {timeLimitMin} phút liền mạch.</li>
-        </ul>
-      </Card>
+      <m.div variants={fadeUp}>
+        <Card inset="md">
+          <p className="mb-3 text-sm font-semibold text-white">Luật làm bài</p>
+          <ul className="space-y-2 text-sm text-slate-400">
+            <li>· Đồng hồ chạy liên tục, hết giờ hệ thống tự nộp bài.</li>
+            <li>· Không có phản hồi đúng/sai trong lúc làm — chỉ xem kết quả sau khi nộp.</li>
+            <li>· Câu chưa trả lời tính là sai, không bị trừ điểm thêm nên hãy đoán hết.</li>
+            <li>· Câu nhiều đáp án phải chọn đúng tất cả mới được tính điểm.</li>
+            <li>· Đóng tab giữa bài sẽ mất bài làm, hãy chuẩn bị đủ {timeLimitMin} phút liền mạch.</li>
+          </ul>
+        </Card>
+      </m.div>
 
-      <Button onClick={onStart} className="w-full py-3">
-        Bắt đầu làm bài
-      </Button>
+      <m.div variants={fadeUp}>
+        <Button onClick={onStart} size="lg" block>
+          Bắt đầu làm bài
+        </Button>
+      </m.div>
 
       {history.length > 0 && (
-        <Card className="p-5">
-          <p className="mb-3 text-sm font-semibold text-white">Lịch sử làm bài</p>
-          <div className="space-y-2">
-            {history.map((attempt) => (
-              <div
-                key={attempt.id}
-                className="flex items-center justify-between border-b border-slate-800 pb-2 text-sm last:border-0 last:pb-0"
-              >
-                <span className="text-slate-400">
-                  {new Date(attempt.startedAt).toLocaleString('vi-VN', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                  <span className="ml-2 text-xs text-slate-600">
-                    {formatDuration(attempt.finishedAt - attempt.startedAt)}
+        <m.div variants={fadeUp}>
+          <Card inset="md">
+            <p className="mb-3 text-sm font-semibold text-white">Lịch sử làm bài</p>
+            <div className="space-y-2">
+              {history.map((attempt) => (
+                <div
+                  key={attempt.id}
+                  className="flex items-center justify-between border-b border-line pb-2 text-sm last:border-0 last:pb-0"
+                >
+                  <span className="text-slate-400">
+                    {new Date(attempt.startedAt).toLocaleString('vi-VN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    <span className="ml-2 text-xs text-slate-600">
+                      {formatDuration(attempt.finishedAt - attempt.startedAt)}
+                    </span>
                   </span>
-                </span>
-                <span className={attempt.passed ? 'text-emerald-400' : 'text-rose-400'}>
-                  {attempt.score}/{attempt.total} {attempt.passed ? '· Pass' : '· Chưa đạt'}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Card>
+                  <span className={attempt.passed ? 'text-emerald-400' : 'text-rose-400'}>
+                    {attempt.score}/{attempt.total} {attempt.passed ? '· Pass' : '· Chưa đạt'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </m.div>
       )}
-    </div>
+    </m.div>
   );
 }
 
@@ -318,7 +394,6 @@ function ExamResult({
   onRetry: () => void;
 }) {
   const { url } = useCourse();
-  const [filter, setFilter] = useState<'all' | 'wrong'>('wrong');
 
   const byDomain = useMemo(() => {
     const map = new Map<number, { total: number; correct: number }>();
@@ -333,49 +408,81 @@ function ExamResult({
   }, [exam.questions, attempt.answers]);
 
   const wrongQuestions = exam.questions.filter((q) => !isCorrect(q, attempt.answers[q.id]));
-  const shown = filter === 'wrong' ? wrongQuestions : exam.questions;
   const pct = Math.round((attempt.score / attempt.total) * 100);
   const currentOrder = course.phases.find((p) => p.gateQuiz?.id === exam.id)?.order ?? 0;
   const nextPhase = course.phases.find((p) => p.order === currentOrder + 1);
 
+  const reviewList = (questions: Question[]) =>
+    questions.length === 0 ? (
+      <Card inset="lg" className="text-center text-sm text-slate-400">
+        Không sai câu nào. Rất tốt.
+      </Card>
+    ) : (
+      <div className="space-y-4">
+        {questions.map((q) => (
+          <QuestionCard
+            key={q.id}
+            question={q}
+            selected={attempt.answers[q.id] ?? []}
+            revealed
+            label={`Câu ${exam.questions.indexOf(q) + 1}`}
+          />
+        ))}
+      </div>
+    );
+
   return (
     <div className="mx-auto max-w-3xl space-y-6">
-      <Card
-        className={`p-6 text-center ${
-          attempt.passed ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-rose-500/40 bg-rose-500/5'
-        }`}
-      >
-        <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">{attempt.label}</p>
-        <p className="mt-3 text-5xl font-bold text-white">
-          {attempt.score}
-          <span className="text-2xl text-slate-500">/{attempt.total}</span>
-        </p>
-        <p className={`mt-2 text-lg font-semibold ${attempt.passed ? 'text-emerald-400' : 'text-rose-400'}`}>
-          {pct}% — {attempt.passed ? 'ĐẠT' : 'CHƯA ĐẠT'}
-        </p>
-        <p className="mt-2 text-sm text-slate-400">
-          Cần ≥{attempt.passScore}/{attempt.total} · làm trong{' '}
-          {formatDuration(attempt.finishedAt - attempt.startedAt)}
-        </p>
+      <m.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }}>
+        <Card
+          inset="lg"
+          className={`flex flex-col items-center text-center ${
+            attempt.passed
+              ? 'border-emerald-500/40 bg-emerald-500/5'
+              : 'border-rose-500/40 bg-rose-500/5'
+          }`}
+        >
+          {attempt.passed ? <SummitArt /> : <RetryArt />}
 
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          <Button tone="secondary" onClick={onRetry}>
-            Làm lại
-          </Button>
-          {attempt.passed && exam.kind === 'gate' && nextPhase?.ready && (
-            <ButtonLink to={url(`/phase/${nextPhase.id}/notes/${nextPhase.notes[0]?.id ?? ''}`)}>
-              Sang Phase {nextPhase.order} →
+          <p className="mt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+            {attempt.label}
+          </p>
+          <p className="mt-3 text-5xl font-bold text-white tabular-nums">
+            {attempt.score}
+            <span className="text-2xl text-slate-500">/{attempt.total}</span>
+          </p>
+          <p
+            className={`mt-2 text-lg font-semibold ${
+              attempt.passed ? 'text-emerald-400' : 'text-rose-400'
+            }`}
+          >
+            {pct}% — {attempt.passed ? 'ĐẠT' : 'CHƯA ĐẠT'}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">
+            Cần ≥{attempt.passScore}/{attempt.total} · làm trong{' '}
+            {formatDuration(attempt.finishedAt - attempt.startedAt)}
+          </p>
+
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            <Button tone="secondary" onClick={onRetry}>
+              Làm lại
+            </Button>
+            {attempt.passed && exam.kind === 'gate' && nextPhase?.ready && (
+              <ButtonLink to={url(`/phase/${nextPhase.id}/notes/${nextPhase.notes[0]?.id ?? ''}`)}>
+                Sang Phase {nextPhase.order}
+                <ArrowRightIcon width={16} height={16} />
+              </ButtonLink>
+            )}
+            {!attempt.passed && <ButtonLink to={url('/review')}>Ôn câu sai</ButtonLink>}
+            <ButtonLink to={url()} tone="ghost">
+              Về tổng quan
             </ButtonLink>
-          )}
-          {!attempt.passed && <ButtonLink to={url('/review')}>Ôn câu sai</ButtonLink>}
-          <ButtonLink to={url()} tone="ghost">
-            Về tổng quan
-          </ButtonLink>
-        </div>
-      </Card>
+          </div>
+        </Card>
+      </m.div>
 
       {byDomain.length > 1 && (
-        <Card className="p-5">
+        <Card inset="md">
           <p className="mb-4 text-sm font-semibold text-white">Phân tích theo domain</p>
           <div className="space-y-3">
             {byDomain.map(([domain, stat]) => {
@@ -388,16 +495,21 @@ function ExamResult({
                     </span>
                     <span
                       className={
-                        ratio >= 0.7 ? 'text-emerald-400' : ratio >= 0.5 ? 'text-amber-400' : 'text-rose-400'
+                        ratio >= 0.7
+                          ? 'text-emerald-400'
+                          : ratio >= 0.5
+                            ? 'text-brand-400'
+                            : 'text-rose-400'
                       }
                     >
                       {stat.correct}/{stat.total}
                     </span>
                   </div>
-                  <ProgressBar
+                  <Progress
                     value={stat.correct}
                     max={stat.total}
                     tone={ratio >= 0.7 ? 'green' : 'amber'}
+                    label={`Domain ${domain}: ${domainLabel(course, domain)}`}
                   />
                 </div>
               );
@@ -410,43 +522,15 @@ function ExamResult({
       )}
 
       <div>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-lg font-bold text-white">Xem lại bài làm</h2>
-          <div className="flex gap-2">
-            <Button
-              tone={filter === 'wrong' ? 'primary' : 'secondary'}
-              onClick={() => setFilter('wrong')}
-              className="text-xs"
-            >
-              Câu sai ({wrongQuestions.length})
-            </Button>
-            <Button
-              tone={filter === 'all' ? 'primary' : 'secondary'}
-              onClick={() => setFilter('all')}
-              className="text-xs"
-            >
-              Tất cả ({exam.questions.length})
-            </Button>
-          </div>
-        </div>
-
-        {shown.length === 0 ? (
-          <Card className="p-8 text-center text-sm text-slate-400">
-            Không sai câu nào. Rất tốt.
-          </Card>
-        ) : (
-          <div className="space-y-4">
-            {shown.map((q) => (
-              <QuestionCard
-                key={q.id}
-                question={q}
-                selected={attempt.answers[q.id] ?? []}
-                revealed
-                label={`Câu ${exam.questions.indexOf(q) + 1}`}
-              />
-            ))}
-          </div>
-        )}
+        <h2 className="mb-4 text-lg font-bold text-white">Xem lại bài làm</h2>
+        <Tabs defaultValue="wrong">
+          <TabsList>
+            <TabsTrigger value="wrong">Câu sai ({wrongQuestions.length})</TabsTrigger>
+            <TabsTrigger value="all">Tất cả ({exam.questions.length})</TabsTrigger>
+          </TabsList>
+          <TabsContent value="wrong">{reviewList(wrongQuestions)}</TabsContent>
+          <TabsContent value="all">{reviewList(exam.questions)}</TabsContent>
+        </Tabs>
       </div>
     </div>
   );

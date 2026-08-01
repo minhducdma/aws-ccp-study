@@ -1,4 +1,14 @@
-import { useMemo, useState } from 'react';
+import {
+  ArrowLeftIcon,
+  Badge,
+  CheckIcon,
+  LockIcon,
+  MenuIcon,
+  Sheet,
+  fadeUp,
+  m,
+} from '@study/ui';
+import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
 import { getCourse } from '../lib/content';
 import { CourseContext, courseUrl, useCourse } from '../lib/course';
@@ -23,10 +33,10 @@ function NavItem({
       end={end}
       className={({ isActive }) =>
         [
-          'block rounded-lg px-3 py-1.5 text-sm transition-colors',
-          depth > 0 ? 'ml-3 border-l border-slate-800 pl-3' : '',
+          'focus-ring relative block rounded-lg px-3 py-1.5 text-sm transition-colors duration-200',
+          depth > 0 ? 'ml-3 border-l border-line pl-3' : '',
           isActive
-            ? 'bg-amber-500/15 font-medium text-amber-300'
+            ? 'bg-brand-500/15 font-medium text-brand-300'
             : locked
               ? 'text-slate-600 hover:text-slate-400'
               : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200',
@@ -70,17 +80,30 @@ function CourseShell({
   const { progress } = useProgress(course);
   const wrongCount = Object.keys(progress.wrong).length;
 
+  /* Navigating from inside the mobile panel should put it away. */
+  useEffect(() => setMenuOpen(false), [pathname, setMenuOpen]);
+
   const sidebar = (
-    <nav className="space-y-6 p-4">
+    <nav className="space-y-6 p-4" aria-label="Nội dung khoá học">
       <div className="space-y-1">
         <NavItem to="/" end>
-          ← Tất cả chứng chỉ
+          <span className="inline-flex items-center gap-2">
+            <ArrowLeftIcon width={14} height={14} />
+            Tất cả chứng chỉ
+          </span>
         </NavItem>
         <NavItem to={url()} end>
           Tổng quan
         </NavItem>
         <NavItem to={url('/review')}>
-          Ôn câu sai {wrongCount > 0 && <span className="text-rose-400">({wrongCount})</span>}
+          <span className="inline-flex items-center gap-2">
+            Ôn câu sai
+            {wrongCount > 0 && (
+              <Badge tone="red" size="sm">
+                {wrongCount}
+              </Badge>
+            )}
+          </span>
         </NavItem>
       </div>
 
@@ -96,8 +119,8 @@ function CourseShell({
               <span>
                 Phase {phase.order} · {phase.weight}%
               </span>
-              {passed && <span className="text-emerald-400">✓</span>}
-              {locked && <span className="text-slate-600">🔒</span>}
+              {passed && <CheckIcon width={13} height={13} className="text-emerald-400" />}
+              {locked && <LockIcon width={13} height={13} className="text-slate-600" />}
             </p>
             <p className="mb-2 px-3 text-sm font-medium text-slate-300">{phase.title}</p>
             <div className="space-y-0.5">
@@ -148,20 +171,22 @@ function CourseShell({
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-30 border-b border-slate-800 bg-slate-950/90 backdrop-blur">
+      <a href="#main" className="skip-link">
+        Bỏ qua điều hướng
+      </a>
+
+      <header className="sticky top-0 z-30 border-b border-line bg-canvas/90 backdrop-blur">
         <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3">
           <button
             type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 hover:text-slate-200 lg:hidden"
-            aria-label="Mở menu"
+            onClick={() => setMenuOpen(true)}
+            className="focus-ring rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 lg:hidden"
+            aria-label="Mở menu điều hướng"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <MenuIcon />
           </button>
-          <NavLink to={url()} className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500 text-sm font-bold text-slate-950">
+          <NavLink to={url()} className="focus-ring flex items-center gap-2.5 rounded-lg">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-slate-950">
               {course.provider.slice(0, 1)}
             </span>
             <span className="text-sm font-semibold text-white">
@@ -175,30 +200,25 @@ function CourseShell({
       </header>
 
       <div className="mx-auto flex max-w-[1400px]">
-        <aside className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-72 shrink-0 overflow-y-auto border-r border-slate-800 lg:block">
+        <aside className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-72 shrink-0 overflow-y-auto border-r border-line lg:block">
           {sidebar}
         </aside>
 
-        {menuOpen && (
-          <div className="fixed inset-0 top-[57px] z-20 lg:hidden">
-            <button
-              type="button"
-              className="absolute inset-0 bg-slate-950/70"
-              onClick={() => setMenuOpen(false)}
-              aria-label="Đóng menu"
-            />
-            <aside
-              className="relative h-full w-72 overflow-y-auto border-r border-slate-800 bg-slate-950"
-              onClick={() => setMenuOpen(false)}
-            >
-              {sidebar}
-            </aside>
-          </div>
-        )}
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen} title="Điều hướng khoá học">
+          {sidebar}
+        </Sheet>
 
-        <main key={pathname} className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-10">
+        {/* Keying on the path replays the entrance animation on every navigation. */}
+        <m.main
+          key={pathname}
+          id="main"
+          className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-10"
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+        >
           <Outlet />
-        </main>
+        </m.main>
       </div>
     </div>
   );
