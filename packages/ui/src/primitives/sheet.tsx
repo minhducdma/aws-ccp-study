@@ -2,6 +2,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { AnimatePresence } from 'motion/react';
 import * as m from 'motion/react-m';
 import type { ReactNode } from 'react';
+import { XIcon } from '../illustrations/icons';
 import { transition } from '../motion/presets';
 
 export interface SheetProps {
@@ -10,6 +11,7 @@ export interface SheetProps {
   /** Announced when the panel opens; visually hidden. */
   title: string;
   children: ReactNode;
+  variant?: 'navigation' | 'compact';
 }
 
 /**
@@ -19,7 +21,9 @@ export interface SheetProps {
  * returned to the opener on close, the page behind is marked `aria-hidden` and inert, and both
  * Escape and an outside click dismiss it.
  */
-export function Sheet({ open, onOpenChange, title, children }: SheetProps) {
+export function Sheet({ open, onOpenChange, title, children, variant = 'navigation' }: SheetProps) {
+  const compact = variant === 'compact';
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <AnimatePresence>
@@ -38,13 +42,25 @@ export function Sheet({ open, onOpenChange, title, children }: SheetProps) {
                 Radix's description slot rather than leaving it unset. */}
             <Dialog.Content asChild forceMount aria-describedby={undefined}>
               <m.div
-                className="fixed inset-y-0 left-0 z-50 flex w-[19rem] max-w-[85vw] flex-col overflow-y-auto border-r border-line bg-canvas lg:hidden"
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
+                className={
+                  compact
+                    ? 'fixed inset-x-0 bottom-0 z-50 flex max-h-[80vh] flex-col overflow-y-auto rounded-t-3xl border-t border-line-strong bg-overlay shadow-2xl lg:hidden'
+                    : 'fixed inset-y-0 left-0 z-50 flex w-[19rem] max-w-[85vw] flex-col overflow-y-auto border-r border-line bg-canvas lg:hidden'
+                }
+                initial={compact ? { y: '100%' } : { x: '-100%' }}
+                animate={compact ? { y: 0 } : { x: 0 }}
+                exit={compact ? { y: '100%' } : { x: '-100%' }}
                 transition={transition.normal}
               >
-                <Dialog.Title className="sr-only">{title}</Dialog.Title>
+                <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-4">
+                  <Dialog.Title className="font-display text-lg font-bold text-slate-900">
+                    {title}
+                  </Dialog.Title>
+                  <Dialog.Close className="focus-ring flex size-10 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-200/70 hover:text-slate-900">
+                    <XIcon width={20} height={20} />
+                    <span className="sr-only">Close</span>
+                  </Dialog.Close>
+                </div>
                 {children}
               </m.div>
             </Dialog.Content>

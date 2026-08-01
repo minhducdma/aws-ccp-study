@@ -19,5 +19,6 @@ export * from './illustrations/icons';
 export * from './illustrations/level-glyph';
 export * from './illustrations/roadmap-art';
 export * from './illustrations/state-art';
+export * from './illustrations/study-buddy-art';
 
 export * from './motion';

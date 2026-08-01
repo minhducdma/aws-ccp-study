@@ -20,14 +20,13 @@
   --color-brand-900: #78350f;
   --color-brand-950: #451a03;
 
-    /* Warm neutral surfaces reduce glare during long study sessions while preserving enough
-      separation between the canvas, cards, and floating overlays. */
-    --color-canvas: #eef0ed;
-    --color-surface: #f8f7f3;
-    --color-surface-hover: #f1efe9;
-    --color-overlay: #fbfaf7;
-    --color-line: #d9ddd8;
-    --color-line-strong: #c5cbc5;
+  /* Mid-light warm neutrals keep long study sessions comfortable without turning the UI dark. */
+  --color-canvas: #e2e6e2;
+  --color-surface: #eff1ed;
+  --color-surface-hover: #e7eae5;
+  --color-overlay: #f4f5f1;
+  --color-line: #cbd1cb;
+  --color-line-strong: #b8c0b9;
 
   /* Status colours. Referenced by the illustrations, which paint via `var()` rather than
      utility classes and so cannot use Tailwind's own emerald/sky scales. */

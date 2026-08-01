@@ -9,7 +9,8 @@ import {
   FlameIcon,
   LockIcon,
   Progress,
-  StatTile,
+  StudyBuddyArt,
+  SummitArt,
   Switch,
   TargetIcon,
   TrophyIcon,
@@ -33,113 +34,108 @@ export default function Dashboard() {
   const wrongCount = Object.keys(progress.wrong).length;
   const nextPhase = course.phases.find((p) => p.ready && !hasPassed(progress, p.gateQuiz?.id));
 
+  const stats = [
+    {
+      label: t('dashboard.stat.readiness'),
+      value: `${readinessWeight}%`,
+      hint: t('catalog.phasesPassed', {
+        passed: passedPhases.length,
+        total: course.phases.length,
+        count: course.phases.length,
+      }),
+      icon: <TargetIcon width={20} height={20} />,
+      tone: 'bg-sky-200/45 text-sky-900',
+    },
+    {
+      label: t('dashboard.stat.questions'),
+      value: course.questionCount,
+      hint: t('dashboard.stat.questionsHint'),
+      icon: <BookIcon width={20} height={20} />,
+      tone: 'bg-emerald-200/40 text-emerald-900',
+    },
+    {
+      label: t('dashboard.stat.wrong'),
+      value: wrongCount,
+      hint: t('dashboard.stat.wrongHint'),
+      icon: <FlameIcon width={20} height={20} />,
+      tone: 'bg-rose-200/40 text-rose-900',
+    },
+    {
+      label: t('dashboard.stat.passScore'),
+      value: `${course.exam.passScore}/${course.exam.maxScore}`,
+      hint: t('dashboard.stat.passScoreHint', {
+        questions: course.exam.totalQuestions,
+        minutes: course.exam.durationMin,
+      }),
+      icon: <TrophyIcon width={20} height={20} />,
+      tone: 'bg-amber-200/45 text-amber-900',
+    },
+  ];
+
+  const phaseTones = [
+    'border-l-sky-400 bg-sky-50/40',
+    'border-l-emerald-400 bg-emerald-50/40',
+    'border-l-amber-400 bg-amber-50/40',
+    'border-l-rose-400 bg-rose-50/40',
+  ];
+
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      <header>
-        <p className="text-xs font-semibold tracking-widest text-brand-500 uppercase">
-          {t('dashboard.eyebrow', { hours: course.estimatedHours, code: course.code })}
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-slate-900">{localized(course.title)}</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
-          {t('dashboard.intro', { count: course.phases.length })}
-        </p>
-      </header>
-
-      <m.div
-        className="grid gap-3 sm:grid-cols-4"
-        variants={stagger(0.07)}
-        initial="hidden"
-        animate="visible"
+      <m.header
+        className="relative grid min-h-[310px] overflow-hidden rounded-3xl border border-sky-300/60 bg-gradient-to-br from-sky-200/55 via-surface to-brand-200/45 px-6 py-7 sm:grid-cols-[1.1fr_0.9fr] sm:px-8"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
       >
-        <m.div variants={fadeUp}>
-          <StatTile
-            label={t('dashboard.stat.readiness')}
-            value={readinessWeight}
-            suffix="%"
-            animate
-            icon={<TargetIcon width={18} height={18} />}
-            hint={t('catalog.phasesPassed', {
-              passed: passedPhases.length,
-              total: course.phases.length,
-              count: course.phases.length,
-            })}
-          />
-        </m.div>
-        <m.div variants={fadeUp}>
-          <StatTile
-            label={t('dashboard.stat.questions')}
-            value={course.questionCount}
-            animate
-            icon={<BookIcon width={18} height={18} />}
-            hint={t('dashboard.stat.questionsHint')}
-          />
-        </m.div>
-        <m.div variants={fadeUp}>
-          <StatTile
-            label={t('dashboard.stat.wrong')}
-            value={wrongCount}
-            animate
-            icon={<FlameIcon width={18} height={18} />}
-            hint={t('dashboard.stat.wrongHint')}
-          />
-        </m.div>
-        <m.div variants={fadeUp}>
-          <StatTile
-            label={t('dashboard.stat.passScore')}
-            value={`${course.exam.passScore}/${course.exam.maxScore}`}
-            icon={<TrophyIcon width={18} height={18} />}
-            hint={t('dashboard.stat.passScoreHint', {
-              questions: course.exam.totalQuestions,
-              minutes: course.exam.durationMin,
-            })}
-          />
-        </m.div>
-      </m.div>
-
-      {nextPhase && (
-        <m.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.4 }}
-        >
-          <Card
-            inset="md"
-            className="relative flex flex-wrap items-center justify-between gap-4 overflow-hidden border-brand-500/30 bg-brand-500/5"
-          >
-            {/* Soft moving glow so the primary call to action reads as the live one */}
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute -top-16 -right-10 size-40 animate-float rounded-full bg-brand-500/10 blur-3xl"
-            />
-            <div className="relative">
-              <p className="text-xs font-semibold tracking-wide text-brand-400 uppercase">
-                {t('dashboard.next.eyebrow')}
-              </p>
-              <p className="mt-1 font-semibold text-slate-900">
+        <div className="relative z-10 flex flex-col justify-center">
+          <p className="text-xs font-bold tracking-widest text-brand-700 uppercase">
+            {t('dashboard.eyebrow', { hours: course.estimatedHours, code: course.code })}
+          </p>
+          <h1 className="mt-2 max-w-xl text-3xl font-bold text-slate-900 sm:text-4xl">
+            {localized(course.title)}
+          </h1>
+          <p className="mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
+            {t('dashboard.intro', { count: course.phases.length })}
+          </p>
+          {nextPhase && (
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <ButtonLink
+                to={
+                  nextPhase.notes.length > 0 && !progress.notesRead[nextPhase.notes[0].id]
+                    ? url(`/phase/${nextPhase.id}/notes/${nextPhase.notes[0].id}`)
+                    : url(`/phase/${nextPhase.id}/practice`)
+                }
+              >
+                {t('dashboard.next.cta')}
+              </ButtonLink>
+              <span className="text-xs font-semibold text-slate-600">
                 {t('phase.labelWithTitle', {
                   order: nextPhase.order,
                   title: localized(nextPhase.title),
                 })}
-              </p>
-              <p className="mt-0.5 text-sm text-slate-600">
-                {nextPhase.notes.length > 0 && !progress.notesRead[nextPhase.notes[0].id]
-                  ? t('dashboard.next.readNotes')
-                  : t('dashboard.next.keepPracticing')}
-              </p>
+              </span>
             </div>
-            <ButtonLink
-              className="relative"
-              to={
-                nextPhase.notes.length > 0 && !progress.notesRead[nextPhase.notes[0].id]
-                  ? url(`/phase/${nextPhase.id}/notes/${nextPhase.notes[0].id}`)
-                  : url(`/phase/${nextPhase.id}/practice`)
-              }
-            >
-              {t('dashboard.next.cta')}
-            </ButtonLink>
-          </Card>
-        </m.div>
-      )}
+          )}
+        </div>
+        <StudyBuddyArt className="mx-auto mt-4 max-w-[360px] self-end sm:mt-0" label={t('art.studyBuddy')} />
+      </m.header>
+
+      <m.div
+        className="grid grid-cols-2 gap-3 lg:grid-cols-4"
+        variants={stagger(0.07)}
+        initial="hidden"
+        animate="visible"
+      >
+        {stats.map((stat) => (
+          <m.div key={stat.label} variants={fadeUp} className={`rounded-2xl p-4 ${stat.tone}`}>
+            <div className="flex items-start justify-between gap-2">
+              <p className="text-[11px] font-bold tracking-wide uppercase opacity-75">{stat.label}</p>
+              <span className="shrink-0 opacity-70">{stat.icon}</span>
+            </div>
+            <p className="mt-2 text-2xl font-black text-slate-900 tabular-nums">{stat.value}</p>
+            <p className="mt-1 text-xs leading-snug opacity-75">{stat.hint}</p>
+          </m.div>
+        ))}
+      </m.div>
 
       <section className="space-y-3">
         <h2 className="text-lg font-bold text-slate-900">
@@ -152,7 +148,7 @@ export default function Dashboard() {
           whileInView="visible"
           viewport={{ once: true, amount: 0.05 }}
         >
-          {course.phases.map((phase) => {
+          {course.phases.map((phase, phaseIndex) => {
             const previous = course.phases.find((p) => p.order === phase.order - 1);
             const locked =
               !progress.freeMode && previous ? !hasPassed(progress, previous.gateQuiz?.id) : false;
@@ -165,10 +161,17 @@ export default function Dashboard() {
 
             return (
               <m.div key={phase.id} variants={fadeUp}>
-                <Card inset="md" className={locked ? 'opacity-60' : ''}>
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
+                <Card
+                  inset="none"
+                  className={`border-l-4 p-4 sm:p-5 ${phaseTones[phaseIndex % phaseTones.length]} ${locked ? 'opacity-60' : ''}`}
+                >
+                  <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                    <div className="flex min-w-0 flex-1 gap-4">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface text-lg font-black text-slate-700 shadow-sm">
+                        {phase.order}
+                      </span>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
                         <Badge tone={passed ? 'green' : locked ? 'slate' : 'amber'}>
                           {t('phase.label', { order: phase.order })}
                         </Badge>
@@ -187,9 +190,9 @@ export default function Dashboard() {
                           </Badge>
                         )}
                         {!phase.ready && <Badge tone="slate">{t('phase.draft')}</Badge>}
-                      </div>
-                      <h3 className="mt-2 font-semibold text-slate-900">{localized(phase.title)}</h3>
-                      <p className="mt-1 text-sm text-slate-600">
+                        </div>
+                        <h3 className="mt-2 font-semibold text-slate-900">{localized(phase.title)}</h3>
+                        <p className="mt-1 text-sm text-slate-600">
                         {tNode(
                           'dashboard.phaseProgress',
                           {
@@ -208,24 +211,26 @@ export default function Dashboard() {
                             ),
                           },
                         )}
-                      </p>
-                      {practiceTotal > 0 && (
-                        <Progress
-                          value={practiceDone}
-                          max={practiceTotal}
-                          tone={passed ? 'green' : 'amber'}
-                          className="mt-3 max-w-xs"
-                          label={t('dashboard.practiceProgressLabel', { order: phase.order })}
-                        />
-                      )}
+                        </p>
+                        {practiceTotal > 0 && (
+                          <Progress
+                            value={practiceDone}
+                            max={practiceTotal}
+                            tone={passed ? 'green' : 'amber'}
+                            className="mt-3 max-w-xs"
+                            label={t('dashboard.practiceProgressLabel', { order: phase.order })}
+                          />
+                        )}
+                      </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-end">
                       {phase.notes.length > 0 && (
                         <ButtonLink
                           to={url(`/phase/${phase.id}/notes/${phase.notes[0].id}`)}
                           tone="secondary"
                           size="sm"
+                          className="w-full sm:w-auto"
                         >
                           {t('dashboard.notes')}
                         </ButtonLink>
@@ -235,6 +240,7 @@ export default function Dashboard() {
                           to={url(`/phase/${phase.id}/practice`)}
                           tone="secondary"
                           size="sm"
+                          className="w-full sm:w-auto"
                         >
                           {t('dashboard.practice')}
                         </ButtonLink>
@@ -244,6 +250,7 @@ export default function Dashboard() {
                           to={url(`/exam/${phase.gateQuiz.id}`)}
                           tone={passed ? 'secondary' : 'primary'}
                           size="sm"
+                          className="w-full sm:w-auto"
                         >
                           {t('dashboard.gateQuiz')}
                         </ButtonLink>
@@ -257,8 +264,14 @@ export default function Dashboard() {
         </m.div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-bold text-slate-900">{t('dashboard.mockHeading')}</h2>
+      <section className="space-y-4">
+        <div className="flex items-end justify-between gap-4 border-b border-line pb-2">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900">{t('dashboard.mockHeading')}</h2>
+            <p className="mt-1 max-w-xl text-sm text-slate-600">{t('dashboard.mockIntro')}</p>
+          </div>
+          <SummitArt className="w-24 shrink-0 sm:w-36" label={t('art.mockJourney')} />
+        </div>
         {course.mockExams.length === 0 ? (
           <Card inset="md" className="text-sm text-slate-600">
             {tNode(
@@ -268,7 +281,8 @@ export default function Dashboard() {
             )}
           </Card>
         ) : (
-          course.mockExams.map((mock) => {
+          <div className="grid gap-3 sm:grid-cols-2">
+          {course.mockExams.map((mock) => {
             const best = bestAttempt(progress, mock.id);
             return (
               <Card
@@ -304,7 +318,8 @@ export default function Dashboard() {
                 </ButtonLink>
               </Card>
             );
-          })
+          })}
+          </div>
         )}
       </section>
 

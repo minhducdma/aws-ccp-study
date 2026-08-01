@@ -15,8 +15,7 @@ import {
   type CourseLevel,
 } from '@study/ui';
 import { Link } from 'react-router-dom';
-import AuthWidget from '../components/AuthWidget';
-import LocaleSwitch from '../components/LocaleSwitch';
+import AppHeader from '../components/AppHeader';
 import { useI18n, type I18n, type MessageKey } from '../i18n';
 import { content, courses } from '../lib/content';
 import { courseUrl } from '../lib/course';
@@ -194,11 +193,9 @@ export default function CatalogPage() {
   const available = courses.filter((c) => c.status === 'available');
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-8 sm:py-14">
-      <div className="mb-6 flex items-center justify-end gap-3">
-        <AuthWidget />
-        <LocaleSwitch />
-      </div>
+    <>
+      <AppHeader />
+      <div className="mx-auto max-w-5xl px-4 pt-10 pb-28 sm:px-8 sm:pt-14 lg:pb-14">
 
       <m.header
         className="mb-12 grid items-center gap-8 md:grid-cols-[1.1fr_0.9fr]"
@@ -288,6 +285,7 @@ export default function CatalogPage() {
           </ul>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -3,7 +3,6 @@ import {
   Badge,
   CheckIcon,
   LockIcon,
-  MenuIcon,
   Sheet,
   fadeUp,
   m,
@@ -14,6 +13,7 @@ import { useI18n } from '../i18n';
 import { getCourse, mockExamTitle } from '../lib/content';
 import { CourseContext, courseUrl, useCourse } from '../lib/course';
 import { hasPassed, useProgress } from '../lib/progress';
+import AppHeader from './AppHeader';
 import AuthWidget from './AuthWidget';
 import LocaleSwitch from './LocaleSwitch';
 
@@ -90,6 +90,10 @@ function CourseShell({
 
   const sidebar = (
     <nav className="space-y-6 p-4" aria-label={t('nav.courseContents')}>
+      <div className="flex items-center gap-2 border-b border-line pb-4 lg:hidden">
+        <LocaleSwitch />
+        <AuthWidget className="ml-auto" />
+      </div>
       <div className="space-y-1">
         <NavItem to="/" end>
           <span className="inline-flex items-center gap-2">
@@ -181,34 +185,17 @@ function CourseShell({
         {t('nav.skip')}
       </a>
 
-      <header className="sticky top-0 z-30 border-b border-line bg-canvas/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1400px] items-center gap-3 px-4 py-3">
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            className="focus-ring rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-900 lg:hidden"
-            aria-label={t('nav.openMenu')}
-          >
-            <MenuIcon />
-          </button>
-          <NavLink to={url()} className="focus-ring flex items-center gap-2.5 rounded-lg">
-            <span className="flex size-8 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-slate-950">
-              {course.provider.slice(0, 1)}
-            </span>
-            <span className="text-sm font-semibold text-slate-900">
-              {localized(course.title)}
-              <span className="ml-2 hidden text-xs font-normal text-slate-500 sm:inline">
-                {course.code}
-              </span>
-            </span>
-          </NavLink>
-          <LocaleSwitch className="ml-auto" />
-          <AuthWidget />
-        </div>
-      </header>
+      <AppHeader
+        title={localized(course.title)}
+        code={course.code}
+        courseUrl={url()}
+        reviewUrl={url('/review')}
+        wrongCount={wrongCount}
+        onOpenMenu={() => setMenuOpen(true)}
+      />
 
       <div className="mx-auto flex max-w-[1400px]">
-        <aside className="sticky top-[57px] hidden h-[calc(100vh-57px)] w-72 shrink-0 overflow-y-auto border-r border-line lg:block">
+        <aside className="sticky top-16 hidden h-[calc(100vh-4rem)] w-72 shrink-0 overflow-y-auto border-r border-line lg:block">
           {sidebar}
         </aside>
 
@@ -220,7 +207,7 @@ function CourseShell({
         <m.main
           key={pathname}
           id="main"
-          className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-10"
+          className="min-w-0 flex-1 px-4 pt-6 pb-28 sm:px-8 sm:pt-10 lg:pb-10"
           variants={fadeUp}
           initial="hidden"
           animate="visible"
