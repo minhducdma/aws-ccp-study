@@ -9,13 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import type { LocalizedText } from '../types';
-import {
-  contentFallbackChain,
-  initialLocale,
-  LOCALE_INFO,
-  storeLocale,
-  type Locale,
-} from './locale';
+import { contentFallbackChain, initialLocale, storeLocale, type Locale } from './locale';
 import { en } from './messages/en';
 import { vi, type Catalog, type MessageKey } from './messages/vi';
 import {
@@ -110,5 +104,3 @@ export function I18nProvider({ children, locale: forced }: I18nProviderProps) {
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
-
-export { LOCALE_INFO };

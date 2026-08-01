@@ -27,6 +27,7 @@ export default function LocaleSwitch({ className }: { className?: string }) {
             lang={info.code}
             onClick={() => setLocale(info.code)}
             aria-pressed={active}
+            title={active ? undefined : t('locale.switchTo', { name: info.endonym })}
             className={[
               'focus-ring rounded-md px-2 py-0.5 text-xs font-semibold transition-colors duration-200',
               active
@@ -34,8 +35,10 @@ export default function LocaleSwitch({ className }: { className?: string }) {
                 : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200',
             ].join(' ')}
           >
+            {/* The two letters are the visible name; screen readers get the language in full,
+                and aria-pressed already says which one is on. */}
             <span aria-hidden="true">{info.short}</span>
-            <span className="sr-only">{t('locale.switchTo', { name: info.endonym })}</span>
+            <span className="sr-only">{info.endonym}</span>
           </button>
         );
       })}
