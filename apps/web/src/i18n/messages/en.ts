@@ -103,7 +103,7 @@ export const en: Catalog = {
   'dashboard.stat.questionsHint': 'taken from the source practice exams',
   'dashboard.stat.wrong': 'Still wrong',
   'dashboard.stat.wrongHint': 'waiting to be reviewed',
-  'dashboard.stat.passScore': 'Real pass score',
+  'dashboard.stat.passScore': 'Minimum score',
   'dashboard.stat.passScoreHint': '{questions} questions · {minutes} minutes',
   'dashboard.next.eyebrow': 'Up next',
   'dashboard.next.readNotes': 'Start with the core concepts.',

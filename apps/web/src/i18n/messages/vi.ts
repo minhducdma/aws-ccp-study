@@ -93,7 +93,7 @@ export const vi = {
   'dashboard.stat.questionsHint': 'lấy từ practice exam gốc',
   'dashboard.stat.wrong': 'Câu đang sai',
   'dashboard.stat.wrongHint': 'cần ôn lại',
-  'dashboard.stat.passScore': 'Điểm đậu thật',
+  'dashboard.stat.passScore': 'Điểm tối thiểu',
   'dashboard.stat.passScoreHint': '{questions} câu · {minutes} phút',
   'dashboard.next.eyebrow': 'Việc tiếp theo',
   'dashboard.next.readNotes': 'Bắt đầu bằng phần kiến thức trọng tâm.',
