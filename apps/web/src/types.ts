@@ -40,14 +40,19 @@ export interface PracticeState {
   checked: string[];
 }
 
-/** Progress for a single course. Question ids are unique within a course, not across courses. */
 export interface CourseProgress {
   notesRead: Record<string, boolean>;
   practice: Record<string, PracticeState>;
   attempts: Attempt[];
   wrong: Record<string, number>;
   freeMode: boolean;
+  /** Epoch ms of the last local change to this course's non-attempt fields. */
+  updatedAt: number;
 }
+
+/** What actually gets written to `userProgress/{uid}/courses/{courseId}` — everything in
+ *  `CourseProgress` except the attempt history, which lives in its own subcollection. */
+export type CourseProgressFields = Omit<CourseProgress, 'attempts'>;
 
 export interface ProgressStore {
   version: 2;

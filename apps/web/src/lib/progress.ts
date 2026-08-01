@@ -1,6 +1,21 @@
-import { doc, onSnapshot, setDoc, type Unsubscribe } from 'firebase/firestore';
+import {
+  collection,
+  deleteDoc,
+  doc,
+  onSnapshot,
+  setDoc,
+  type Unsubscribe,
+} from 'firebase/firestore';
 import { useCallback, useEffect, useState } from 'react';
-import type { Attempt, Course, CourseProgress, Letter, PracticeState, ProgressStore } from '../types';
+import type {
+  Attempt,
+  Course,
+  CourseProgress,
+  CourseProgressFields,
+  Letter,
+  PracticeState,
+  ProgressStore,
+} from '../types';
 import { isCorrect, lookupQuestion } from './content';
 import { db } from './firebase/config';
 
@@ -17,6 +32,7 @@ export const emptyCourseProgress: CourseProgress = {
   attempts: [],
   wrong: {},
   freeMode: false,
+  updatedAt: 0,
 };
 
 const emptyStore: ProgressStore = { version: 2, courses: {} };
@@ -65,23 +81,86 @@ function applyRemote(next: ProgressStore) {
   listeners.forEach((fn) => fn());
 }
 
-function progressDoc(uid: string) {
-  return doc(db, 'userProgress', uid);
+// --- Firestore layout ------------------------------------------------------
+// userProgress/{uid}/courses/{courseId}                    — CourseProgressFields (no attempts)
+// userProgress/{uid}/courses/{courseId}/attempts/{attemptId} — one document per exam attempt
+//
+// Splitting attempts into their own subcollection means ticking a checkbox or answering one
+// practice question only rewrites the small course document, never the whole exam history, and
+// the console reads as "courses > this course > attempts > this attempt" instead of one opaque
+// blob.
+
+function coursesCollectionRef(uid: string) {
+  return collection(db, 'userProgress', uid, 'courses');
+}
+
+function courseDocRef(uid: string, courseId: string) {
+  return doc(db, 'userProgress', uid, 'courses', courseId);
+}
+
+function attemptsCollectionRef(uid: string, courseId: string) {
+  return collection(db, 'userProgress', uid, 'courses', courseId, 'attempts');
+}
+
+function attemptDocRef(uid: string, courseId: string, attemptId: string) {
+  return doc(db, 'userProgress', uid, 'courses', courseId, 'attempts', attemptId);
 }
 
 let currentUid: string | null = null;
-let unsubscribeRemote: Unsubscribe | null = null;
+let unsubscribeCourses: Unsubscribe | null = null;
+const attemptUnsubscribes = new Map<string, Unsubscribe>();
+
+function stopWatchingRemote() {
+  unsubscribeCourses?.();
+  unsubscribeCourses = null;
+  attemptUnsubscribes.forEach((unsubscribe) => unsubscribe());
+  attemptUnsubscribes.clear();
+}
+
+/** Merges a course document's fields into the local store without touching its attempts, which
+ * are synced separately by `watchAttempts`. */
+function applyRemoteCourseFields(courseId: string, fields: CourseProgressFields) {
+  const attempts = store.courses[courseId]?.attempts ?? emptyCourseProgress.attempts;
+  applyRemote({
+    ...store,
+    courses: { ...store.courses, [courseId]: { ...fields, attempts } },
+  });
+}
+
+function watchAttempts(uid: string, courseId: string): Unsubscribe {
+  return onSnapshot(attemptsCollectionRef(uid, courseId), (snapshot) => {
+    const attempts = snapshot.docs.map((d) => d.data() as Attempt);
+    const current = store.courses[courseId] ?? emptyCourseProgress;
+    applyRemote({
+      ...store,
+      courses: { ...store.courses, [courseId]: { ...current, attempts } },
+    });
+  });
+}
+
+/** First sign-in on this device/account: this browser's guest progress becomes the seed for
+ * every course it has data for, one Firestore document per course plus one per attempt. */
+function seedRemoteFromLocalGuest(uid: string) {
+  for (const [courseId, progress] of Object.entries(store.courses)) {
+    const { attempts, ...fields } = progress;
+    setDoc(courseDocRef(uid, courseId), { ...fields, updatedAt: Date.now() }).catch(() => {
+      // Best-effort seed; if it fails the user keeps their local copy and can retry by editing.
+    });
+    for (const attempt of attempts) {
+      setDoc(attemptDocRef(uid, courseId, attempt.id), attempt).catch(() => {});
+    }
+  }
+}
 
 /**
  * Called by AuthProvider whenever the signed-in user changes. Signing in for the first time
- * carries whatever this browser already had (guest progress) up to Firestore; after that,
+ * seeds Firestore with whatever this browser already had (guest progress); after that,
  * Firestore is the source of truth and syncs live to every device. Signing out falls back to
  * this browser's own localStorage copy.
  */
 export function bindProgressUser(uid: string | null): void {
   if (uid === currentUid) return;
-  unsubscribeRemote?.();
-  unsubscribeRemote = null;
+  stopWatchingRemote();
   currentUid = uid;
 
   if (!uid) {
@@ -89,35 +168,78 @@ export function bindProgressUser(uid: string | null): void {
     return;
   }
 
-  const ref = progressDoc(uid);
-  unsubscribeRemote = onSnapshot(ref, (snapshot) => {
-    if (snapshot.exists()) {
-      const remote = snapshot.data() as ProgressStore;
-      applyRemote({ version: 2, courses: remote.courses ?? {} });
-    } else {
-      setDoc(ref, store).catch(() => {
-        // Ignore write failures; the next commit (or a later snapshot) will retry.
-      });
+  unsubscribeCourses = onSnapshot(coursesCollectionRef(uid), (snapshot) => {
+    if (snapshot.empty && Object.keys(store.courses).length > 0) {
+      seedRemoteFromLocalGuest(uid);
+      return;
+    }
+
+    for (const change of snapshot.docChanges()) {
+      const courseId = change.doc.id;
+      if (change.type === 'removed') {
+        attemptUnsubscribes.get(courseId)?.();
+        attemptUnsubscribes.delete(courseId);
+        continue;
+      }
+      applyRemoteCourseFields(courseId, change.doc.data() as CourseProgressFields);
+      if (!attemptUnsubscribes.has(courseId)) {
+        attemptUnsubscribes.set(courseId, watchAttempts(uid, courseId));
+      }
     }
   });
-}
-
-function commit(next: ProgressStore) {
-  applyRemote(next);
-  if (currentUid) {
-    setDoc(progressDoc(currentUid), next).catch(() => {
-      // The change is already visible locally; Firestore's offline queue retries once the
-      // connection is back, and the next onSnapshot call reconciles the rest.
-    });
-  }
 }
 
 export function courseProgress(courseId: string): CourseProgress {
   return store.courses[courseId] ?? emptyCourseProgress;
 }
 
+/** Writes a course's fields (everything but attempts) locally and, once signed in, to its
+ * Firestore document. Any `attempts` on `next` is ignored here — attempts are only ever added
+ * via `addAttempt` or cleared via `clearAttempts`, never rewritten by a fields-only edit. */
 function commitCourse(courseId: string, next: CourseProgress) {
-  commit({ ...store, courses: { ...store.courses, [courseId]: next } });
+  const { attempts: _ignored, ...rest } = next;
+  const fields: CourseProgressFields = { ...rest, updatedAt: Date.now() };
+  const attempts = store.courses[courseId]?.attempts ?? emptyCourseProgress.attempts;
+  applyRemote({
+    ...store,
+    courses: { ...store.courses, [courseId]: { ...fields, attempts } },
+  });
+  if (currentUid) {
+    setDoc(courseDocRef(currentUid, courseId), fields).catch(() => {
+      // The change is already visible locally; Firestore's offline queue retries once the
+      // connection is back, and the next courses snapshot reconciles the rest.
+    });
+  }
+}
+
+/** Appends one finished exam attempt: written as its own Firestore document (never edited
+ * afterwards) and appended to the local cache. */
+function addAttempt(courseId: string, attempt: Attempt) {
+  const current = store.courses[courseId] ?? emptyCourseProgress;
+  applyRemote({
+    ...store,
+    courses: { ...store.courses, [courseId]: { ...current, attempts: [...current.attempts, attempt] } },
+  });
+  if (currentUid) {
+    setDoc(attemptDocRef(currentUid, courseId, attempt.id), attempt).catch(() => {
+      // Same offline-queue reasoning as commitCourse.
+    });
+  }
+}
+
+/** Clears every recorded attempt for a course, both locally and (if signed in) in Firestore. */
+function clearAttempts(courseId: string) {
+  const current = store.courses[courseId] ?? emptyCourseProgress;
+  const attemptIds = current.attempts.map((a) => a.id);
+  applyRemote({
+    ...store,
+    courses: { ...store.courses, [courseId]: { ...current, attempts: [] } },
+  });
+  if (currentUid) {
+    for (const attemptId of attemptIds) {
+      deleteDoc(attemptDocRef(currentUid, courseId, attemptId)).catch(() => {});
+    }
+  }
 }
 
 export function useProgress(course: Course) {
@@ -193,7 +315,8 @@ export function useProgress(course: Course) {
           wrong[questionId] = (wrong[questionId] ?? 0) + 1;
         }
       }
-      commitCourse(courseId, { ...current, attempts: [...current.attempts, attempt], wrong });
+      addAttempt(courseId, attempt);
+      commitCourse(courseId, { ...current, wrong });
     },
     [course, courseId],
   );
@@ -206,6 +329,7 @@ export function useProgress(course: Course) {
   );
 
   const resetAll = useCallback(() => {
+    clearAttempts(courseId);
     commitCourse(courseId, { ...emptyCourseProgress });
   }, [courseId]);
 
