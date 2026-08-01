@@ -1,7 +1,6 @@
 import {
   Badge,
   ClipboardIcon,
-  LayersIcon,
   MenuIcon,
   Sheet,
   TargetIcon,
@@ -102,13 +101,6 @@ export default function AppHeader({
             className="fixed inset-x-0 bottom-0 z-40 flex h-[4.5rem] items-center border-t border-line-strong bg-overlay/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.08)] backdrop-blur-lg lg:hidden"
             aria-label={t('nav.courseNavigation')}
           >
-            <NavLink
-              to="/"
-              className={({ isActive }) => `${mobileLink} ${isActive ? 'text-brand-700' : 'text-slate-500'}`}
-            >
-              <LayersIcon width={20} height={20} />
-              <span>{t('nav.catalog')}</span>
-            </NavLink>
             <NavLink
               to={courseUrl}
               end
