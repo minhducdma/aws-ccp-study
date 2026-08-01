@@ -1,7 +1,8 @@
 /**
- * Chạy thử bản build y như GitHub Pages: phục vụ dist/ dưới tiền tố /<repo>/ và
- * trả về 404.html cho mọi đường dẫn không phải file tĩnh.
- * Dùng để kiểm tra base path và deep link trước khi deploy: node scripts/pages-preview.mjs
+ * Previews the build the way GitHub Pages serves it: dist/ mounted under the /<repo>/
+ * prefix, with 404.html returned for any path that is not a static file.
+ * Use it to check the base path and deep links before deploying:
+ *   node scripts/pages-preview.mjs
  */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -33,7 +34,7 @@ const server = createServer(async (req, res) => {
     const body = await readFile(join(DIST, target));
     res.writeHead(200, { 'content-type': MIME[extname(target)] ?? 'application/octet-stream' }).end(body);
   } catch {
-    // GitHub Pages tra ve 404.html cho duong dan khong ton tai; SPA tu dinh tuyen lai.
+    // GitHub Pages returns 404.html for unknown paths; the SPA then routes itself.
     res.writeHead(404, { 'content-type': MIME['.html'] }).end(await readFile(join(DIST, '404.html')));
   }
 });

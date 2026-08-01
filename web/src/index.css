@@ -20,13 +20,13 @@ body {
   @apply bg-amber-500/30;
 }
 
-/* Thanh cuộn mảnh cho vùng nội dung dài */
+/* Slim scrollbar for long content areas */
 * {
   scrollbar-width: thin;
   scrollbar-color: theme(colors.slate.700) transparent;
 }
 
-/* ---------- Nội dung markdown ---------- */
+/* ---------- Markdown content ---------- */
 .md {
   @apply text-[15px] leading-relaxed text-slate-300;
 }
@@ -148,7 +148,7 @@ body {
   @apply mr-1 accent-amber-500;
 }
 
-/* Bảng có nhiều cột trong notes: cho phép cuộn ngang */
+/* Wide tables in the notes: allow horizontal scrolling */
 .md-scroll table {
   @apply block max-w-full overflow-x-auto whitespace-normal;
 }

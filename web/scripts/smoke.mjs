@@ -1,7 +1,7 @@
-// Render từng route bằng SSR để bắt lỗi runtime trong component mà typecheck không thấy.
+// Renders every route through SSR to catch component runtime errors that typechecking misses.
 import { createServer } from 'vite';
 
-// localStorage không tồn tại trong Node — cấp một bản giả để lib/progress hoạt động.
+// Node has no localStorage, so provide a stub to keep lib/progress working.
 const store = new Map();
 globalThis.localStorage = {
   getItem: (k) => store.get(k) ?? null,

@@ -1,5 +1,5 @@
-// Chuyển các file markdown ở thư mục gốc thành content.json cho web app.
-// Chạy tự động trước `npm run dev` và `npm run build`.
+// Turns the markdown files at the repo root into content.json for the web app.
+// Runs automatically before `npm run dev` and `npm run build`.
 import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -66,21 +66,21 @@ const MULTI_HINTS = [
   /chọn\s+ba/i,
 ];
 
-/** Cắt bỏ khối <details> chứa đáp án, trả về [phầnCâuHỏi, phầnĐápÁn]. */
+/** Splits off the <details> block holding the answers, returning [questions, answers]. */
 function splitAtAnswerBlock(markdown) {
   const idx = markdown.indexOf('<details>');
   if (idx === -1) return [markdown, ''];
   return [markdown.slice(0, idx), markdown.slice(idx)];
 }
 
-// Trích dẫn nguồn có thể là `(Exam 8 - Q8)`, *(Exam 8 - Q8)* hoặc (Exam 8 - Q8).
+// A source citation may be written as `(Exam 8 - Q8)`, *(Exam 8 - Q8)* or (Exam 8 - Q8).
 const SOURCE_RE = /\((Exam\s*\d+\s*-\s*Q\d+)\)/i;
 
 function cleanQuestionText(raw) {
   return raw
     .replace(/[`*]*\(Exam\s*\d+\s*-\s*Q\d+\)[`*]*/gi, '')
     .replace(/\**\(Chọn\s+(?:HAI|BA)\)\**/gi, '')
-    // Đề gốc chèn <br/> để ngắt dòng; app render text thuần nên đổi thành khoảng trắng.
+    // Upstream exams use <br/> for line breaks; the app renders plain text, so collapse to a space.
     .replace(/<br\s*\/?>/gi, ' ')
     .replace(/\s{2,}/g, ' ')
     .trim();
@@ -92,13 +92,13 @@ function extractSource(raw) {
 }
 
 /**
- * Đọc các block câu hỏi. Chấp nhận nhiều biến thể định dạng:
- *   **1.** Nội dung câu hỏi  `(Exam 8 - Q8)`
- *   - A. lựa chọn
- * hoặc có marker và trích dẫn nằm ở dòng riêng:
- *   **1.** Nội dung câu hỏi
+ * Reads the question blocks, tolerating several formatting variants:
+ *   **1.** Question text  `(Exam 8 - Q8)`
+ *   - A. option
+ * or with the marker and the citation on their own lines:
+ *   **1.** Question text
  *   > **(Chọn HAI)**
- *   - A. lựa chọn
+ *   - A. option
  *   *(Exam 15 - Q29)*
  */
 function parseQuestions(markdown, { idPrefix, fileLabel }) {
@@ -137,7 +137,7 @@ function parseQuestions(markdown, { idPrefix, fileLabel }) {
       continue;
     }
 
-    // Heading / separator / khối đáp án đánh dấu hết câu hiện tại.
+    // A heading, separator or answer block ends the current question.
     if (/^(#{1,6}\s|---\s*$|<details)/.test(line)) {
       flush();
       continue;
@@ -146,8 +146,8 @@ function parseQuestions(markdown, { idPrefix, fileLabel }) {
     const body = line.replace(/^\s*>\s?/, '').trim();
     if (!body) continue;
 
-    // Mọi dòng phụ đều vào meta để dò marker "(Chọn HAI)" và trích dẫn nguồn,
-    // nhưng chỉ dòng nằm trước danh sách lựa chọn mới thuộc nội dung câu hỏi.
+    // Every trailing line goes into meta so the "(Chọn HAI)" marker and the citation can be
+    // detected, but only lines before the option list belong to the question text.
     current.meta += ' ' + body;
     if (current.options.length === 0) current.text += ' ' + body;
   }
@@ -163,7 +163,7 @@ function parseQuestions(markdown, { idPrefix, fileLabel }) {
   }));
 }
 
-/** Dòng "1D, 2BE, 3C, ..." — nguồn đáp án đáng tin cậy nhất. */
+/** The "1D, 2BE, 3C, ..." line — the most reliable source of answers. */
 function parseQuickAnswerTable(markdown) {
   const map = new Map();
   for (const line of markdown.split('\n')) {
@@ -177,7 +177,7 @@ function parseQuickAnswerTable(markdown) {
 }
 
 /**
- * Giải thích từng câu, hỗ trợ 2 định dạng:
+ * Per-question explanations, in either of two formats:
  *   **1. Đáp án: D** — `(Exam 1 - Q2)`
  *   ### Câu 1 — Đáp án: A, E
  */
@@ -188,8 +188,8 @@ function parseExplanations(markdown) {
 
   const hits = [];
   for (const m of markdown.matchAll(pattern)) {
-    // Cắt bỏ marker "(Chọn HAI)" phía sau rồi chỉ nhận ký tự đứng độc lập,
-    // nếu không chữ C trong "Chọn" và A trong "HAI" sẽ bị tính là đáp án.
+    // Drop the trailing "(Chọn HAI)" marker and accept standalone letters only, otherwise the
+    // C in "Chọn" and the A in "HAI" would be counted as answers.
     const lettersText = (m[2] ?? m[4]).split('(')[0].replace(/\*/g, '');
     hits.push({
       num: Number(m[1] ?? m[3]),
@@ -201,13 +201,14 @@ function parseExplanations(markdown) {
 
   hits.forEach((hit, i) => {
     const end = i + 1 < hits.length ? hits[i + 1].start : markdown.length;
-    // Một số file để trích dẫn nguồn trong phần đáp án thay vì trong đề, để không lộ nguồn khi làm bài.
+    // Some files keep the citation in the answer key rather than the question, so it stays
+    // hidden while the exam is being taken.
     const source = extractSource(markdown.slice(hit.start, end));
     const body = markdown
       .slice(hit.headerEnd, end)
       .replace(/<\/details>[\s\S]*$/i, '')
       .split('\n')
-      .filter((l) => !l.trim().startsWith('>')) // bỏ phần trích lại câu hỏi
+      .filter((l) => !l.trim().startsWith('>')) // drop the quoted copy of the question
       .join('\n')
       .replace(/`\(Exam\s*\d+\s*-\s*Q\d+\)`/gi, '')
       .replace(/^[\s—\-–]+/, '')
@@ -218,7 +219,7 @@ function parseExplanations(markdown) {
   return result;
 }
 
-/** Bảng map số câu -> domain trong file đáp án mock exam. */
+/** The question-number to domain table found in the mock exam answer files. */
 function parseDomainMap(markdown) {
   const map = new Map();
   for (const line of markdown.split('\n')) {

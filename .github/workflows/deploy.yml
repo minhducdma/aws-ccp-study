@@ -10,7 +10,7 @@ permissions:
   pages: write
   id-token: write
 
-# Đẩy nhiều commit liên tiếp thì chỉ giữ lần deploy mới nhất, không huỷ lần đang chạy dở.
+# On rapid successive pushes keep only the newest deploy, without cancelling one in flight.
 concurrency:
   group: pages
   cancel-in-progress: false
@@ -31,7 +31,7 @@ jobs:
         working-directory: web
         run: npm ci
 
-      # prebuild chạy build-content.mjs, đọc lại toàn bộ file markdown ở thư mục gốc repo.
+      # prebuild runs build-content.mjs, which re-reads every markdown file at the repo root.
       - name: Build
         working-directory: web
         run: npm run build

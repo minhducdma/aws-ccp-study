@@ -30,7 +30,7 @@ function commit(next: Progress) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
-    // Bỏ qua khi localStorage bị chặn (private mode).
+    // Ignore writes rejected when localStorage is unavailable (private mode).
   }
   listeners.forEach((fn) => fn());
 }

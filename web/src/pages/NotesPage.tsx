@@ -6,7 +6,7 @@ import { getPhase } from '../lib/content';
 import { useProgress } from '../lib/progress';
 import { slugify } from '../lib/slug';
 
-/** Lấy heading cấp 2 làm mục lục, bỏ những heading nằm trong code block. */
+/** Builds the outline from level-2 headings, skipping headings inside code blocks. */
 function useOutline(markdown: string) {
   return useMemo(() => {
     const items: { text: string; slug: string }[] = [];

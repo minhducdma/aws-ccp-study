@@ -14,7 +14,7 @@ export function getMockExam(examId: string | undefined): MockExam | undefined {
   return mockExams.find((m) => m.id === examId);
 }
 
-/** Gate quiz hoặc mock exam, dùng chung một màn hình thi. */
+/** A gate quiz or a mock exam; both are rendered by the same exam screen. */
 export function getExam(examId: string | undefined) {
   const phase = phases.find((p) => p.gateQuiz?.id === examId);
   if (phase?.gateQuiz) {

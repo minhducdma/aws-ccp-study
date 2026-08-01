@@ -1,5 +1,5 @@
-// Đối chiếu đáp án của mọi câu hỏi trong content.json với practice exam gốc trên GitHub.
-// Đây là lớp kiểm tra ground-truth: nếu tài liệu ghi sai đáp án, script này sẽ chỉ ra.
+// Checks every answer in content.json against the upstream practice exams on GitHub.
+// This is the ground-truth layer: if the study material records a wrong answer, it shows up here.
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,9 +24,9 @@ async function loadExam(num) {
 }
 
 /**
- * Đọc đề gốc: "1. Câu hỏi" + " - A. ..." + "Correct answer: D".
- * Số câu được đánh theo thứ tự xuất hiện, không tin số ghi trong file: một số đề
- * dùng markdown auto-numbering nên mọi câu đều viết là "1.".
+ * Reads an upstream exam: "1. Question" + " - A. ..." + "Correct answer: D".
+ * Questions are numbered by order of appearance rather than by the number written in the
+ * file, because some exams rely on markdown auto-numbering and write "1." for every question.
  */
 function parseUpstream(markdown) {
   const map = new Map();
@@ -40,7 +40,7 @@ function parseUpstream(markdown) {
       map.set(currentNum, { text: header[1].trim(), correct: null });
       continue;
     }
-    // Đề gốc dùng cả "Correct answer: A, D", "Correct Answer: AC" và cả chữ thường "Ac".
+    // Upstream uses "Correct answer: A, D", "Correct Answer: AC" and even lower case "Ac".
     const answer = line.match(/Correct\s*answer:\s*([A-E](?:\s*[,&]?\s*[A-E])*)/i);
     if (answer && currentNum != null) {
       const entry = map.get(currentNum);

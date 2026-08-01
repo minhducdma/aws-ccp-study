@@ -4,12 +4,13 @@ import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// GitHub Pages phục vụ project site tại /<tên-repo>/, đặt qua biến BASE_PATH khi cần đổi.
+// GitHub Pages serves project sites under /<repo-name>/; override with BASE_PATH when needed.
 const BASE_PATH = process.env.BASE_PATH ?? '/aws-ccp-study/';
 
 /**
- * GitHub Pages không có SPA fallback: mở thẳng /review hay F5 giữa bài thi sẽ ra trang 404.
- * Nhân bản index.html thành 404.html để Pages trả về đúng app, rồi router tự xử lý đường dẫn.
+ * GitHub Pages has no SPA fallback: opening /review directly, or refreshing mid-exam,
+ * lands on its 404 page. Copying index.html to 404.html makes Pages hand the app back
+ * so the router can resolve the path itself.
  */
 function spaFallback(): Plugin {
   return {

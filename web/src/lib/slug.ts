@@ -1,4 +1,4 @@
-/** Tạo anchor id từ nội dung heading, dùng chung cho mục lục và trình render markdown. */
+/** Builds an anchor id from heading text; shared by the outline and the markdown renderer. */
 export function slugify(text: string): string {
   return text
     .toLowerCase()

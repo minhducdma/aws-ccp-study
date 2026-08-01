@@ -1,6 +1,6 @@
-// Sinh file mock exam từ practice exam gốc.
-// Câu hỏi, lựa chọn và đáp án được lấy nguyên văn từ đề gốc nên không thể sai;
-// phần phân loại domain và giải thích tiếng Việt đọc từ mock-annotations.json.
+// Generates the mock exam files from the upstream practice exams.
+// Questions, options and answers are copied verbatim from the source so they cannot drift;
+// the domain classification and the Vietnamese explanations come from mock-annotations.json.
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -41,8 +41,9 @@ async function loadExam(num) {
 }
 
 /**
- * Đề gốc có nhiều biến thể: số câu có thể là "1." cho mọi câu (markdown auto-numbering),
- * lựa chọn có thể thụt lề, dòng đáp án có thể là "Correct answer: A, D" hoặc "Correct Answer: AC".
+ * The upstream exams vary: every question may be numbered "1." (markdown auto-numbering),
+ * options may be indented, and the answer line may read "Correct answer: A, D" or
+ * "Correct Answer: AC".
  */
 function parseExam(markdown) {
   const questions = [];
@@ -63,7 +64,7 @@ function parseExam(markdown) {
       continue;
     }
 
-    // Đề gốc có chỗ viết đáp án bằng chữ thường ("Correct Answer: Ac"), phải chuẩn hoá về chữ hoa.
+    // Some answers are written in lower case upstream ("Correct Answer: Ac"), so normalise them.
     const answer = line.match(/Correct\s*answer:\s*([A-E](?:\s*[,&]?\s*[A-E])*)/i);
     if (answer && !current.correct) {
       current.correct = answer[1].match(/[A-E]/gi)?.map((l) => l.toUpperCase()) ?? null;
@@ -210,7 +211,8 @@ for (const { mockNum, examNum } of MOCKS) {
 
   const missingAnswers = questions.filter((q) => !q.correct?.length);
   const missingOptions = questions.filter((q) => q.options.length < 2);
-  // Đề gốc đôi khi ghi "(Choose two.)" nhưng đáp án chỉ có một chữ — cần biết để không dạy sai.
+  // Upstream sometimes says "(Choose two.)" while listing a single answer letter; surface that
+  // so a known-bad question is not taught as fact.
   const inconsistentMulti = questions.filter(
     (q) => MULTI_RE.test(q.text) && (q.correct?.length ?? 0) < 2,
   );

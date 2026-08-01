@@ -19,8 +19,9 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
     <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-5 sm:p-6">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         {label && <Badge tone="slate">{label}</Badge>}
-        {/* Không hiện số đáp án đúng: bản thân câu hỏi đã ghi "(Choose TWO)" khi cần,
-            nói thêm số lượng sẽ dễ hơn đề thi thật. */}
+        {/* Never reveal how many answers are correct: the question text already says
+            "(Choose TWO)" when it matters, so stating the count would make this easier
+            than the real exam. */}
         {question.multi && <Badge tone="amber">Chọn nhiều đáp án</Badge>}
         {revealed && (correct ? <Badge tone="green">Đúng</Badge> : <Badge tone="red">Sai</Badge>)}
         {question.source && (
