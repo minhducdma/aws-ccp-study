@@ -1,0 +1,19 @@
+{
+  "id": "aws-soa-c03",
+  "code": "SOA-C03",
+  "title": "AWS Certified CloudOps Engineer – Associate",
+  "shortTitle": "CloudOps Engineer",
+  "provider": "AWS",
+  "level": "Associate",
+  "levelOrder": 2,
+  "status": "planned",
+  "summary": "Vận hành hệ thống trên AWS: giám sát, tự động hoá, khắc phục sự cố, quản lý mạng và bảo mật vận hành.",
+  "estimatedHours": 40,
+  "exam": {
+    "totalQuestions": 65,
+    "scoredQuestions": 50,
+    "durationMin": 130,
+    "passScore": 720,
+    "maxScore": 1000
+  }
+}

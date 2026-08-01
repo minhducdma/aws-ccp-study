@@ -1,0 +1,19 @@
+{
+  "id": "aws-mla-c01",
+  "code": "MLA-C01",
+  "title": "AWS Certified Machine Learning Engineer – Associate",
+  "shortTitle": "ML Engineer",
+  "provider": "AWS",
+  "level": "Associate",
+  "levelOrder": 2,
+  "status": "planned",
+  "summary": "Đưa mô hình ML lên production: chuẩn bị dữ liệu, huấn luyện, triển khai và giám sát bằng SageMaker.",
+  "estimatedHours": 45,
+  "exam": {
+    "totalQuestions": 65,
+    "scoredQuestions": 50,
+    "durationMin": 130,
+    "passScore": 720,
+    "maxScore": 1000
+  }
+}

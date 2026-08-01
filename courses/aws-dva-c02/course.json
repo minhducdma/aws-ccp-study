@@ -1,0 +1,19 @@
+{
+  "id": "aws-dva-c02",
+  "code": "DVA-C02",
+  "title": "AWS Certified Developer – Associate",
+  "shortTitle": "Developer",
+  "provider": "AWS",
+  "level": "Associate",
+  "levelOrder": 2,
+  "status": "planned",
+  "summary": "Phát triển, triển khai và gỡ lỗi ứng dụng cloud-native: Lambda, API Gateway, DynamoDB, CI/CD và SDK.",
+  "estimatedHours": 40,
+  "exam": {
+    "totalQuestions": 65,
+    "scoredQuestions": 50,
+    "durationMin": 130,
+    "passScore": 733,
+    "maxScore": 1000
+  }
+}

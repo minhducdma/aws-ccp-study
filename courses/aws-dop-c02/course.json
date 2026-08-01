@@ -1,0 +1,19 @@
+{
+  "id": "aws-dop-c02",
+  "code": "DOP-C02",
+  "title": "AWS Certified DevOps Engineer – Professional",
+  "shortTitle": "DevOps Engineer",
+  "provider": "AWS",
+  "level": "Professional",
+  "levelOrder": 3,
+  "status": "planned",
+  "summary": "CI/CD, infrastructure as code, giám sát và ứng cứu sự cố ở quy mô production.",
+  "estimatedHours": 70,
+  "exam": {
+    "totalQuestions": 75,
+    "scoredQuestions": 65,
+    "durationMin": 180,
+    "passScore": 750,
+    "maxScore": 1000
+  }
+}

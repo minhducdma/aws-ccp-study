@@ -1,0 +1,19 @@
+{
+  "id": "aws-dea-c01",
+  "code": "DEA-C01",
+  "title": "AWS Certified Data Engineer – Associate",
+  "shortTitle": "Data Engineer",
+  "provider": "AWS",
+  "level": "Associate",
+  "levelOrder": 2,
+  "status": "planned",
+  "summary": "Xây dựng và vận hành data pipeline: Glue, Redshift, Kinesis, Lake Formation, quản trị và chất lượng dữ liệu.",
+  "estimatedHours": 45,
+  "exam": {
+    "totalQuestions": 65,
+    "scoredQuestions": 50,
+    "durationMin": 130,
+    "passScore": 720,
+    "maxScore": 1000
+  }
+}

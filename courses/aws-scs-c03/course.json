@@ -1,0 +1,19 @@
+{
+  "id": "aws-scs-c03",
+  "code": "SCS-C03",
+  "title": "AWS Certified Security – Specialty",
+  "shortTitle": "Security",
+  "provider": "AWS",
+  "level": "Specialty",
+  "levelOrder": 4,
+  "status": "planned",
+  "summary": "Bảo mật chuyên sâu: quản lý danh tính, mã hoá, bảo vệ hạ tầng, phát hiện và ứng cứu sự cố.",
+  "estimatedHours": 60,
+  "exam": {
+    "totalQuestions": 65,
+    "scoredQuestions": 50,
+    "durationMin": 170,
+    "passScore": 750,
+    "maxScore": 1000
+  }
+}

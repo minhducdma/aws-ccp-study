@@ -1,0 +1,19 @@
+{
+  "id": "aws-saa-c03",
+  "code": "SAA-C03",
+  "title": "AWS Certified Solutions Architect – Associate",
+  "shortTitle": "Solutions Architect",
+  "provider": "AWS",
+  "level": "Associate",
+  "levelOrder": 2,
+  "status": "planned",
+  "summary": "Thiết kế kiến trúc chịu lỗi, hiệu năng cao và tối ưu chi phí trên AWS. Bước tiếp theo tự nhiên sau Cloud Practitioner.",
+  "estimatedHours": 40,
+  "exam": {
+    "totalQuestions": 65,
+    "scoredQuestions": 50,
+    "durationMin": 130,
+    "passScore": 720,
+    "maxScore": 1000
+  }
+}

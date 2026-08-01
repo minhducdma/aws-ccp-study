@@ -1,0 +1,19 @@
+{
+  "id": "aws-sap-c02",
+  "code": "SAP-C02",
+  "title": "AWS Certified Solutions Architect – Professional",
+  "shortTitle": "Solutions Architect Pro",
+  "provider": "AWS",
+  "level": "Professional",
+  "levelOrder": 3,
+  "status": "planned",
+  "summary": "Kiến trúc phức tạp nhiều account và hybrid: chiến lược migration, tối ưu chi phí quy mô lớn, quản trị tập trung.",
+  "estimatedHours": 70,
+  "exam": {
+    "totalQuestions": 75,
+    "scoredQuestions": 65,
+    "durationMin": 180,
+    "passScore": 750,
+    "maxScore": 1000
+  }
+}

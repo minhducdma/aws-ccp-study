@@ -1,0 +1,19 @@
+{
+  "id": "aws-aif-c01",
+  "code": "AIF-C01",
+  "title": "AWS Certified AI Practitioner",
+  "shortTitle": "AI Practitioner",
+  "provider": "AWS",
+  "level": "Foundational",
+  "levelOrder": 1,
+  "status": "planned",
+  "summary": "Khái niệm AI/ML và generative AI trên AWS: Bedrock, SageMaker, prompt engineering và AI có trách nhiệm.",
+  "estimatedHours": 14,
+  "exam": {
+    "totalQuestions": 85,
+    "scoredQuestions": 65,
+    "durationMin": 90,
+    "passScore": 700,
+    "maxScore": 1000
+  }
+}

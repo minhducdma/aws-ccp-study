@@ -1,0 +1,19 @@
+{
+  "id": "aws-aip-c01",
+  "code": "AIP-C01",
+  "title": "AWS Certified Generative AI Developer – Professional",
+  "shortTitle": "Generative AI Developer",
+  "provider": "AWS",
+  "level": "Professional",
+  "levelOrder": 3,
+  "status": "planned",
+  "summary": "Xây dựng ứng dụng generative AI production: RAG, agent, fine-tuning, đánh giá và vận hành trên Bedrock.",
+  "estimatedHours": 70,
+  "exam": {
+    "totalQuestions": 75,
+    "scoredQuestions": 65,
+    "durationMin": 180,
+    "passScore": 750,
+    "maxScore": 1000
+  }
+}
