@@ -42,6 +42,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       else await signUp(email, password, displayName.trim() || undefined);
       navigate('/');
     } catch (err) {
+      console.error('[auth] sign-in/sign-up failed:', err);
       setError(t(authErrorKey(err)));
     } finally {
       setLoading(false);
@@ -55,6 +56,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       await signInWithGoogle();
       navigate('/');
     } catch (err) {
+      console.error('[auth] Google sign-in failed:', err);
       setError(t(authErrorKey(err)));
     } finally {
       setLoading(false);
