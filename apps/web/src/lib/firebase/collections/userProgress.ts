@@ -1,20 +1,31 @@
 import {
   collection,
   deleteDoc,
+  deleteField,
   doc,
+  getDocs,
   onSnapshot,
   setDoc,
   type QuerySnapshot,
   type Unsubscribe,
 } from 'firebase/firestore';
-import type { Attempt, CourseProgressFields } from '../../../types';
+import type {
+  Attempt,
+  CourseProgress,
+  CourseProgressSummary,
+  LegacyCourseProgressFields,
+  PracticeState,
+} from '../../../types';
 import { db } from '../config';
 
 /**
  * The `userProgress` collection, one document per signed-in user (keyed by uid):
  *
- *   userProgress/{uid}/courses/{courseId}                     — CourseProgressFields
+ *   userProgress/{uid}/courses/{courseId}                     — CourseProgressSummary
  *   userProgress/{uid}/courses/{courseId}/attempts/{attemptId} — one document per exam attempt
+ *   userProgress/{uid}/courses/{courseId}/notes/{noteId}       — one note read state
+ *   userProgress/{uid}/courses/{courseId}/practice/{setId}     — one practice set state
+ *   userProgress/{uid}/courses/{courseId}/wrong/{questionId}   — one wrong-answer counter
  *
  * Splitting attempts into their own subcollection means ticking a checkbox or answering one
  * practice question only rewrites the small course document, never the whole exam history.
@@ -32,6 +43,44 @@ export function courseDocRef(uid: string, courseId: string) {
 
 export function attemptsCollectionRef(uid: string, courseId: string) {
   return collection(db, 'userProgress', uid, 'courses', courseId, 'attempts');
+}
+
+function notesCollectionRef(uid: string, courseId: string) {
+  return collection(courseDocRef(uid, courseId), 'notes');
+}
+
+function practiceCollectionRef(uid: string, courseId: string) {
+  return collection(courseDocRef(uid, courseId), 'practice');
+}
+
+function wrongCollectionRef(uid: string, courseId: string) {
+  return collection(courseDocRef(uid, courseId), 'wrong');
+}
+
+function noteDocRef(uid: string, courseId: string, noteId: string) {
+  return doc(notesCollectionRef(uid, courseId), noteId);
+}
+
+function practiceDocRef(uid: string, courseId: string, setId: string) {
+  return doc(practiceCollectionRef(uid, courseId), setId);
+}
+
+function wrongDocRef(uid: string, courseId: string, questionId: string) {
+  return doc(wrongCollectionRef(uid, courseId), questionId);
+}
+
+interface NoteProgressDocument {
+  read: boolean;
+  updatedAt: number;
+}
+
+interface PracticeProgressDocument extends PracticeState {
+  updatedAt: number;
+}
+
+interface WrongProgressDocument {
+  count: number;
+  updatedAt: number;
 }
 
 export function attemptDocRef(uid: string, courseId: string, attemptId: string) {
@@ -58,13 +107,140 @@ export function subscribeToAttempts(
   });
 }
 
-/** Overwrites one course's fields document (never includes attempts). */
-export function saveCourseFields(
+export function subscribeToNotes(
   uid: string,
   courseId: string,
-  fields: CourseProgressFields,
+  onChange: (notesRead: Record<string, boolean>) => void,
+): Unsubscribe {
+  return onSnapshot(notesCollectionRef(uid, courseId), (snapshot) => {
+    onChange(Object.fromEntries(snapshot.docs.map((entry) => [entry.id, (entry.data() as NoteProgressDocument).read])));
+  });
+}
+
+export function subscribeToPractice(
+  uid: string,
+  courseId: string,
+  onChange: (practice: Record<string, PracticeState>) => void,
+): Unsubscribe {
+  return onSnapshot(practiceCollectionRef(uid, courseId), (snapshot) => {
+    onChange(
+      Object.fromEntries(
+        snapshot.docs.map((entry) => {
+          const { updatedAt: _updatedAt, ...state } = entry.data() as PracticeProgressDocument;
+          return [entry.id, state];
+        }),
+      ),
+    );
+  });
+}
+
+export function subscribeToWrong(
+  uid: string,
+  courseId: string,
+  onChange: (wrong: Record<string, number>) => void,
+): Unsubscribe {
+  return onSnapshot(wrongCollectionRef(uid, courseId), (snapshot) => {
+    onChange(Object.fromEntries(snapshot.docs.map((entry) => [entry.id, (entry.data() as WrongProgressDocument).count])));
+  });
+}
+
+export async function loadUserProgress(uid: string): Promise<Record<string, CourseProgress>> {
+  const courses = await getDocs(coursesCollectionRef(uid));
+  const entries = await Promise.all(
+    courses.docs.map(async (courseEntry) => {
+      const courseId = courseEntry.id;
+      const legacy = courseEntry.data() as Partial<LegacyCourseProgressFields>;
+      const [notes, practice, wrong, attempts] = await Promise.all([
+        getDocs(notesCollectionRef(uid, courseId)),
+        getDocs(practiceCollectionRef(uid, courseId)),
+        getDocs(wrongCollectionRef(uid, courseId)),
+        getDocs(attemptsCollectionRef(uid, courseId)),
+      ]);
+
+      const notesRead = { ...(legacy.notesRead ?? {}) };
+      notes.forEach((entry) => {
+        notesRead[entry.id] = (entry.data() as NoteProgressDocument).read;
+      });
+      const practiceStates = { ...(legacy.practice ?? {}) };
+      practice.forEach((entry) => {
+        const { updatedAt: _updatedAt, ...state } = entry.data() as PracticeProgressDocument;
+        practiceStates[entry.id] = state;
+      });
+      const wrongCounts = { ...(legacy.wrong ?? {}) };
+      wrong.forEach((entry) => {
+        wrongCounts[entry.id] = (entry.data() as WrongProgressDocument).count;
+      });
+
+      return [
+        courseId,
+        {
+          notesRead,
+          practice: practiceStates,
+          wrong: wrongCounts,
+          attempts: attempts.docs.map((entry) => entry.data() as Attempt),
+          freeMode: legacy.freeMode ?? false,
+          updatedAt: legacy.updatedAt ?? 0,
+        },
+      ] as const;
+    }),
+  );
+  return Object.fromEntries(entries);
+}
+
+export function saveCourseSummary(
+  uid: string,
+  courseId: string,
+  summary: CourseProgressSummary,
 ): Promise<void> {
-  return setDoc(courseDocRef(uid, courseId), fields);
+  return setDoc(
+    courseDocRef(uid, courseId),
+    {
+      ...summary,
+      notesRead: deleteField(),
+      practice: deleteField(),
+      wrong: deleteField(),
+    },
+    { merge: true },
+  );
+}
+
+export function saveNoteProgress(
+  uid: string,
+  courseId: string,
+  noteId: string,
+  read: boolean,
+): Promise<void> {
+  return setDoc(noteDocRef(uid, courseId, noteId), { read, updatedAt: Date.now() });
+}
+
+export function deleteNoteProgress(uid: string, courseId: string, noteId: string): Promise<void> {
+  return deleteDoc(noteDocRef(uid, courseId, noteId));
+}
+
+export function savePracticeProgress(
+  uid: string,
+  courseId: string,
+  setId: string,
+  state: PracticeState,
+): Promise<void> {
+  return setDoc(practiceDocRef(uid, courseId, setId), { ...state, updatedAt: Date.now() });
+}
+
+export function deletePracticeProgress(uid: string, courseId: string, setId: string): Promise<void> {
+  return deleteDoc(practiceDocRef(uid, courseId, setId));
+}
+
+export function saveWrongProgress(
+  uid: string,
+  courseId: string,
+  questionId: string,
+  count: number,
+): Promise<void> {
+  return setDoc(wrongDocRef(uid, courseId, questionId), { count, updatedAt: Date.now() });
+}
+
+export function deleteWrongProgress(uid: string, courseId: string, questionId: string): Promise<void> {
+  return deleteDoc(wrongDocRef(uid, courseId, questionId));
 }
 
 /** Writes one exam attempt as its own document. Attempts are append-only — never edited. */

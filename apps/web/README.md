@@ -97,11 +97,24 @@ Everything above still describes a signed-out reader. Signing in changes where t
 
 `AuthProvider` sits in `main.tsx`, above the router, so `useAuth()` works on every screen. `AuthWidget` (`src/components/AuthWidget.tsx`) is the sign-in link or the account initial shown in the header of `CatalogPage` and `CourseLayout`. `AuthForm` (`src/components/AuthForm.tsx`) is the shared component behind `/login` and `/signup`.
 
-`lib/progress.ts` does not know about React or Firebase Auth directly. `AuthProvider` calls `bindProgressUser(uid | null)` whenever the signed-in user changes, and that function decides where the module-level store reads and writes from:
+`AuthProvider` calls `bindProgressUser(uid | null)` whenever the signed-in user changes. The UI still reads one in-memory course object, but Firestore stores each independently changing part separately:
+
+```text
+userProgress/{uid}/courses/{courseId}                       freeMode, updatedAt
+userProgress/{uid}/courses/{courseId}/notes/{noteId}        read, updatedAt
+userProgress/{uid}/courses/{courseId}/practice/{setId}      index, answers, checked, updatedAt
+userProgress/{uid}/courses/{courseId}/wrong/{questionId}    count, updatedAt
+userProgress/{uid}/courses/{courseId}/attempts/{attemptId}  one completed attempt
+```
+
+This keeps a single practice answer from rewriting notes, wrong-answer counters, or exam history. Existing course documents with embedded `notesRead`, `practice`, and `wrong` maps are read once, written into the detailed collections, then stripped of those legacy fields.
+
+The binding function decides where the module-level store reads and writes from:
 
 - **Signed out** — the store is `localStorage`, exactly as described above.
-- **Signed in** — the store is the Firestore document `userProgress/{uid}`, kept live with `onSnapshot`, so every open tab and every device shows the same progress a moment after a change. `localStorage` keeps a copy too, so the app still has something to show offline.
-- **First sign-in** — if `userProgress/{uid}` does not exist yet, whatever this browser already had (guest progress) is written there, so studying before creating an account is never lost.
+- **Signed in** — the detailed Firestore collections are kept live with `onSnapshot`, so every open tab and device receives updates. `localStorage` remains an offline cache.
+- **Every sign-in** — local guest/cache data and remote data are loaded before listeners start. Course maps are merged, attempts are deduplicated by id, wrong-answer counters keep the highest count, and conflicting practice state uses the newer course update. The merged result is persisted to the detailed schema, so neither source is silently discarded.
+- **Signed out** — account listeners stop and the account cache is removed from memory and `localStorage`, preventing one account's progress from appearing in a guest session.
 
 `firestore.rules`, at the repo root, is the actual access control: a document under `userProgress/{uid}` can only be read or written by a request whose `auth.uid` matches `uid`. Nothing in the client code enforces that; the rules do. Deploy them with `firebase deploy --only firestore:rules --project <project-id>`.
 

@@ -50,9 +50,13 @@ export interface CourseProgress {
   updatedAt: number;
 }
 
-/** What actually gets written to `userProgress/{uid}/courses/{courseId}` — everything in
- *  `CourseProgress` except the attempt history, which lives in its own subcollection. */
-export type CourseProgressFields = Omit<CourseProgress, 'attempts'>;
+/** Pre-v3 Firestore shape, retained only so existing course documents can be migrated. */
+export type LegacyCourseProgressFields = Omit<CourseProgress, 'attempts'>;
+
+export interface CourseProgressSummary {
+  freeMode: boolean;
+  updatedAt: number;
+}
 
 export interface ProgressStore {
   version: 2;

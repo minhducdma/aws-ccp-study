@@ -4,7 +4,6 @@ import type {
   Attempt,
   Course,
   CourseProgress,
-  CourseProgressFields,
   Letter,
   PracticeState,
   ProgressStore,
@@ -12,10 +11,20 @@ import type {
 import { isCorrect, lookupQuestion } from './content';
 import {
   deleteAttempt as deleteAttemptDoc,
+  deleteNoteProgress,
+  deletePracticeProgress,
+  deleteWrongProgress,
+  loadUserProgress,
   saveAttempt as saveAttemptDoc,
-  saveCourseFields,
+  saveCourseSummary,
+  saveNoteProgress,
+  savePracticeProgress,
+  saveWrongProgress,
   subscribeToAttempts,
   subscribeToCourses,
+  subscribeToNotes,
+  subscribeToPractice,
+  subscribeToWrong,
 } from './firebase/collections/userProgress';
 
 const STORAGE_KEY = 'study-progress-v2';
@@ -96,46 +105,126 @@ function clearLocalProgress() {
 
 let currentUid: string | null = null;
 let unsubscribeCourses: Unsubscribe | null = null;
-const attemptUnsubscribes = new Map<string, Unsubscribe>();
+const courseUnsubscribes = new Map<string, Unsubscribe[]>();
 
 function stopWatchingRemote() {
   unsubscribeCourses?.();
   unsubscribeCourses = null;
-  attemptUnsubscribes.forEach((unsubscribe) => unsubscribe());
-  attemptUnsubscribes.clear();
+  courseUnsubscribes.forEach((unsubscribes) => unsubscribes.forEach((unsubscribe) => unsubscribe()));
+  courseUnsubscribes.clear();
 }
 
-/** Merges a course document's fields into the local store without touching its attempts, which
- * are synced separately by `watchAttempts`. */
-function applyRemoteCourseFields(courseId: string, fields: CourseProgressFields) {
-  const attempts = store.courses[courseId]?.attempts ?? emptyCourseProgress.attempts;
+function applyRemoteCourseSummary(courseId: string, fields: Partial<CourseProgress>) {
+  const current = store.courses[courseId] ?? emptyCourseProgress;
   applyRemote({
     ...store,
-    courses: { ...store.courses, [courseId]: { ...fields, attempts } },
+    courses: {
+      ...store.courses,
+      [courseId]: {
+        ...current,
+        freeMode: fields.freeMode ?? current.freeMode,
+        updatedAt: fields.updatedAt ?? current.updatedAt,
+      },
+    },
   });
 }
 
-function watchAttempts(uid: string, courseId: string): Unsubscribe {
-  return subscribeToAttempts(uid, courseId, (attempts) => {
-    const current = store.courses[courseId] ?? emptyCourseProgress;
-    applyRemote({
-      ...store,
-      courses: { ...store.courses, [courseId]: { ...current, attempts } },
-    });
-  });
+function updateRemoteCourse(courseId: string, patch: Partial<CourseProgress>) {
+  const current = store.courses[courseId] ?? emptyCourseProgress;
+  applyRemote({ ...store, courses: { ...store.courses, [courseId]: { ...current, ...patch } } });
 }
 
-/** First sign-in on this device/account: this browser's guest progress becomes the seed for
- * every course it has data for, one Firestore document per course plus one per attempt. */
-function seedRemoteFromLocalGuest(uid: string) {
-  for (const [courseId, progress] of Object.entries(store.courses)) {
-    const { attempts, ...fields } = progress;
-    saveCourseFields(uid, courseId, { ...fields, updatedAt: Date.now() }).catch(() => {
-      // Best-effort seed; if it fails the user keeps their local copy and can retry by editing.
-    });
-    for (const attempt of attempts) {
-      saveAttemptDoc(uid, courseId, attempt).catch(() => {});
+function watchCourseDetails(uid: string, courseId: string) {
+  if (courseUnsubscribes.has(courseId)) return;
+  courseUnsubscribes.set(courseId, [
+    subscribeToNotes(uid, courseId, (notesRead) => updateRemoteCourse(courseId, { notesRead })),
+    subscribeToPractice(uid, courseId, (practice) => updateRemoteCourse(courseId, { practice })),
+    subscribeToWrong(uid, courseId, (wrong) => updateRemoteCourse(courseId, { wrong })),
+    subscribeToAttempts(uid, courseId, (attempts) => updateRemoteCourse(courseId, { attempts })),
+  ]);
+}
+
+function mergeCourseProgress(local: CourseProgress, remote: CourseProgress): CourseProgress {
+  const localIsNewer = local.updatedAt > remote.updatedAt;
+  const practice = { ...remote.practice };
+  for (const [setId, localState] of Object.entries(local.practice)) {
+    if (!practice[setId] || localIsNewer) practice[setId] = localState;
+  }
+  const wrong = { ...remote.wrong };
+  for (const [questionId, count] of Object.entries(local.wrong)) {
+    wrong[questionId] = Math.max(wrong[questionId] ?? 0, count);
+  }
+  const attempts = new Map(remote.attempts.map((attempt) => [attempt.id, attempt]));
+  local.attempts.forEach((attempt) => attempts.set(attempt.id, attempt));
+
+  return {
+    notesRead: { ...remote.notesRead, ...local.notesRead },
+    practice,
+    wrong,
+    attempts: [...attempts.values()],
+    freeMode: localIsNewer ? local.freeMode : remote.freeMode,
+    updatedAt: Math.max(local.updatedAt, remote.updatedAt),
+  };
+}
+
+function mergeProgressStores(local: ProgressStore, remoteCourses: Record<string, CourseProgress>): ProgressStore {
+  const courses = { ...remoteCourses };
+  for (const [courseId, localProgress] of Object.entries(local.courses)) {
+    courses[courseId] = courses[courseId]
+      ? mergeCourseProgress(localProgress, courses[courseId])
+      : localProgress;
+  }
+  return { version: 2, courses };
+}
+
+async function persistCourse(uid: string, courseId: string, progress: CourseProgress) {
+  await Promise.allSettled([
+    saveCourseSummary(uid, courseId, {
+      freeMode: progress.freeMode,
+      updatedAt: progress.updatedAt || Date.now(),
+    }),
+    ...Object.entries(progress.notesRead).map(([noteId, read]) =>
+      saveNoteProgress(uid, courseId, noteId, read),
+    ),
+    ...Object.entries(progress.practice).map(([setId, state]) =>
+      savePracticeProgress(uid, courseId, setId, state),
+    ),
+    ...Object.entries(progress.wrong).map(([questionId, count]) =>
+      saveWrongProgress(uid, courseId, questionId, count),
+    ),
+    ...progress.attempts.map((attempt) => saveAttemptDoc(uid, courseId, attempt)),
+  ]);
+}
+
+function startWatchingRemote(uid: string) {
+  unsubscribeCourses = subscribeToCourses(uid, (snapshot) => {
+    for (const change of snapshot.docChanges()) {
+      const courseId = change.doc.id;
+      if (change.type === 'removed') {
+        courseUnsubscribes.get(courseId)?.forEach((unsubscribe) => unsubscribe());
+        courseUnsubscribes.delete(courseId);
+        continue;
+      }
+      applyRemoteCourseSummary(courseId, change.doc.data() as Partial<CourseProgress>);
+      watchCourseDetails(uid, courseId);
     }
+  });
+}
+
+async function synchronizeProgress(uid: string, local: ProgressStore) {
+  try {
+    const remoteCourses = await loadUserProgress(uid);
+    if (currentUid !== uid) return;
+    const merged = mergeProgressStores(local, remoteCourses);
+    applyRemote(merged);
+    await Promise.all(
+      Object.entries(merged.courses).map(([courseId, progress]) => persistCourse(uid, courseId, progress)),
+    );
+  } catch {
+    // Keep the local snapshot visible offline; Firestore listeners reconnect automatically.
+    if (currentUid === uid) applyRemote(local);
+  } finally {
+    if (currentUid === uid) startWatchingRemote(uid);
   }
 }
 
@@ -157,25 +246,7 @@ export function bindProgressUser(uid: string | null): void {
     return;
   }
 
-  unsubscribeCourses = subscribeToCourses(uid, (snapshot) => {
-    if (snapshot.empty && Object.keys(store.courses).length > 0) {
-      seedRemoteFromLocalGuest(uid);
-      return;
-    }
-
-    for (const change of snapshot.docChanges()) {
-      const courseId = change.doc.id;
-      if (change.type === 'removed') {
-        attemptUnsubscribes.get(courseId)?.();
-        attemptUnsubscribes.delete(courseId);
-        continue;
-      }
-      applyRemoteCourseFields(courseId, change.doc.data() as CourseProgressFields);
-      if (!attemptUnsubscribes.has(courseId)) {
-        attemptUnsubscribes.set(courseId, watchAttempts(uid, courseId));
-      }
-    }
-  });
+  void synchronizeProgress(uid, store);
 }
 
 export function courseProgress(courseId: string): CourseProgress {
@@ -186,15 +257,14 @@ export function courseProgress(courseId: string): CourseProgress {
  * Firestore document. Any `attempts` on `next` is ignored here — attempts are only ever added
  * via `addAttempt` or cleared via `clearAttempts`, never rewritten by a fields-only edit. */
 function commitCourse(courseId: string, next: CourseProgress) {
-  const { attempts: _ignored, ...rest } = next;
-  const fields: CourseProgressFields = { ...rest, updatedAt: Date.now() };
+  const updatedAt = Date.now();
   const attempts = store.courses[courseId]?.attempts ?? emptyCourseProgress.attempts;
   applyRemote({
     ...store,
-    courses: { ...store.courses, [courseId]: { ...fields, attempts } },
+    courses: { ...store.courses, [courseId]: { ...next, updatedAt, attempts } },
   });
   if (currentUid) {
-    saveCourseFields(currentUid, courseId, fields).catch(() => {
+    saveCourseSummary(currentUid, courseId, { freeMode: next.freeMode, updatedAt }).catch(() => {
       // The change is already visible locally; Firestore's offline queue retries once the
       // connection is back, and the next courses snapshot reconciles the rest.
     });
@@ -247,6 +317,7 @@ export function useProgress(course: Course) {
     (noteId: string, read = true) => {
       const current = courseProgress(courseId);
       commitCourse(courseId, { ...current, notesRead: { ...current.notesRead, [noteId]: read } });
+      if (currentUid) saveNoteProgress(currentUid, courseId, noteId, read).catch(() => {});
     },
     [courseId],
   );
@@ -259,6 +330,9 @@ export function useProgress(course: Course) {
         ...current,
         practice: { ...current.practice, [setId]: { ...set, ...patch } },
       });
+      if (currentUid) {
+        savePracticeProgress(currentUid, courseId, setId, { ...set, ...patch }).catch(() => {});
+      }
     },
     [courseId],
   );
@@ -269,6 +343,7 @@ export function useProgress(course: Course) {
       const practice = { ...current.practice };
       delete practice[setId];
       commitCourse(courseId, { ...current, practice });
+      if (currentUid) deletePracticeProgress(currentUid, courseId, setId).catch(() => {});
     },
     [courseId],
   );
@@ -280,6 +355,9 @@ export function useProgress(course: Course) {
       const wrong = { ...current.wrong };
       for (const id of questionIds) wrong[id] = (wrong[id] ?? 0) + 1;
       commitCourse(courseId, { ...current, wrong });
+      if (currentUid) {
+        questionIds.forEach((id) => saveWrongProgress(currentUid!, courseId, id, wrong[id]).catch(() => {}));
+      }
     },
     [courseId],
   );
@@ -290,6 +368,7 @@ export function useProgress(course: Course) {
       const wrong = { ...current.wrong };
       delete wrong[questionId];
       commitCourse(courseId, { ...current, wrong });
+      if (currentUid) deleteWrongProgress(currentUid, courseId, questionId).catch(() => {});
     },
     [courseId],
   );
@@ -306,6 +385,11 @@ export function useProgress(course: Course) {
       }
       addAttempt(courseId, attempt);
       commitCourse(courseId, { ...current, wrong });
+      if (currentUid) {
+        Object.entries(wrong).forEach(([questionId, count]) =>
+          saveWrongProgress(currentUid!, courseId, questionId, count).catch(() => {}),
+        );
+      }
     },
     [course, courseId],
   );
@@ -318,8 +402,20 @@ export function useProgress(course: Course) {
   );
 
   const resetAll = useCallback(() => {
+    const current = courseProgress(courseId);
     clearAttempts(courseId);
     commitCourse(courseId, { ...emptyCourseProgress });
+    if (currentUid) {
+      Object.keys(current.notesRead).forEach((noteId) =>
+        deleteNoteProgress(currentUid!, courseId, noteId).catch(() => {}),
+      );
+      Object.keys(current.practice).forEach((setId) =>
+        deletePracticeProgress(currentUid!, courseId, setId).catch(() => {}),
+      );
+      Object.keys(current.wrong).forEach((questionId) =>
+        deleteWrongProgress(currentUid!, courseId, questionId).catch(() => {}),
+      );
+    }
   }, [courseId]);
 
   return {
