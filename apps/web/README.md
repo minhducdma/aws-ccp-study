@@ -1,41 +1,58 @@
 # @study/web
 
-Web app React + Vite + Tailwind. Toàn bộ dữ liệu lấy từ `@study/content`, toàn bộ giao diện lấy từ `@study/ui`; app **không** hardcode chứng chỉ nào, nên thêm khoá học không cần sửa gì ở đây.
+The React web app, built with Vite and Tailwind. All the data comes from `@study/content` and all the interface comes from `@study/ui`. No exam is named in this code, so a new course needs no change here.
 
-Trong `src/` chỉ còn component gắn với nghiệp vụ (`QuestionCard`, `CourseLayout`, `Markdown`). Nút, thẻ, badge, hộp thoại và animation nằm ở [`packages/ui`](../../packages/ui/README.md) — cần thêm primitive thì thêm bên đó chứ đừng định nghĩa lại tại đây.
+Start it from the repo root with `npm run dev`, not with `vite` in this folder, because Turborepo has to build the content first.
 
-Chạy từ thư mục gốc của repo (`npm run dev`) chứ đừng chạy `vite` trực tiếp trong thư mục này, vì Turborepo cần build nội dung trước.
+## Routes
 
-## Routing
-
-| Đường dẫn | Màn hình |
+| Path | Screen |
 |---|---|
-| `/` | Trang lộ trình, liệt kê mọi chứng chỉ, khoá nào chưa có nội dung thì hiện ổ khoá |
-| `/course/:courseId` | Tổng quan một khoá |
-| `/course/:courseId/review` | Sổ tay câu sai |
-| `/course/:courseId/phase/:phaseId/notes/:noteId` | Bài đọc |
-| `/course/:courseId/phase/:phaseId/practice` | Luyện tập từng câu |
-| `/course/:courseId/exam/:examId` | Gate quiz và đề thi thử, dùng chung một màn hình |
+| `/` | Roadmap page. Lists every exam, and shows a lock on the ones with no content |
+| `/course/:courseId` | Course overview |
+| `/course/:courseId/review` | The wrong answer notebook |
+| `/course/:courseId/phase/:phaseId/notes/:noteId` | Reading material |
+| `/course/:courseId/phase/:phaseId/practice` | Practice, one question at a time |
+| `/course/:courseId/exam/:examId` | Gate quiz and mock exam, on the same screen |
 
-`CourseLayout` phân giải `:courseId` thành object khoá học rồi đưa xuống qua context. Trong các page, dùng `useCourse()` để lấy `course` và hàm `url()` dựng link — đừng tự nối chuỗi `/course/...`, vì `url()` là chỗ duy nhất biết tiền tố.
+`CourseLayout` turns `:courseId` into a course object and passes it down through a context. In a page, call `useCourse()` to read `course` and to build links with `url()`. Never join a `/course/...` string by hand, because `url()` is the only place that knows the prefix.
 
-Khoá học không tồn tại hoặc đang ở trạng thái `planned` sẽ bị redirect về trang lộ trình.
+A course that does not exist, or one with the `planned` status, is sent back to the roadmap page.
 
-## Lưu tiến độ
+## Components
 
-Tiến độ nằm trong `localStorage` dưới key `study-progress-v2`, tách riêng từng khoá:
+Only the parts tied to this product live in `src/`: `QuestionCard`, `CourseLayout` and `Markdown`. Buttons, cards, badges, dialogs and animation belong to [`packages/ui`](../../packages/ui/README.md). When you need a new one, add it there instead of writing it again here.
+
+## Saved progress
+
+Progress sits in `localStorage` under the key `study-progress-v2`, and each course is kept apart:
 
 ```
 { version: 2, courses: { "aws-clf-c02": { notesRead, practice, attempts, wrong, freeMode } } }
 ```
 
-ID câu hỏi chỉ duy nhất trong phạm vi một khoá, nên mọi thao tác tra cứu đều phải đi qua `lookupQuestion(course, id)`. Dữ liệu từ bản v1 cũ (`aws-ccp-progress-v1`, thời còn một khoá duy nhất) được tự động chuyển vào nhánh `aws-clf-c02` ở lần chạy đầu, và bản cũ vẫn được giữ lại chứ không xoá.
+A question id is unique inside one course only, so every lookup has to go through `lookupQuestion(course, id)`. Data from the old v1 key (`aws-ccp-progress-v1`, from the days of a single course) moves into the `aws-clf-c02` branch on the first run, and the old key is kept, not deleted.
 
-## Script riêng của app
+## Commands
 
-| Lệnh | Việc |
+| Command | What it does |
 |---|---|
-| `npm run smoke` | Render mọi route bằng SSR để bắt lỗi runtime mà typecheck không thấy |
-| `npm run preview:pages` | Phục vụ `dist/` y hệt GitHub Pages: có tiền tố base path và fallback `404.html` |
+| `npm run smoke` | Renders every route with SSR to catch runtime errors that a type check cannot see |
+| `npm run preview:pages` | Serves `dist/` exactly like GitHub Pages, with the base path and the `404.html` fallback |
 
-`vite.config.ts` giữ hai thứ đặc thù cho GitHub Pages: biến `BASE_PATH` và plugin chép `index.html` thành `404.html` khi build. Xem phần deploy trong [README gốc](../../README.md) trước khi đổi chúng.
+The smoke test uses the same providers as `main.tsx`. When you add a provider there, add it to `scripts/smoke-entry.tsx` too, or the routes will fail.
+
+## GitHub Pages
+
+`vite.config.ts` holds two things that exist only for GitHub Pages: the `BASE_PATH` variable, and a plugin that copies `index.html` to `404.html` at build time. Read the deploy part of the [root README](../../README.md) before you change either of them.
+
+The build is also split into three chunks. Study material changes far more often than the libraries, so `content`, `vendor` and the app entry are kept apart, and a returning learner keeps the big vendor chunk in cache when only the markdown moved.
+
+## Related docs
+
+| Doc | What it covers |
+|---|---|
+| [`../../README.md`](../../README.md) | The platform and the commands |
+| [`../../courses/README.md`](../../courses/README.md) | How to write the content of a course |
+| [`../../packages/content/README.md`](../../packages/content/README.md) | The markdown parser and its scripts |
+| [`../../packages/ui/README.md`](../../packages/ui/README.md) | The design system |

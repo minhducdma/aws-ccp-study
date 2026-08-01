@@ -1,142 +1,101 @@
-# Nền tảng luyện thi chứng chỉ AWS
+# AWS Certification Study Platform
 
-Monorepo chứa các khoá tự luyện chứng chỉ AWS. Mỗi khoá chia thành nhiều phase theo đúng trọng số domain của kỳ thi, mỗi phase gồm notes, ngân hàng câu luyện tập và một Gate Quiz phải pass mới sang phase sau.
+A monorepo of self-study courses for AWS exams. Each course is cut into phases. A phase has notes, practice questions and a gate quiz, and the next phase opens only after you pass that quiz.
 
-Khoá đang có nội dung đầy đủ: **AWS Certified Cloud Practitioner (CLF-C02)** — 398 câu hỏi, 4 phase, 2 đề thi thử. Các chứng chỉ AWS còn lại đã có sẵn chỗ trong lộ trình và hiện đang khoá.
+One course is ready today: **AWS Certified Cloud Practitioner (CLF-C02)**, with 398 questions, 4 phases and 2 mock exams. The other AWS exams already have a seat in the roadmap, but they are locked.
 
-Bản đang chạy: <https://minhducdma.github.io/aws-ccp-study/>
+Live site: <https://minhducdma.github.io/aws-ccp-study/>
 
-## Cấu trúc repo
+## Repo layout
 
 ```
-courses/                       Dữ liệu — mỗi chứng chỉ một thư mục
-  aws-clf-c02/
-    course.json                Manifest: thông tin kỳ thi, danh sách phase, trọng số, domain
-    phases/1-cloud-concepts/
-      notes.md                 Kiến thức trọng tâm
-      practice.md              Câu luyện tập (đáp án ẩn trong khối <details>)
-      gate-quiz.md             Gate Quiz, không kèm đáp án
-      gate-quiz.answers.md     Đáp án + giải thích, chỉ mở sau khi làm xong
-    phases/3-technology/
-      cheatsheet.md            Bảng tra nhanh AWS service
-    mock-exams/
-      mock-1.md                Đề mô phỏng 50 câu / 90 phút
-      mock-1.answers.md        Đáp án + phân loại domain từng câu
-      annotations.json         Domain và giải thích tiếng Việt cho đề mô phỏng
-  aws-saa-c03/course.json      Khoá chưa có nội dung: chỉ manifest, catalog tự khoá lại
-  README.md                    Hướng dẫn soạn nội dung: định dạng, quy tắc tên file, script
-
-packages/content/              Pipeline: đọc courses/ và sinh ra content.json
-packages/ui/                   Design system: token, primitive, animation, minh hoạ SVG
-apps/web/                      Web app React, không biết gì về chứng chỉ cụ thể
+courses/            Data. One folder for each exam
+packages/content/   Reads courses/ and writes content.json
+packages/ui/        Design system: tokens, components, animation, SVG art
+apps/web/           React web app
 ```
 
-Ranh giới quan trọng: `courses/` là dữ liệu, `apps/web/` là ứng dụng. Web app không hardcode chứng chỉ nào — mọi thứ riêng của từng khoá đều nằm trong `course.json`.
+The important line is between `courses/` and `apps/web/`. The first one is data, the second one is the app. No exam name is written in the app code, so everything that belongs to one exam stays in its own `course.json`.
 
-## Chạy tại máy
+## Commands
 
-```bash
-npm install
-npm run dev
-```
+Run all of them from the repo root.
 
-Mở <http://localhost:5180>. Turborepo tự chạy `@study/content` trước để đọc lại markdown, rồi mới khởi động Vite.
-
-| Lệnh (chạy ở thư mục gốc) | Việc |
+| Command | What it does |
 |---|---|
-| `npm run dev` | Dev server, tự build lại nội dung trước khi chạy |
-| `npm run build` | Build bản tĩnh vào `apps/web/dist/` |
-| `npm run check` | Đọc lại markdown và in mọi cảnh báo (thiếu đáp án, lệch đáp án, thiếu câu) |
-| `npm run verify` | Tải đề gốc từ GitHub và đối chiếu đáp án từng câu với bản gốc |
-| `npm run smoke` | Render thử toàn bộ route bằng SSR để bắt lỗi runtime |
-| `npm run mock-exams` | Sinh lại file đề mô phỏng từ đề gốc |
-| `npm run preview:pages` | Chạy thử bản build y hệt cách GitHub Pages phục vụ nó |
+| `npm install` | Installs the dependencies of every package |
+| `npm run dev` | Starts the dev server on <http://localhost:5180> |
+| `npm run build` | Builds the static site into `apps/web/dist/` |
+| `npm run check` | Reads the markdown again and prints every warning |
+| `npm run verify` | Downloads the source exams and compares every answer |
+| `npm run smoke` | Renders every route with SSR to catch runtime errors |
+| `npm run mock-exams` | Builds the mock exam files again from the source exams |
+| `npm run preview:pages` | Serves the build the same way GitHub Pages does |
 
-Turborepo cache theo nội dung file: sửa markdown thì cả hai package build lại, không sửa gì thì `npm run build` trả về trong khoảng 50ms.
+Turborepo caches by file content. If you edit markdown, both packages run again. If you edit nothing, `npm run build` returns almost at once, because there is nothing to redo.
 
-## Thêm một khoá học mới
+## Web app features
 
-Hướng dẫn đầy đủ — định dạng markdown cho câu hỏi và đáp án, quy tắc đặt tên file, chạy script nào sau khi soạn — nằm ở [`courses/README.md`](courses/README.md). Tóm tắt: không cần sửa code trong `apps/web/`, chỉ tạo `courses/<id>/course.json`, đổi `status` thành `available`, khai báo các phase rồi đặt markdown vào đúng đường dẫn:
-
-```json
-{
-  "id": "aws-saa-c03",
-  "code": "SAA-C03",
-  "title": "AWS Certified Solutions Architect – Associate",
-  "level": "Associate",
-  "levelOrder": 2,
-  "status": "available",
-  "domainLabels": { "1": "Design Secure Architectures" },
-  "phases": [
-    {
-      "id": "phase-1",
-      "dir": "1-secure-architectures",
-      "title": "Design Secure Architectures",
-      "domain": 1,
-      "weight": 30,
-      "estimatedHours": 10,
-      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
-      "quiz": { "count": 25, "passScore": 20, "timeLimitMin": 35 }
-    }
-  ]
-}
-```
-
-Muốn `npm run verify` đối chiếu được đáp án, thêm khối `upstream` trỏ tới nguồn đề gốc. Muốn sinh đề mô phỏng tự động, thêm `mockExams.generateFrom`.
-
-## Tính năng web app
-
-| Tính năng | Mô tả |
+| Feature | What it does |
 |---|---|
-| Trang lộ trình | Toàn bộ chứng chỉ AWS xếp theo cấp độ, khoá nào chưa có nội dung thì hiện khoá |
-| Notes | Markdown render kèm mục lục, đánh dấu đã đọc |
-| Luyện tập | Từng câu một, kiểm tra ngay, xem giải thích, lưu vị trí đang làm |
-| Gate Quiz | Đếm ngược thời gian, không hiện đáp án tới khi nộp, tự chấm và mở khoá phase sau |
-| Thi thử | 50 câu / 90 phút, có phân tích điểm theo từng domain |
-| Ôn câu sai | Tự thu thập mọi câu từng trả lời sai, trả lời đúng lại thì xoá khỏi danh sách |
-| Khoá phase | Phase sau chỉ mở khi Gate Quiz phase trước đạt ngưỡng, tắt được bằng chế độ học tự do |
+| Roadmap page | Lists every AWS exam by level, and locks the ones with no content |
+| Notes | Shows the markdown with an outline and a "read" mark |
+| Practice | One question at a time, with an instant check and an explanation |
+| Gate quiz | Runs a timer, hides the answers until you submit, then opens the next phase |
+| Mock exam | 50 questions in 90 minutes, with a score table for each domain |
+| Wrong answers | Keeps every question you failed, and removes it when you get it right |
+| Phase lock | Opens a phase only after the phase before is passed. Free mode turns this off |
 
-Tiến độ lưu bằng `localStorage`, **tách riêng cho từng chứng chỉ**, nên học nhiều khoá song song không lẫn nhau. Vì gắn theo domain của trình duyệt nên tiến độ ở localhost và ở GitHub Pages là hai bản khác nhau.
+Progress is saved in `localStorage`, and it is kept **for each exam on its own**, so two courses never mix. It also belongs to the browser domain, so your progress on localhost and on GitHub Pages are two different copies.
 
-## Bảo đảm chất lượng nội dung
+## Content quality
 
-`npm run verify` là lớp quan trọng nhất: nó so từng đáp án trong tài liệu với dòng `Correct answer` trong đề gốc, nên nếu có câu bị ghi sai đáp án thì sẽ bị phát hiện thay vì âm thầm dạy sai. Hiện tại **398/398 câu khớp bản gốc**.
+`npm run verify` is the check that matters most. It compares every answer in this repo with the `Correct answer` line in the source exam, so a wrong answer is found instead of being taught. Today **398 of 398 questions match**.
 
-Đề mô phỏng sinh bằng `npm run mock-exams`: câu hỏi và đáp án lấy nguyên văn từ đề gốc nên không thể lệch; phân loại domain và giải thích tiếng Việt nằm trong `annotations.json` của từng khoá.
+`npm run mock-exams` writes the mock exams. It copies the questions and the answers from the source, so they always match. The domain labels and the Vietnamese explanations come from `annotations.json` in each course.
 
-## Deploy lên GitHub Pages
+## Deploy to GitHub Pages
 
-Workflow `.github/workflows/deploy.yml` chạy mỗi lần push lên `main`: cài dependency, đọc lại markdown, build và publish. Bật một lần trong repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+`.github/workflows/deploy.yml` runs on every push to `main`. It installs, reads the markdown, builds and publishes. You turn it on once in the repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
 
-| Chỗ | Giá trị hiện tại | Khi nào phải sửa |
+| Setting | Value now | When to change it |
 |---|---|---|
-| `BASE_PATH` trong `apps/web/vite.config.ts` | `/aws-ccp-study/` | Đổi tên repo. Dùng domain riêng hoặc repo `<user>.github.io` thì đặt về `/` |
-| `basename` của router (`apps/web/src/main.tsx`) | Lấy tự động từ `import.meta.env.BASE_URL` | Không cần sửa |
-| `404.html` trong `apps/web/dist/` | Bản sao của `index.html`, sinh tự động khi build | Không cần sửa |
+| `BASE_PATH` in `apps/web/vite.config.ts` | `/aws-ccp-study/` | You rename the repo. Use `/` for a custom domain or a `<user>.github.io` repo |
+| Router `basename` in `apps/web/src/main.tsx` | Taken from `import.meta.env.BASE_URL` | Never |
+| `404.html` in `apps/web/dist/` | A copy of `index.html`, written at build time | Never |
 
-`404.html` là phần bắt buộc: GitHub Pages chỉ phục vụ file tĩnh, không biết `/course/aws-clf-c02/review` là route của app. Khi mở thẳng link đó hoặc F5 giữa bài thi, Pages trả về `404.html` — vốn chính là app — và router tự hiển thị đúng trang. Chạy `npm run preview:pages` rồi mở <http://localhost:4173/aws-ccp-study/> để thử trước khi push.
+The `404.html` file is not optional. GitHub Pages only serves static files, so it does not know that `/course/aws-clf-c02/review` is a route of the app. When you open that link, or press F5 in the middle of an exam, Pages returns `404.html`, which is the app itself, and then the router shows the right page. Run `npm run preview:pages` and open <http://localhost:4173/aws-ccp-study/> to test this before you push.
 
-## AWS Certified Cloud Practitioner (CLF-C02)
+## CLF-C02 exam
 
-| Thông số | Giá trị |
+| Item | Value |
 |---|---|
-| Số câu | 65 (50 tính điểm + 15 không tính điểm) |
-| Thời gian | 90 phút |
-| Điểm đậu | 700/1000 (~70%) |
-| Lệ phí | ~100 USD |
-| Hình thức | Online (Pearson VUE OnVUE) hoặc test center |
+| Questions | 65 (50 scored, 15 not scored) |
+| Time | 90 minutes |
+| Pass score | 700 / 1000, about 70% |
+| Fee | About 100 USD |
+| Format | Online with Pearson VUE OnVUE, or at a test centre |
 
-| Domain | Tỉ lệ | Phase | Thời lượng | Gate Quiz |
+| Domain | Share | Phase | Hours | Gate quiz |
 |---|---|---|---|---|
-| Cloud Concepts | 24% | 1 | ~2.9h | ≥16/20 · 30 phút |
-| Security & Compliance | 30% | 2 | ~3.6h | ≥20/25 · 35 phút |
-| Cloud Technology & Services | 34% | 3 | ~4.1h | ≥24/30 · 45 phút |
-| Billing, Pricing & Support | 12% | 4 | ~1.4h | ≥12/15 · 20 phút |
+| Cloud Concepts | 24% | 1 | ~2.9 | ≥16/20 in 30 min |
+| Security & Compliance | 30% | 2 | ~3.6 | ≥20/25 in 35 min |
+| Cloud Technology & Services | 34% | 3 | ~4.1 | ≥24/30 in 45 min |
+| Billing, Pricing & Support | 12% | 4 | ~1.4 | ≥12/15 in 20 min |
 
-Chưa đạt ngưỡng thì đừng sang phase tiếp — ôn lại đúng phần đã sai rồi làm lại quiz. Trước khi thi thật: pass cả 4 Gate Quiz, đạt ≥35/50 ở đề mô phỏng, và skim lại cheat sheet cùng mục "câu hỏi hay bẫy" trong mỗi file notes.
+Do not open the next phase when you fail a quiz. Read the part you got wrong again, then take the quiz one more time. Before the real exam, pass all four gate quizzes, get at least 35 out of 50 in a mock exam, and read the cheat sheet and the "common traps" part of each notes file again.
 
-## Nguồn tài liệu
+## Sources
 
-Notes và câu hỏi của CLF-C02 lấy từ repo mã nguồn mở [kananinirav/AWS-Certified-Cloud-Practitioner-Notes](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes) (23 đề luyện, ~1.150 câu), kết hợp với [AWS Certified Cloud Practitioner Exam Guide (CLF-C02)](https://d1.awsstatic.com/training-and-certification/docs-cloud-practitioner/AWS-Certified-Cloud-Practitioner_Exam-Guide_C02.pdf) chính thức.
+The CLF-C02 notes and questions come from the open source repo [kananinirav/AWS-Certified-Cloud-Practitioner-Notes](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes), which holds 23 practice exams and about 1,150 questions, together with the official [AWS Certified Cloud Practitioner Exam Guide (CLF-C02)](https://d1.awsstatic.com/training-and-certification/docs-cloud-practitioner/AWS-Certified-Cloud-Practitioner_Exam-Guide_C02.pdf).
 
-Repo này không liên quan đến, không được Amazon xác nhận hay uỷ quyền. Tên thương hiệu và tên sản phẩm chỉ dùng để tham chiếu.
+This repo has no link with Amazon, and Amazon does not review it or approve it. Brand names and product names are used only to point at them.
+
+## Related docs
+
+| Doc | What it covers |
+|---|---|
+| [`courses/README.md`](courses/README.md) | How to write the content of a course |
+| [`packages/content/README.md`](packages/content/README.md) | The markdown parser and its scripts |
+| [`packages/ui/README.md`](packages/ui/README.md) | The design system |
+| [`apps/web/README.md`](apps/web/README.md) | The web app |

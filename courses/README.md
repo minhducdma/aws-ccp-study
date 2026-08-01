@@ -1,44 +1,42 @@
-# Hướng dẫn soạn nội dung khoá học
+# Course content guide
 
-Thư mục này là **dữ liệu**, không phải code. Mỗi chứng chỉ là một thư mục con, và web app đọc chúng qua `course.json` — nên thêm hoặc sửa khoá học không bao giờ phải đụng vào `apps/web/`.
+This folder holds **data**, not code. Each exam is one sub-folder, and the web app reads it through `course.json`. Because of that, you never touch `apps/web/` when you add a course or fix a question.
 
-Đọc file này trước khi tạo khoá mới. Định dạng markdown bên dưới là thứ parser trong `packages/content/scripts/build.mjs` thực sự nhận, sai một ký tự là câu hỏi bị bỏ qua.
+Read this file before you start a new course. The markdown format below is what the parser in `packages/content/scripts/build.mjs` really accepts, and one wrong character makes it skip a question.
 
-## Quy tắc đặt tên
-
-| Thứ | Quy tắc | Ví dụ |
-|---|---|---|
-| Thư mục khoá học | `<nhà cung cấp>-<mã đề viết thường>` | `aws-clf-c02`, `aws-saa-c03` |
-| Thư mục phase | `<thứ tự>-<slug ngắn>` | `1-cloud-concepts`, `3-technology` |
-| File notes | `notes.md`, thêm file phụ thì đặt tên theo nội dung | `cheatsheet.md` |
-| File luyện tập | `practice.md` | |
-| Gate quiz | `gate-quiz.md` và `gate-quiz.answers.md` | |
-| Đề thi thử | `mock-<n>.md` và `mock-<n>.answers.md` | `mock-1.md` |
-
-Ba tên bắt buộc đúng tuyệt đối là `practice.md`, `gate-quiz.md`, `gate-quiz.answers.md` — parser tìm theo tên cứng. Riêng file notes thì khai báo trong manifest nên đặt tên gì cũng được.
-
-Đề thi thử phải khớp `mock-<số>.md`; file nào không khớp mẫu này sẽ bị bỏ qua.
-
-## Bố cục một khoá học
+## Folder layout
 
 ```
 courses/aws-clf-c02/
-├── course.json                    Bắt buộc. Mọi thứ riêng của khoá nằm ở đây
+├── course.json                    Required. Everything about this exam
 ├── phases/
 │   └── 1-cloud-concepts/
-│       ├── notes.md               Bài đọc
-│       ├── practice.md            Câu luyện tập, đáp án nằm cuối file
-│       ├── gate-quiz.md           Đề chặn phase, KHÔNG kèm đáp án
-│       └── gate-quiz.answers.md   Đáp án + giải thích
+│       ├── notes.md               The reading material
+│       ├── practice.md            Practice questions, answers at the end
+│       ├── gate-quiz.md           The blocking quiz, with NO answers
+│       └── gate-quiz.answers.md   Answers and explanations
 └── mock-exams/
     ├── mock-1.md
     ├── mock-1.answers.md
-    └── annotations.json           Domain + giải thích cho đề sinh tự động
+    └── annotations.json           Domains and explanations for the built exams
 ```
 
-Khoá chưa soạn nội dung thì chỉ cần đúng một file `course.json` với `"status": "planned"`; trang lộ trình sẽ hiện nó ở trạng thái khoá.
+A course with no content yet needs only one `course.json` file with `"status": "planned"`. The roadmap page then shows it as locked.
 
-## Manifest `course.json`
+## File names
+
+| Item | Rule | Example |
+|---|---|---|
+| Course folder | `<provider>-<exam code in lower case>` | `aws-clf-c02`, `aws-saa-c03` |
+| Phase folder | `<order>-<short slug>` | `1-cloud-concepts`, `3-technology` |
+| Notes file | `notes.md`, plus any extra file you need | `cheatsheet.md` |
+| Practice file | `practice.md` | |
+| Gate quiz | `gate-quiz.md` and `gate-quiz.answers.md` | |
+| Mock exam | `mock-<n>.md` and `mock-<n>.answers.md` | `mock-1.md` |
+
+Three names must be exact: `practice.md`, `gate-quiz.md` and `gate-quiz.answers.md`. The parser looks for them by name. Notes files are free, because you list them in the manifest. A mock exam must match `mock-<number>.md`, and any other name is skipped.
+
+## The `course.json` manifest
 
 ```json
 {
@@ -50,7 +48,7 @@ Khoá chưa soạn nội dung thì chỉ cần đúng một file `course.json` v
   "level": "Associate",
   "levelOrder": 2,
   "status": "available",
-  "summary": "Một hai câu mô tả hiện trên thẻ ở trang lộ trình.",
+  "summary": "One or two lines. They show on the card in the roadmap page.",
   "estimatedHours": 40,
   "exam": {
     "totalQuestions": 65,
@@ -77,22 +75,22 @@ Khoá chưa soạn nội dung thì chỉ cần đúng một file `course.json` v
 }
 ```
 
-| Trường | Ý nghĩa |
+| Field | What it means |
 |---|---|
-| `id` | Phải trùng tên thư mục. Đây cũng là khoá lưu tiến độ, đổi nó là mất tiến độ cũ |
-| `status` | `available` thì parser đọc nội dung, `planned` thì bỏ qua và hiện khoá |
-| `levelOrder` | Thứ tự nhóm trên trang lộ trình: 1 Foundational, 2 Associate, 3 Professional, 4 Specialty |
-| `domainLabels` | Tên domain hiện trong bảng phân tích điểm sau khi thi. Key là số domain dạng chuỗi |
-| `phases[].dir` | Tên thư mục dưới `phases/`. Thứ tự phase lấy theo thứ tự trong mảng, không theo tên thư mục |
-| `phases[].weight` | Tỉ lệ domain trong đề thi thật, dùng để tính "độ sẵn sàng". Tổng nên bằng 100 |
-| `phases[].notes` | Danh sách file bài đọc kèm tiêu đề hiện trên sidebar |
-| `phases[].quiz.count` | Số câu mong đợi. Lệch với thực tế thì `npm run check` cảnh báo |
+| `id` | Must be the same as the folder name. It is also the progress key, so a new id loses the old progress |
+| `status` | `available` means the parser reads the content. `planned` means it skips it and shows a lock |
+| `levelOrder` | Group order on the roadmap: 1 Foundational, 2 Associate, 3 Professional, 4 Specialty |
+| `domainLabels` | Domain names in the score table after an exam. The key is the domain number as a string |
+| `phases[].dir` | Folder name under `phases/`. Phase order follows the array, not the folder name |
+| `phases[].weight` | Share of this domain in the real exam. It drives the "readiness" number, and the total should be 100 |
+| `phases[].notes` | Reading files and the titles shown in the sidebar |
+| `phases[].quiz.count` | How many questions you expect. `npm run check` warns when the real number is different |
 
-Hai khối tuỳ chọn, chỉ cần khi muốn dùng công cụ đối chiếu và sinh đề:
+Two blocks are optional. You need them only for the tools that compare and build exams:
 
 ```json
 "upstream": {
-  "label": "tên nguồn hiện trong log",
+  "label": "source name shown in the log",
   "rawBase": "https://raw.githubusercontent.com/<owner>/<repo>/master/practice-exam",
   "filePattern": "practice-exam-{n}.md"
 },
@@ -103,21 +101,21 @@ Hai khối tuỳ chọn, chỉ cần khi muốn dùng công cụ đối chiếu 
 }
 ```
 
-`upstream` cho phép `npm run verify` tải đề gốc về và so từng đáp án. `mockExams.generateFrom` cho phép `npm run mock-exams` sinh thẳng file đề từ nguồn đó.
+`upstream` lets `npm run verify` download the source exam and compare each answer. `mockExams.generateFrom` lets `npm run mock-exams` write the exam files straight from that source.
 
-## Định dạng câu hỏi
+## Question format
 
-Áp dụng chung cho `practice.md`, `gate-quiz.md` và `mock-<n>.md`.
+The same format works in `practice.md`, `gate-quiz.md` and `mock-<n>.md`.
 
 ```markdown
-**1.** Nội dung câu hỏi viết trên một dòng.  `(Exam 1 - Q2)`
+**1.** The question text, all on one line.  `(Exam 1 - Q2)`
 
-- A. Lựa chọn thứ nhất
-- B. Lựa chọn thứ hai
-- C. Lựa chọn thứ ba
-- D. Lựa chọn thứ tư
+- A. First choice
+- B. Second choice
+- C. Third choice
+- D. Fourth choice
 
-**2.** Câu chọn nhiều đáp án phải ghi rõ. (Choose TWO)  `(Exam 1 - Q4)`
+**2.** A question with more than one answer must say so. (Choose TWO)  `(Exam 1 - Q4)`
 
 - A. ...
 - B. ...
@@ -126,17 +124,17 @@ Hai khối tuỳ chọn, chỉ cần khi muốn dùng công cụ đối chiếu 
 - E. ...
 ```
 
-Những điểm parser bắt buộc:
+Rules the parser needs:
 
-- Số thứ tự phải ở dạng `**N.**` ngay đầu dòng. Dùng markdown tự đánh số (`1.`) sẽ không nhận.
-- Lựa chọn bắt đầu bằng `-` hoặc `*`, rồi một chữ cái **A đến E**, rồi `.` hoặc `)`. Dưới hai lựa chọn thì câu bị bỏ qua kèm cảnh báo.
-- Câu nhiều đáp án: ghi `(Choose TWO)`, `(Select TWO)`, `(Choose three)` hoặc `(Chọn HAI)` / `(Chọn BA)`. Không ghi cũng vẫn tự nhận là nhiều đáp án nếu đáp án có từ hai chữ cái, nhưng nên ghi để người học biết.
-- Trích dẫn nguồn `(Exam N - QX)` là tuỳ chọn nhưng **rất nên có**: thiếu nó thì `npm run verify` không đối chiếu được câu đó. Đặt trong dấu backtick hay in nghiêng đều được, parser tự gỡ khỏi đề khi hiển thị.
-- Một heading (`#`), một dòng `---` hoặc thẻ `<details>` sẽ kết thúc câu đang đọc.
+- The number must look like `**N.**` at the start of the line. Markdown auto numbering (`1.`) does not work.
+- A choice starts with `-` or `*`, then a letter from **A to E**, then `.` or `)`. A question with fewer than two choices is skipped with a warning.
+- For more than one answer, write `(Choose TWO)`, `(Select TWO)`, `(Choose three)`, `(Chọn HAI)` or `(Chọn BA)`. The parser also sees it when the answer has two letters or more, but please still write it, so the learner knows.
+- The source note `(Exam N - QX)` is optional but **strongly advised**. Without it, `npm run verify` cannot compare that question. Backticks or italics both work, and the parser removes it from the text on screen.
+- A heading (`#`), a `---` line or a `<details>` tag ends the question that is being read.
 
-## Định dạng đáp án
+## Answer format
 
-`practice.md` để đáp án ngay trong file, bọc trong `<details>` để không lộ khi đang làm. `gate-quiz.md` thì tách hẳn sang `gate-quiz.answers.md`. Nội dung khối đáp án giống nhau ở cả hai trường hợp:
+`practice.md` keeps its answers in the same file, inside `<details>`, so nothing is shown too early. `gate-quiz.md` keeps them in `gate-quiz.answers.md`. The answer block itself looks the same in both cases:
 
 ```markdown
 ## Bảng đáp án nhanh
@@ -149,18 +147,18 @@ Những điểm parser bắt buộc:
 
 ### Câu 1 — Đáp án: A, E
 
-> Chép lại đề ở đây cho dễ đối chiếu, dòng trích dẫn này parser tự bỏ qua.
+> You may copy the question here. The parser drops quoted lines.
 
-Phần giải thích. Nên nói rõ vì sao đáp án đúng là đúng **và** vì sao từng đáp án
-sai là sai, vì đây là phần người học đọc khi làm sai.
+The explanation. Say why the right answer is right **and** why each wrong
+answer is wrong, because this is what a learner reads after a mistake.
 ```
 
-- **Bảng đáp án nhanh** là nguồn đáng tin nhất và phải nằm trên một dòng riêng theo đúng mẫu `1D, 2BE, 3C` (ít nhất hai câu). Đây là thứ parser ưu tiên dùng.
-- Tiêu đề giải thích chấp nhận hai kiểu: `### Câu N — Đáp án: A, E` hoặc `**N. Đáp án: D**`.
-- Nếu bảng nhanh và phần giải thích ghi khác nhau, `npm run check` báo lệch. Đừng bỏ qua cảnh báo này.
-- Dòng bắt đầu bằng `>` bị loại khỏi phần giải thích, nên cứ thoải mái trích lại đề.
+- The **quick answer table** is the source the parser trusts most. It must sit on its own line and follow the shape `1D, 2BE, 3C`, with two questions or more.
+- An explanation title can be `### Câu N — Đáp án: A, E` or `**N. Đáp án: D**`.
+- When the quick table and the explanations disagree, `npm run check` reports it. Do not ignore that warning.
+- Lines that start with `>` are dropped from the explanation, so you can copy the question freely.
 
-Riêng file đáp án của đề thi thử có thêm bảng gán domain cho từng câu, dùng để vẽ biểu đồ phân tích điểm sau khi nộp bài:
+The answer file of a mock exam also holds a domain table. The app uses it to draw the score breakdown after you submit:
 
 ```markdown
 | Câu | Domain | Chủ đề |
@@ -169,27 +167,36 @@ Riêng file đáp án của đề thi thử có thêm bảng gán domain cho t�
 | 2 | 2 | IAM |
 ```
 
-## Soạn xong thì chạy gì
+## Workflow
 
-Tất cả lệnh chạy ở thư mục gốc của repo.
+Run every command from the repo root.
 
-| Lệnh | Khi nào dùng |
+| Command | When you use it |
 |---|---|
-| `npm run check` | **Chạy đầu tiên.** Đọc lại toàn bộ markdown và in mọi cảnh báo: thiếu đáp án, lệch đáp án, câu thiếu lựa chọn, số câu không khớp manifest |
-| `npm run dev` | Xem thử trên web, tự đọc lại markdown trước khi khởi động |
-| `npm run verify` | Tải đề gốc về và so từng đáp án. Chỉ chạy được với khoá có khai báo `upstream` |
-| `npm run mock-exams` | Sinh lại file đề thi thử. Thêm `-- <course-id>` để chỉ làm một khoá |
-| `npm run build` | Build bản tĩnh trước khi deploy |
+| `npm run check` | **First.** Reads all the markdown and prints every warning: missing answers, answers that disagree, questions with too few choices, a count that does not match the manifest |
+| `npm run dev` | To look at it in the browser. It reads the markdown again before it starts |
+| `npm run verify` | To download the source exam and compare each answer. Only for a course with an `upstream` block |
+| `npm run mock-exams` | To write the mock exam files again. Add `-- <course-id>` for one course only |
+| `npm run build` | To build the static site before you deploy |
 
-Quy trình gọn nhất khi thêm nội dung: sửa markdown → `npm run check` cho sạch cảnh báo → `npm run verify` nếu có nguồn đối chiếu → `npm run dev` xem lại bằng mắt → commit.
+The short path when you add content: edit the markdown, run `npm run check` until there is no warning, run `npm run verify` if the course has a source, look at it with `npm run dev`, then commit.
 
-Không cần chạy lệnh nào để "đăng ký" file mới. Parser quét thư mục theo manifest mỗi lần build, và Turborepo theo dõi `courses/**` nên chỉ cần file thay đổi là nội dung được đọc lại.
+You never run a command to "register" a new file. The parser walks the folders from the manifest on every build, and Turborepo watches `courses/**`, so a changed file is enough.
 
-## Mở khoá một chứng chỉ đang bị khoá
+## Unlock a locked exam
 
-1. Mở `courses/<id>/course.json`, thêm mảng `phases` và đổi `status` thành `available`.
-2. Tạo thư mục `phases/<dir>/` đúng như đã khai báo, đặt `notes.md` vào.
-3. Chạy `npm run check`. Lúc này sẽ có cảnh báo thiếu `practice.md` và `gate-quiz.md` — bình thường, phase sẽ hiện "đang soạn nội dung" cho tới khi đủ ba phần.
-4. Bổ sung dần cho tới khi hết cảnh báo.
+1. Open `courses/<id>/course.json`, add the `phases` array and set `status` to `available`.
+2. Create the `phases/<dir>/` folders you just declared, and put `notes.md` in them.
+3. Run `npm run check`. You will see warnings about the missing `practice.md` and `gate-quiz.md`. That is normal, and the phase shows "đang soạn nội dung" until all three parts are there.
+4. Add the missing files one by one until no warning is left.
 
-Phase chỉ được coi là hoàn chỉnh khi có đủ notes, practice và gate quiz. Thiếu một trong ba thì web vẫn chạy, chỉ là phase đó hiện nhãn đang soạn.
+A phase counts as complete only with notes, practice and a gate quiz. With one part missing the site still works, and that phase only shows a "being written" label.
+
+## Related docs
+
+| Doc | What it covers |
+|---|---|
+| [`../README.md`](../README.md) | The platform and the commands |
+| [`../packages/content/README.md`](../packages/content/README.md) | The markdown parser and its scripts |
+| [`../packages/ui/README.md`](../packages/ui/README.md) | The design system |
+| [`../apps/web/README.md`](../apps/web/README.md) | The web app |

@@ -1,42 +1,40 @@
 # @study/ui
 
-Design system dùng chung của nền tảng: design token, primitive, animation và bộ minh hoạ vector. Web app không tự định nghĩa nút, thẻ hay badge nữa mà lấy hết từ đây.
+The shared design system: tokens, components, animation and SVG art. The web app no longer writes its own buttons, cards or badges, and takes them all from here.
 
-Package này xuất thẳng file nguồn TypeScript, không có bước build riêng. Vite của app biên dịch chúng cùng lúc với code app, nên sửa component là thấy ngay mà không cần watch thêm tiến trình nào.
+This package ships TypeScript source and has no build step of its own. Vite compiles it together with the app code, so a change shows up at once with no extra watcher.
 
-## Vì sao không dùng gluestack
+## Folders
 
-Yêu cầu ban đầu là dùng [gluestack](https://gluestack.io/), nhưng bản v5 phát hành 25/06/2026 đã bỏ hỗ trợ web: engine NativeWind v5 chưa chạy được trên web nên họ ngừng hỗ trợ Next.js, còn UniWind thì chỉ dành cho Expo. Bản v4 tuy còn chạy web nhưng bắt buộc kéo theo `react-native-web` và Tailwind v3, trong khi dự án đang ở Tailwind v4.
-
-Thay vào đó, phần hành vi phức tạp giao cho [Radix UI](https://www.radix-ui.com/) — primitive không kèm style, mạnh về accessibility — còn phần nhìn vẫn thuần Tailwind. Animation dùng [Motion](https://motion.dev/).
-
-## Cấu trúc
-
-| Thư mục | Nội dung |
+| Folder | What is inside |
 |---|---|
-| `src/tokens.css` | Design token khai báo bằng `@theme` của Tailwind v4, cộng thêm quy tắc `prefers-reduced-motion` và utility `focus-ring` |
-| `src/primitives/` | Component dùng lại được: `Button`, `Card`, `Badge`, `Progress`, `Switch`, `Tabs`, `ConfirmDialog`, `Sheet`… |
-| `src/motion/` | Provider animation và bộ preset variant dùng chung |
-| `src/illustrations/` | Icon và tranh minh hoạ SVG viết tay |
+| `src/tokens.css` | Design tokens in a Tailwind v4 `@theme` block, plus the `prefers-reduced-motion` rule and the `focus-ring` utility |
+| `src/primitives/` | The reusable parts: `Button`, `Card`, `Badge`, `Progress`, `Switch`, `Tabs`, `ConfirmDialog`, `Sheet` and more |
+| `src/motion/` | The animation provider and the shared variant presets |
+| `src/illustrations/` | Hand written SVG icons and pictures |
 
-## Token
+## Setup in an app
 
-Mọi biến trong `@theme` tự động thành utility Tailwind: `--color-brand-500` cho ra `bg-brand-500`, `--ease-out-expo` cho ra `ease-out-expo`, `--animate-shimmer` cho ra `animate-shimmer`.
-
-App phải khai báo hai dòng trong CSS gốc, nếu thiếu dòng thứ hai thì Tailwind không quét thư mục này và class trong các primitive sẽ không được sinh ra:
+Add two lines to the main stylesheet. Without the second one Tailwind does not scan this folder, and the classes inside the components are never generated.
 
 ```css
 @import '@study/ui/tokens.css';
 @source '../../../packages/ui/src';
 ```
 
-Tailwind loại bỏ biến không ai dùng. Các minh hoạ tô màu bằng `var(--color-pass)` thay vì class, nên khi thêm token chỉ dành cho SVG hãy kiểm tra lại nó còn trong CSS đầu ra.
+Then wrap the app once in `MotionProvider`, as `apps/web/src/main.tsx` does.
+
+## Tokens
+
+Every variable in `@theme` also becomes a Tailwind utility. `--color-brand-500` gives `bg-brand-500`, `--ease-out-expo` gives `ease-out-expo`, and `--animate-shimmer` gives `animate-shimmer`.
+
+Tailwind removes a variable that nobody uses. The illustrations paint with `var(--color-pass)` instead of a class, so when you add a token only for SVG, check that it is still in the CSS output.
 
 ## Animation
 
-`MotionProvider` bọc app một lần ở `main.tsx`. Nó nạp `LazyMotion` với bộ tính năng `domAnimation` thay vì toàn bộ Motion, bỏ qua engine layout projection và drag mà app không dùng.
+`MotionProvider` loads `LazyMotion` with the `domAnimation` feature set instead of all of Motion. It leaves out the layout projection engine and the drag engine, which this app does not use.
 
-Vì vậy trong component phải import `m` chứ không phải `motion`:
+So inside a component you import `m`, not `motion`:
 
 ```tsx
 import { m, fadeUp } from '@study/ui';
@@ -44,36 +42,45 @@ import { m, fadeUp } from '@study/ui';
 <m.div variants={fadeUp} initial="hidden" animate="visible" />;
 ```
 
-Provider bật chế độ `strict`, nên lỡ dùng `motion.div` sẽ báo lỗi ngay thay vì âm thầm kéo thêm bundle.
+The provider runs in `strict` mode, so `motion.div` throws an error at once instead of quietly pulling the bigger bundle back in.
 
-`reducedMotion="user"` khiến Motion bỏ mọi biến đổi hình học khi người dùng bật giảm chuyển động ở hệ điều hành, chỉ giữ lại fade. Animation viết bằng CSS được xử lý riêng bởi khối `@media (prefers-reduced-motion: reduce)` trong `tokens.css`.
+`reducedMotion="user"` makes Motion drop every movement when the reader asks the operating system for less motion, and keep only the fade. CSS animation is handled apart from that, by the `@media (prefers-reduced-motion: reduce)` block in `tokens.css`.
 
-Quy ước phân chia: animation lặp vô hạn và micro-interaction (hover, nhấn) viết bằng CSS vì không tốn main thread; animation có dàn dựng — xuất hiện tuần tự, chuyển cảnh, vào/ra của overlay — thì dùng Motion.
+The rule we follow: animation that loops for ever, and small feedback like hover or press, is written in CSS, because it costs no main thread. Animation that is arranged — items that appear one after another, a change of view, an overlay coming in and out — is written with Motion.
 
 ## Accessibility
 
-Đây là lý do chính chọn Radix. Những thứ dễ làm sai nếu tự viết đã có sẵn:
+This is the main reason we chose Radix. The parts that are easy to get wrong by hand are already correct:
 
-- `ConfirmDialog` thay cho `window.confirm`: khoá focus trong hộp thoại, trả focus về nút cũ khi đóng, đóng bằng Escape, tự nối `aria-labelledby` và `aria-describedby`.
-- `Sheet` cho menu điện thoại: khoá focus và vô hiệu hoá nền phía sau.
-- `Progress` phát ra `role="progressbar"` kèm `aria-valuenow`. Prop `label` là bắt buộc, vì một thanh tiến độ đọc lên thành con số không có chủ ngữ thì vô nghĩa.
-- `Switch` phát ra `role="switch"` với `aria-checked`, khác với một cái nút bấm bình thường.
+- `ConfirmDialog` replaces `window.confirm`. It keeps the focus inside the dialog, gives it back to the old button on close, closes on Escape, and joins `aria-labelledby` and `aria-describedby` for you.
+- `Sheet` is the phone menu. It keeps the focus inside the panel and turns off the page behind it.
+- `Progress` sends `role="progressbar"` with `aria-valuenow`. The `label` prop is required, because a progress bar read out as a bare number means nothing.
+- `Switch` sends `role="switch"` with `aria-checked`, which a normal button cannot do.
 
-Ngoài Radix: mọi thành phần tương tác dùng chung utility `focus-ring`, và `Button` cỡ `md` cao tối thiểu 44px cho vừa đầu ngón tay trên điện thoại.
+Outside Radix: every part you can click uses the shared `focus-ring` utility, and a `md` size `Button` is at least 44px tall, so a finger can hit it on a phone.
 
-## Chi phí bundle
+## Bundle cost
 
-Tổng bundle của web app tăng từ 283 lên 354 KB gzip. Trong 71 KB đó, thư viện chiếm khoảng 56 KB — Motion 36 KB, năm primitive Radix 20 KB — phần còn lại là component, minh hoạ và CSS của chính design system.
+The web app grew from 283 KB to 354 KB gzip. Of those 71 KB, about 56 KB are the libraries: Motion 36 KB and five Radix primitives 20 KB. The rest is the components, the pictures and the CSS of this package.
 
-Radix Tooltip từng nằm trong package nhưng đã bị gỡ: nó kéo theo `@floating-ui`, một mình tốn 18 KB gzip trong khi năm primitive Radix còn lại cộng lại chỉ 20 KB, và tất cả chỉ để phục vụ hai dòng chú thích vốn có thể viết thẳng ra màn hình. Chú thích hiển thị sẵn cũng hợp lý hơn trên điện thoại, nơi không có thao tác rê chuột. Nếu sau này cần popover thật thì thêm lại, nhưng hãy cân nhắc con số đó trước.
+Radix Tooltip used to live here, but it is gone. It pulls in `@floating-ui` and costs 18 KB gzip on its own, while the five Radix primitives that stayed cost 20 KB together, and all of that was for two short hints that fit on the screen anyway. A hint you can always see is also better on a phone, where nobody hovers. Add it back if you ever need a real popover, but look at the number first.
 
-Khi thêm thư viện mới, đo bằng cách bundle riêng nó ra để biết giá thật:
+When you add a library, measure it on its own to learn the real price:
 
 ```bash
 echo "export * as x from '<package>';" > /tmp/probe.js
 npx esbuild /tmp/probe.js --bundle --minify --format=esm --external:react --external:react-dom | gzip -c | wc -c
 ```
 
-## Thêm component mới
+## Add a component
 
-Đặt file vào `src/primitives/`, dùng `cva` để khai báo biến thể và `cn()` để gộp class. `cn()` chạy qua `tailwind-merge` nên class truyền từ ngoài vào sẽ thắng class mặc định cùng nhóm — nhờ đó `className="px-8"` ghi đè được `px-4` của variant. Cuối cùng export lại trong `src/index.ts`.
+Put the file in `src/primitives/`. Use `cva` for the variants and `cn()` to join the classes. `cn()` runs through `tailwind-merge`, so a class passed from outside beats the default class of the same group, which is why `className="px-8"` can override the `px-4` of a variant. Export it again from `src/index.ts` at the end.
+
+## Related docs
+
+| Doc | What it covers |
+|---|---|
+| [`../../README.md`](../../README.md) | The platform and the commands |
+| [`../../courses/README.md`](../../courses/README.md) | How to write the content of a course |
+| [`../content/README.md`](../content/README.md) | The markdown parser and its scripts |
+| [`../../apps/web/README.md`](../../apps/web/README.md) | The web app |

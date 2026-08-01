@@ -1,32 +1,43 @@
 # @study/content
 
-Đọc markdown trong `courses/` và sinh ra `generated/content.json` — nguồn dữ liệu duy nhất của web app. Package này không phụ thuộc React và chạy được độc lập bằng Node.
+Reads the markdown in `courses/` and writes `generated/content.json`, which is the only data source of the web app. This package does not use React and runs on plain Node.
 
-Muốn biết cách soạn nội dung, xem [`courses/README.md`](../../courses/README.md). File này nói về bản thân pipeline.
+To learn how to write the content itself, read [`courses/README.md`](../../courses/README.md). This file is about the pipeline.
 
-## Xuất ra gì
+## Scripts
+
+| Script | What it does |
+|---|---|
+| `scripts/build.mjs` | Scans `courses/*/course.json`, parses the markdown and writes `generated/content.json`. Add `--verbose` to print every warning instead of the first 12 lines |
+| `scripts/verify.mjs` | Downloads the source exam of every course with an `upstream` block and compares each answer with the `Correct answer` line. Exits with code 1 when something differs |
+| `scripts/make-mock-exams.mjs` | Writes mock exam files from the source exam. Takes a course id, and without one it does every course with `mockExams.generateFrom` |
+
+Downloaded exams are cached in `.cache/<course-id>/`, so a second run needs no network.
+
+## Output
 
 ```js
 import content from '@study/content';
 // { generatedAt, courses: [...], warnings: [...] }
 ```
 
-Kiểu dữ liệu khai báo tay trong `index.d.ts`. Đây là bản mô tả duy nhất của schema, nên sửa cấu trúc trong `scripts/build.mjs` thì phải sửa file đó theo, nếu không TypeScript ở web app sẽ nói dối.
+The types are written by hand in `index.d.ts`. That file is the only description of the schema, so when you change the shape in `scripts/build.mjs` you must change it too. If you forget, TypeScript in the web app will tell a lie.
 
-`generated/` bị gitignore vì là sản phẩm build. Turborepo tự chạy `build` của package này trước khi build web.
+`generated/` is in `.gitignore` because it is a build result. Turborepo runs the `build` script of this package before it builds the web app.
 
-## Ba script
+## Why the parser is hand written
 
-| Script | Việc |
+The source markdown comes from several community repos and it is not consistent. Some exams number the questions by hand, and some use markdown auto numbering, so every question starts with `1.`. A source note is sometimes in backticks and sometimes in italics. An answer line is sometimes `Correct answer: A, D` and sometimes `Correct Answer: AC`.
+
+A general markdown library would give a syntax tree, but all of the guessing above would still be ours to write. So the parser reads the text directly.
+
+`verify.mjs` is the safety net for that choice. It compares the answers we parsed with the source, so a parser mistake shows up at once instead of quietly teaching the wrong thing.
+
+## Related docs
+
+| Doc | What it covers |
 |---|---|
-| `scripts/build.mjs` | Quét `courses/*/course.json`, parse markdown, ghi `generated/content.json`. Thêm `--verbose` để in hết cảnh báo thay vì 12 dòng đầu |
-| `scripts/verify.mjs` | Tải đề gốc của khoá có khai báo `upstream` và so từng đáp án với dòng `Correct answer` bản gốc. Thoát với mã 1 nếu có câu lệch |
-| `scripts/make-mock-exams.mjs` | Sinh file đề thi thử từ đề gốc. Nhận tham số course id, không truyền thì làm mọi khoá có `mockExams.generateFrom` |
-
-Đề gốc tải về được cache tại `.cache/<course-id>/` để lần chạy sau không cần mạng.
-
-## Vì sao tự viết parser thay vì dùng thư viện
-
-Markdown nguồn đến từ nhiều repo cộng đồng và không nhất quán: có đề đánh số thủ công, có đề dựa vào markdown tự đánh số nên câu nào cũng là `1.`; trích dẫn khi thì trong backtick khi thì in nghiêng; đáp án khi ghi `Correct answer: A, D` khi ghi `Correct Answer: AC`. Một thư viện parse markdown tổng quát cho ra cây cú pháp nhưng vẫn phải tự viết toàn bộ phần suy luận này.
-
-Đổi lại, `verify.mjs` đóng vai trò lưới an toàn: nó so đáp án đã parse với bản gốc nên parser sai ở đâu là lộ ra ngay thay vì âm thầm dạy sai.
+| [`../../README.md`](../../README.md) | The platform and the commands |
+| [`../../courses/README.md`](../../courses/README.md) | How to write the content of a course |
+| [`../ui/README.md`](../ui/README.md) | The design system |
+| [`../../apps/web/README.md`](../../apps/web/README.md) | The web app |
