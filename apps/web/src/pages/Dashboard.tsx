@@ -157,26 +157,25 @@ export default function Dashboard() {
             const practiceState = phase.practice ? progress.practice[phase.practice.id] : undefined;
             const practiceDone = practiceState?.checked.length ?? 0;
             const practiceTotal = phase.practice?.questions.length ?? 0;
-            const notesDone = phase.notes.filter((n) => progress.notesRead[n.id]).length;
 
             return (
               <m.div key={phase.id} variants={fadeUp}>
                 <Card
                   inset="none"
-                  className={`border-l-4 p-4 sm:p-5 ${phaseTones[phaseIndex % phaseTones.length]} ${locked ? 'opacity-60' : ''}`}
+                  className={`rounded-2xl border-l-4 p-3 sm:rounded-3xl sm:p-5 ${phaseTones[phaseIndex % phaseTones.length]} ${locked ? 'opacity-60' : ''}`}
                 >
-                  <div className="grid gap-5 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-5">
                     <div className="flex min-w-0 flex-1 gap-4">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface text-lg font-black text-slate-700 shadow-sm">
+                      <span className="hidden size-10 shrink-0 items-center justify-center rounded-xl bg-surface text-lg font-black text-slate-700 shadow-sm sm:flex">
                         {phase.order}
                       </span>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <Badge tone={passed ? 'green' : locked ? 'slate' : 'amber'}>
                           {t('phase.label', { order: phase.order })}
                         </Badge>
                         <Badge tone="sky">{t('phase.weightOfExam', { weight: phase.weight })}</Badge>
-                        <span className="text-xs text-slate-500">~{phase.estimatedHours}h</span>
                         {passed && (
                           <Badge tone="green">
                             <CheckIcon width={12} height={12} />
@@ -190,47 +189,51 @@ export default function Dashboard() {
                           </Badge>
                         )}
                         {!phase.ready && <Badge tone="slate">{t('phase.draft')}</Badge>}
+                          </div>
+                          <span className="shrink-0 rounded-lg bg-surface/70 px-2 py-1 text-xs font-bold text-slate-700 tabular-nums">
+                            ~{phase.estimatedHours}h
+                          </span>
                         </div>
-                        <h3 className="mt-2 font-semibold text-slate-900">{localized(phase.title)}</h3>
-                        <p className="mt-1 text-sm text-slate-600">
-                        {tNode(
-                          'dashboard.phaseProgress',
-                          {
-                            notesRead: notesDone,
-                            notesTotal: phase.notes.length,
-                            checked: practiceDone,
-                            practiceTotal,
-                          },
-                          {
-                            gateScore: best ? (
-                              <span className={best.passed ? 'text-emerald-400' : 'text-rose-400'}>
-                                {best.score}/{best.total}
-                              </span>
-                            ) : (
-                              t('dashboard.gateQuizNotTaken')
-                            ),
-                          },
-                        )}
-                        </p>
+                        <h3 className="mt-2 text-[15px] font-semibold text-slate-900 sm:text-base">
+                          {localized(phase.title)}
+                        </h3>
+                        <dl className="mt-2 grid max-w-xs gap-1.5 text-xs sm:text-sm">
+                          <div className="flex items-center justify-between gap-4">
+                            <dt className="text-slate-600">{t('dashboard.practice')}</dt>
+                            <dd className="font-bold text-slate-800 tabular-nums">
+                              {practiceDone}/{practiceTotal}
+                            </dd>
+                          </div>
+                          <div className="flex items-center justify-between gap-4">
+                            <dt className="text-slate-600">{t('dashboard.gateQuiz')}</dt>
+                            <dd
+                              className={`font-bold tabular-nums ${
+                                best ? (best.passed ? 'text-emerald-600' : 'text-rose-600') : 'text-slate-500'
+                              }`}
+                            >
+                              {best ? `${best.score}/${best.total}` : t('dashboard.gateQuizNotTaken')}
+                            </dd>
+                          </div>
+                        </dl>
                         {practiceTotal > 0 && (
                           <Progress
                             value={practiceDone}
                             max={practiceTotal}
                             tone={passed ? 'green' : 'amber'}
-                            className="mt-3 max-w-xs"
+                            className="mt-2 h-1.5 max-w-xs sm:mt-3 sm:h-2"
                             label={t('dashboard.practiceProgressLabel', { order: phase.order })}
                           />
                         )}
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                    <div className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:justify-end sm:gap-2">
                       {phase.notes.length > 0 && (
                         <ButtonLink
                           to={url(`/phase/${phase.id}/notes/${phase.notes[0].id}`)}
                           tone="secondary"
                           size="sm"
-                          className="w-full sm:w-auto"
+                          className="min-h-10 w-full sm:min-h-0 sm:w-auto"
                         >
                           {t('dashboard.notes')}
                         </ButtonLink>
@@ -240,7 +243,7 @@ export default function Dashboard() {
                           to={url(`/phase/${phase.id}/practice`)}
                           tone="secondary"
                           size="sm"
-                          className="w-full sm:w-auto"
+                          className="min-h-10 w-full sm:min-h-0 sm:w-auto"
                         >
                           {t('dashboard.practice')}
                         </ButtonLink>
@@ -250,7 +253,7 @@ export default function Dashboard() {
                           to={url(`/exam/${phase.gateQuiz.id}`)}
                           tone={passed ? 'secondary' : 'primary'}
                           size="sm"
-                          className="w-full sm:w-auto"
+                          className="min-h-10 w-full sm:min-h-0 sm:w-auto"
                         >
                           {t('dashboard.gateQuiz')}
                         </ButtonLink>
