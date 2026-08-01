@@ -21,7 +21,7 @@ const components = {
   h2: heading('h2'),
   h3: heading('h3'),
   table: ({ children }: { children?: ReactNode }) => (
-    <div className="overflow-x-auto">
+    <div className="md-table-wrap" tabIndex={0}>
       <table>{children}</table>
     </div>
   ),

@@ -134,24 +134,71 @@ body {
   @apply my-8 border-slate-200;
 }
 
+.md-table-wrap {
+  @apply my-6 max-w-full overflow-x-auto rounded-xl border border-line-strong bg-surface/85 shadow-sm outline-none;
+  overscroll-behavior-inline: contain;
+}
+
+.md-table-wrap:focus-visible {
+  @apply ring-2 ring-brand-500/50 ring-offset-2 ring-offset-canvas;
+}
+
 .md table {
-  @apply my-5 w-full border-collapse overflow-hidden text-left text-[13.5px];
+  @apply m-0 w-full border-separate border-spacing-0 text-left text-sm leading-relaxed;
+  min-width: 36rem;
+}
+
+.md table:has(thead th:nth-child(3)) {
+  min-width: 42rem;
+}
+
+.md table:has(thead th:nth-child(4)) {
+  min-width: 54rem;
+}
+
+.md table:has(thead th:nth-child(5)) {
+  min-width: 64rem;
 }
 
 .md thead {
-  @apply bg-slate-100;
+  @apply bg-line/55;
 }
 
 .md th {
-  @apply border border-slate-300/70 px-3 py-2 font-semibold text-slate-900;
+  @apply border-r border-b border-line-strong px-4 py-3 font-bold text-slate-900 last:border-r-0;
 }
 
 .md td {
-  @apply border border-slate-200 px-3 py-2 align-top text-slate-600;
+  @apply border-r border-b border-line px-4 py-3 align-top text-slate-700 last:border-r-0;
+}
+
+.md tbody tr:last-child td {
+  @apply border-b-0;
 }
 
 .md tbody tr:nth-child(even) {
-  @apply bg-slate-50;
+  @apply bg-overlay/55;
+}
+
+.md tbody tr {
+  @apply transition-colors hover:bg-brand-50/55;
+}
+
+.md th:first-child,
+.md td:first-child {
+  @apply sticky left-0 z-10 w-32 min-w-32 border-r-line-strong bg-surface font-semibold text-slate-800 shadow-[1px_0_0_0_var(--color-line)];
+}
+
+.md thead th:first-child {
+  @apply z-20 bg-line/80;
+}
+
+.md tbody tr:nth-child(even) td:first-child {
+  @apply bg-overlay;
+}
+
+.md tbody tr:hover td:first-child {
+  @apply bg-brand-50;
 }
 
 .md table code {
@@ -170,7 +217,9 @@ body {
   @apply mr-1 accent-amber-500;
 }
 
-/* Wide tables in the notes: allow horizontal scrolling */
-.md-scroll table {
-  @apply block max-w-full overflow-x-auto whitespace-normal;
+@media (min-width: 768px) {
+  .md th:first-child,
+  .md td:first-child {
+    @apply static min-w-0 shadow-none;
+  }
 }

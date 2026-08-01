@@ -138,7 +138,7 @@ export default function NotesPage() {
               <li key={item.slug}>
                 <a
                   href={`#${item.slug}`}
-                  className="focus-ring block border-l-2 border-transparent py-1 pl-3 text-xs text-slate-500 transition-all duration-200 hover:border-brand-500 hover:pl-4 hover:text-brand-300"
+                  className="focus-ring block rounded-r-lg border-l-2 border-transparent px-3 py-1.5 text-sm font-medium leading-snug text-slate-600 transition-colors duration-200 hover:border-brand-600 hover:bg-surface-hover hover:text-brand-700"
                 >
                   {item.text}
                 </a>
