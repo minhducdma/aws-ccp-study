@@ -10,6 +10,7 @@
     "prebuild": "npm run content",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "preview:pages": "npm run build && node scripts/pages-preview.mjs",
     "check": "node scripts/build-content.mjs --verbose",
     "smoke": "node scripts/build-content.mjs && node scripts/smoke.mjs",
     "verify": "node scripts/build-content.mjs && node scripts/verify-answers.mjs"
