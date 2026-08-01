@@ -9,11 +9,13 @@ import {
   ProgressRing,
   RoadmapArt,
   fadeUp,
+  hoverLift,
   m,
   stagger,
   type CourseLevel,
 } from '@study/ui';
 import { Link } from 'react-router-dom';
+import AuthWidget from '../components/AuthWidget';
 import LocaleSwitch from '../components/LocaleSwitch';
 import { useI18n, type I18n, type MessageKey } from '../i18n';
 import { content, courses } from '../lib/content';
@@ -61,7 +63,7 @@ function AvailableCard({ course, progress }: { course: Course; progress: CourseP
   const title = localized(course.title);
 
   return (
-    <m.li variants={fadeUp} whileHover={{ y: -4 }} whileTap={{ scale: 0.99 }} className="list-none">
+    <m.li variants={fadeUp} {...hoverLift} className="list-none">
       <Link
         to={courseUrl(course.id)}
         className={[
@@ -193,7 +195,8 @@ export default function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-8 sm:py-14">
-      <div className="mb-6 flex justify-end">
+      <div className="mb-6 flex items-center justify-end gap-3">
+        <AuthWidget />
         <LocaleSwitch />
       </div>
 

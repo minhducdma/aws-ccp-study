@@ -3,10 +3,15 @@ import type { Transition, Variants } from 'motion/react';
 /** Matches `--ease-out-expo` in tokens.css so JS and CSS animations decelerate identically. */
 export const easeOutExpo = [0.16, 1, 0.3, 1] as const;
 
+/** Matches `--ease-out-back` in tokens.css: overshoots past the target before settling. */
+export const easeOutBack = [0.34, 1.56, 0.64, 1] as const;
+
 export const transition = {
   quick: { duration: 0.2, ease: easeOutExpo },
   normal: { duration: 0.32, ease: easeOutExpo },
   slow: { duration: 0.56, ease: easeOutExpo },
+  /** For hover/tap acknowledgements that should read as bouncy rather than smooth. */
+  bouncy: { type: 'spring', stiffness: 420, damping: 18, mass: 0.6 },
 } satisfies Record<string, Transition>;
 
 /** Content arriving on screen: a short rise paired with a fade. */
@@ -40,8 +45,16 @@ export function stagger(gap = 0.05, delay = 0): Variants {
   };
 }
 
-/** Lift-on-hover for clickable cards. Paired with `whileTap` to acknowledge the press. */
+/**
+ * Lift-and-bounce for clickable cards: a spring drives the hover so it overshoots slightly
+ * before settling, and the tap squishes down with the same energetic feel.
+ */
 export const hoverLift = {
-  whileHover: { y: -4, transition: transition.quick },
-  whileTap: { scale: 0.985, transition: { duration: 0.1 } },
+  whileHover: { y: -6, scale: 1.015, transition: transition.bouncy },
+  whileTap: { scale: 0.96, y: -1, transition: { duration: 0.12 } },
+} as const;
+
+/** Icon shake for hover — small rotation wiggle rather than a lift, for badges and glyphs. */
+export const hoverWiggle = {
+  whileHover: { rotate: [0, -10, 10, -6, 0], transition: { duration: 0.45, ease: easeOutBack } },
 } as const;

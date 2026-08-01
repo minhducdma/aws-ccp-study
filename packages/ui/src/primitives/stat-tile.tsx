@@ -23,7 +23,7 @@ export function StatTile({ label, value, hint, icon, animate, suffix, className 
       )}
     >
       {icon && (
-        <span className="absolute top-3 right-3 text-slate-700 transition-colors duration-200 group-hover:text-brand-500/60">
+        <span className="absolute top-3 right-3 text-slate-700 transition-colors duration-200 group-hover:animate-wiggle group-hover:text-brand-500/60">
           {icon}
         </span>
       )}

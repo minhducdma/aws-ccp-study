@@ -11,9 +11,10 @@ import { Spinner } from './spinner';
  */
 export const buttonVariants = cva(
   [
-    'focus-ring relative inline-flex items-center justify-center gap-2 rounded-xl font-medium',
-    'transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out-expo',
-    'active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 disabled:active:scale-100',
+    'focus-ring relative inline-flex items-center justify-center gap-2 rounded-2xl font-medium',
+    'transition-[background-color,border-color,color,box-shadow,transform] duration-200 ease-out-back',
+    'hover:-translate-y-0.5 active:scale-[0.96] active:translate-y-0',
+    'disabled:pointer-events-none disabled:opacity-40 disabled:hover:translate-y-0 disabled:active:scale-100',
     'select-none',
   ],
   {
