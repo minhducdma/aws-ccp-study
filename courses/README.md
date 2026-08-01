@@ -30,6 +30,7 @@ A course with no content yet needs only one `course.json` file with `"status": "
 | Course folder | `<provider>-<exam code in lower case>` | `aws-clf-c02`, `aws-saa-c03` |
 | Phase folder | `<order>-<short slug>` | `1-cloud-concepts`, `3-technology` |
 | Notes file | `notes.md`, plus any extra file you need | `cheatsheet.md` |
+| Translated notes | The same name with the language before `.md` | `notes.en.md` |
 | Practice file | `practice.md` | |
 | Gate quiz | `gate-quiz.md` and `gate-quiz.answers.md` | |
 | Mock exam | `mock-<n>.md` and `mock-<n>.answers.md` | `mock-1.md` |
@@ -68,12 +69,16 @@ Three names must be exact: `practice.md`, `gate-quiz.md` and `gate-quiz.answers.
       "domain": 1,
       "weight": 30,
       "estimatedHours": 10,
-      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
+      "notes": [
+        { "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }
+      ],
       "quiz": { "count": 25, "passScore": 20, "timeLimitMin": 35 }
     }
   ]
 }
 ```
+
+Any text above may also be written once per language. The section on [writing in more than one language](#writing-in-more-than-one-language) says which fields accept it.
 
 | Field | What it means |
 |---|---|
@@ -85,6 +90,49 @@ Three names must be exact: `practice.md`, `gate-quiz.md` and `gate-quiz.answers.
 | `phases[].weight` | Share of this domain in the real exam. It drives the "readiness" number, and the total should be 100 |
 | `phases[].notes` | Reading files and the titles shown in the sidebar |
 | `phases[].quiz.count` | How many questions you expect. `npm run check` warns when the real number is different |
+
+## Writing in more than one language
+
+The app reads in Vietnamese and in English. Any text in `course.json` may be written once, or once per language:
+
+```json
+"summary": "Nền tảng điện toán đám mây…",
+
+"summary": {
+  "vi": "Nền tảng điện toán đám mây…",
+  "en": "Cloud computing fundamentals…"
+}
+```
+
+A plain string counts as Vietnamese. That is on purpose: a name like `Cloud Concepts` or `Billing, Pricing & Support` is the same in both languages, so writing it twice would only be one more place to keep in step.
+
+These fields accept both forms: `title`, `shortTitle`, `summary`, every value in `domainLabels`, `phases[].title`, `phases[].notes[].title` and `mockExams.titles`. `level` does not: it is a fixed key (`Foundational`, `Associate`, `Professional`, `Specialty`) that the app names in the reader's language on its own.
+
+A notes file works the same way. Write one file, or one file per language:
+
+```json
+"notes": [
+  { "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } },
+  {
+    "file": { "vi": "cheatsheet.md", "en": "cheatsheet.en.md" },
+    "title": { "vi": "Cheat sheet tra nhanh", "en": "Quick-reference cheat sheet" }
+  }
+]
+```
+
+The Vietnamese file is the one that decides the note id, so adding a translation later never loses the "read" mark of a learner. When a reader asks for a language a page has not been written in, the app shows the Vietnamese one with a line saying so, rather than an empty screen. So a translation is always optional, and you can add one file at a time.
+
+Questions are left alone. They are copied from the source exams and stay in the language those exams are written in, because changing the wording of a question would no longer be the question the exam asks.
+
+Mock exams are numbered by the app, in the reader's language, so you do not have to name them. Name them only when a number is not enough:
+
+```json
+"mockExams": {
+  "titles": { "1": { "vi": "Đề tổng hợp", "en": "Full-length exam" } }
+}
+```
+
+`npm run check` warns about a locale key it does not know, so a typo like `"eng"` is caught before it reaches a reader.
 
 Two blocks are optional. You need them only for the tools that compare and build exams:
 

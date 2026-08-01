@@ -59,6 +59,12 @@ This is the main reason we chose Radix. The parts that are easy to get wrong by 
 
 Outside Radix: every part you can click uses the shared `focus-ring` utility, and a `md` size `Button` is at least 44px tall, so a finger can hit it on a phone.
 
+## No copy lives here
+
+This package holds no sentence of its own. Every label a reader can see or hear is a required prop, including the ones that are easy to forget: `ConfirmDialog` takes `cancelLabel`, and each illustration takes a `label` for its `aria-label`. A default such as `cancelLabel = 'Cancel'` would look harmless and then quietly show English inside a Vietnamese dialog, so there are none.
+
+The app translates them: it passes `t('common.cancel')` and friends from its catalogue. See [the web app README](../../apps/web/README.md#languages).
+
 ## Bundle cost
 
 The web app grew from 283 KB to 354 KB gzip. Of those 71 KB, about 56 KB are the libraries: Motion 36 KB and five Radix primitives 20 KB. The rest is the components, the pictures and the CSS of this package.

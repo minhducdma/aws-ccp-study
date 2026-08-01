@@ -28,7 +28,7 @@ Run all of them from the repo root.
 | `npm run build` | Builds the static site into `apps/web/dist/` |
 | `npm run check` | Reads the markdown again and prints every warning |
 | `npm run verify` | Downloads the source exams and compares every answer |
-| `npm run smoke` | Renders every route with SSR to catch runtime errors |
+| `npm run smoke` | Renders every route, in every language, with SSR to catch runtime errors |
 | `npm run mock-exams` | Builds the mock exam files again from the source exams |
 | `npm run preview:pages` | Serves the build the same way GitHub Pages does |
 
@@ -45,8 +45,26 @@ Turborepo caches by file content. If you edit markdown, both packages run again.
 | Mock exam | 50 questions in 90 minutes, with a score table for each domain |
 | Wrong answers | Keeps every question you failed, and removes it when you get it right |
 | Phase lock | Opens a phase only after the phase before is passed. Free mode turns this off |
+| Language | Vietnamese and English, switched in the header, remembered in the browser |
 
 Progress is saved in `localStorage`, and it is kept **for each exam on its own**, so two courses never mix. It also belongs to the browser domain, so your progress on localhost and on GitHub Pages are two different copies.
+
+## Languages
+
+The interface reads in Vietnamese and in English, and the switch sits in the header of every page. A first visit follows the browser language, and the choice is then remembered.
+
+The two kinds of text are handled apart:
+
+| | Where it is written | What happens when a language is missing |
+|---|---|---|
+| Interface: buttons, headings, labels | `apps/web/src/i18n/messages/` | Nothing. The Vietnamese catalogue defines the keys and every other language is typed against it, so the build fails |
+| Content: course summaries, phase titles, notes | `courses/`, inside `course.json` and the markdown files | The page falls back to Vietnamese and says which language it is showing |
+
+That difference is on purpose. The interface is a fixed set of about 200 sentences, so it is worth demanding a complete translation. Course material is thousands of lines and grows every time somebody writes a phase, so it has to be translatable one file at a time.
+
+Exam questions are left in the language of the source exams. Rewriting a question changes what it asks.
+
+Read [`apps/web/README.md`](apps/web/README.md#languages) to add a language, and [`courses/README.md`](courses/README.md#writing-in-more-than-one-language) to translate a course.
 
 ## Content quality
 
