@@ -175,7 +175,7 @@ export const vi = {
   'exam.rule.guess': 'Câu chưa trả lời tính là sai, không bị trừ điểm thêm nên hãy đoán hết.',
   'exam.rule.multi': 'Câu nhiều đáp án phải chọn đúng tất cả mới được tính điểm.',
   'exam.rule.doNotClose':
-    'Đóng tab giữa bài sẽ mất bài làm, hãy chuẩn bị đủ {minutes} phút liền mạch.',
+    'Bài làm được tự động lưu; mở lại trong vòng {minutes} phút để tiếp tục thời gian còn lại.',
   'exam.start': 'Bắt đầu làm bài',
   'exam.historyTitle': 'Lịch sử làm bài',
   'exam.historyPass': '· Pass',
@@ -240,6 +240,9 @@ export const vi = {
   'auth.signIn': 'Đăng nhập',
   'auth.signUp': 'Đăng ký',
   'auth.signOut': 'Đăng xuất',
+  'auth.account': 'Tài khoản',
+  'auth.accountMenu': 'Mở menu tài khoản',
+  'auth.processing': 'Đang xử lý…',
   'auth.closeDialog': 'Đóng hộp thoại tài khoản',
   'auth.email': 'Email',
   'auth.password': 'Mật khẩu',

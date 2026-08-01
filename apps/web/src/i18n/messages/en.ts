@@ -198,7 +198,7 @@ export const en: Catalog = {
     'An unanswered question counts as wrong, and a wrong guess costs nothing extra, so answer everything.',
   'exam.rule.multi': 'A multiple-answer question scores only when every right choice is picked.',
   'exam.rule.doNotClose':
-    'Closing the tab loses your answers, so set aside {minutes} uninterrupted minutes.',
+    'Your answers are saved automatically; reopen within {minutes} minutes to continue the remaining time.',
   'exam.start': 'Start the exam',
   'exam.historyTitle': 'Past attempts',
   'exam.historyPass': '· Passed',
@@ -272,6 +272,9 @@ export const en: Catalog = {
   'auth.signIn': 'Sign in',
   'auth.signUp': 'Sign up',
   'auth.signOut': 'Sign out',
+  'auth.account': 'Account',
+  'auth.accountMenu': 'Open account menu',
+  'auth.processing': 'Working…',
   'auth.closeDialog': 'Close account dialog',
   'auth.email': 'Email',
   'auth.password': 'Password',

@@ -1,6 +1,7 @@
 import type { SVGProps } from 'react';
 
 export {
+  ChevronDown as ChevronDownIcon,
   Eye as EyeIcon,
   EyeOff as EyeOffIcon,
   LockKeyhole as LockKeyholeIcon,

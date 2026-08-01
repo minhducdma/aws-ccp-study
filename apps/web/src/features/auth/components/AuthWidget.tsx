@@ -1,4 +1,15 @@
-import { Button, LogInIcon, LogOutIcon, UserPlusIcon } from '@study/ui';
+import {
+  Button,
+  ChevronDownIcon,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  LogInIcon,
+  LogOutIcon,
+  UserPlusIcon,
+} from '@study/ui';
 import { useState } from 'react';
 import { useI18n } from '../../../i18n';
 import { useAuth } from '../provider';
@@ -12,8 +23,7 @@ import type { AuthMode } from './AuthForm';
  */
 export default function AuthWidget({ className }: { className?: string }) {
   const { t } = useI18n();
-  const { user, logOut } = useAuth();
-  const [loggingOut, setLoggingOut] = useState(false);
+  const { user, logOut, loading } = useAuth();
   const [dialogMode, setDialogMode] = useState<AuthMode | null>(null);
 
   if (user === undefined) return null;
@@ -51,32 +61,53 @@ export default function AuthWidget({ className }: { className?: string }) {
   }
 
   const initial = (user.displayName ?? user.email ?? '?').slice(0, 1).toUpperCase();
+  const name = user.displayName?.trim() || user.email?.split('@')[0] || t('auth.account');
 
   return (
-    <div className={`flex items-center gap-2 ${className ?? ''}`}>
-      <span
-        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700"
-        title={user.displayName ?? user.email ?? undefined}
-        aria-hidden="true"
-      >
-        {initial}
-      </span>
-      <Button
-        tone="ghost"
-        size="sm"
-        loading={loggingOut}
-        icon={<LogOutIcon size={15} aria-hidden="true" />}
-        onClick={async () => {
-          setLoggingOut(true);
-          try {
-            await logOut();
-          } finally {
-            setLoggingOut(false);
-          }
-        }}
-      >
-        {t('auth.signOut')}
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className={`focus-ring flex min-h-10 min-w-0 items-center gap-2 rounded-xl border border-line bg-surface/70 px-2.5 py-1.5 text-left transition-colors hover:border-line-strong hover:bg-surface-hover ${className ?? ''}`}
+          aria-label={t('auth.accountMenu')}
+        >
+          {user.photoURL ? (
+            <img src={user.photoURL} alt="" className="size-7 shrink-0 rounded-full object-cover" />
+          ) : (
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-700" aria-hidden="true">
+              {initial}
+            </span>
+          )}
+          <span className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-800">{name}</span>
+          <ChevronDownIcon size={15} aria-hidden="true" className="shrink-0 text-slate-500" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        <div className="flex min-w-0 items-center gap-3 px-3 py-2.5">
+          {user.photoURL ? (
+            <img src={user.photoURL} alt="" className="size-9 shrink-0 rounded-full object-cover" />
+          ) : (
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-bold text-slate-700" aria-hidden="true">
+              {initial}
+            </span>
+          )}
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-slate-900">{name}</span>
+            {user.email && <span className="block truncate text-xs text-slate-500">{user.email}</span>}
+          </span>
+        </div>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          disabled={loading}
+          className="text-rose-600 data-[highlighted]:bg-rose-50 data-[highlighted]:text-rose-700"
+          onSelect={() => {
+            void logOut().catch((error) => console.error('[auth] sign-out failed:', error));
+          }}
+        >
+          <LogOutIcon size={16} aria-hidden="true" />
+          {t('auth.signOut')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

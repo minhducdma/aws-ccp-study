@@ -46,21 +46,19 @@ export function AuthForm({
   showModeSwitch = true,
 }: AuthFormProps) {
   const { t } = useI18n();
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp, signInWithGoogle, loading } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(true);
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
-    setLoading(true);
     try {
       if (mode === 'signIn') await signIn(email, password, remember);
       else await signUp(email, password, displayName.trim() || undefined, remember);
@@ -69,14 +67,11 @@ export function AuthForm({
     } catch (err) {
       console.error('[auth] sign-in/sign-up failed:', err);
       setError(t(authErrorKey(err)));
-    } finally {
-      setLoading(false);
     }
   };
 
   const withGoogle = async () => {
     setError(null);
-    setLoading(true);
     try {
       await signInWithGoogle(remember);
       if (onSuccess) onSuccess();
@@ -84,8 +79,6 @@ export function AuthForm({
     } catch (err) {
       console.error('[auth] Google sign-in failed:', err);
       setError(t(authErrorKey(err)));
-    } finally {
-      setLoading(false);
     }
   };
 

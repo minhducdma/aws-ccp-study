@@ -1,4 +1,7 @@
 import {
+  LoadingOverlay,
+} from '@study/ui';
+import {
   browserLocalPersistence,
   browserSessionPersistence,
   createUserWithEmailAndPassword,
@@ -13,6 +16,7 @@ import {
 } from 'firebase/auth';
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -21,10 +25,12 @@ import {
 } from 'react';
 import { auth } from '../../services/firebase/config';
 import { bindProgressUser } from '../course/progress';
+import { useI18n } from '../../i18n';
 
 export interface AuthValue {
   /** Undefined while Firebase has not resolved the initial session yet. */
   user: User | null | undefined;
+  loading: boolean;
   signUp: (email: string, password: string, displayName: string | undefined, remember: boolean) => Promise<void>;
   signIn: (email: string, password: string, remember: boolean) => Promise<void>;
   signInWithGoogle: (remember: boolean) => Promise<void>;
@@ -46,7 +52,19 @@ function setAuthPersistence(remember: boolean) {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { t } = useI18n();
   const [user, setUser] = useState<User | null | undefined>(undefined);
+  const [pendingActions, setPendingActions] = useState(0);
+  const loading = user === undefined || pendingActions > 0;
+
+  const runAuthAction = useCallback(async (action: () => Promise<void>) => {
+    setPendingActions((count) => count + 1);
+    try {
+      await action();
+    } finally {
+      setPendingActions((count) => Math.max(0, count - 1));
+    }
+  }, []);
 
   useEffect(
     () =>
@@ -60,25 +78,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthValue>(
     () => ({
       user,
-      signUp: async (email, password, displayName, remember) => {
-        await setAuthPersistence(remember);
-        const credential = await createUserWithEmailAndPassword(auth, email, password);
-        if (displayName) await updateProfile(credential.user, { displayName });
-      },
-      signIn: async (email, password, remember) => {
-        await setAuthPersistence(remember);
-        await signInWithEmailAndPassword(auth, email, password);
-      },
-      signInWithGoogle: async (remember) => {
-        await setAuthPersistence(remember);
-        await signInWithPopup(auth, googleProvider);
-      },
-      logOut: async () => {
-        await signOut(auth);
-      },
+      loading,
+      signUp: (email, password, displayName, remember) =>
+        runAuthAction(async () => {
+          await setAuthPersistence(remember);
+          const credential = await createUserWithEmailAndPassword(auth, email, password);
+          if (displayName) await updateProfile(credential.user, { displayName });
+        }),
+      signIn: (email, password, remember) =>
+        runAuthAction(async () => {
+          await setAuthPersistence(remember);
+          await signInWithEmailAndPassword(auth, email, password);
+        }),
+      signInWithGoogle: (remember) =>
+        runAuthAction(async () => {
+          await setAuthPersistence(remember);
+          await signInWithPopup(auth, googleProvider);
+        }),
+      logOut: () => runAuthAction(() => signOut(auth)),
     }),
-    [user],
+    [loading, runAuthAction, user],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <LoadingOverlay open={loading} label={t('auth.processing')} />
+    </AuthContext.Provider>
+  );
 }
