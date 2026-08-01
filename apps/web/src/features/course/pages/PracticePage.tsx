@@ -95,7 +95,8 @@ export default function PracticePage() {
             label={t('practice.progressLabel', { order: phase.order })}
           />
           <span className="shrink-0 text-xs text-slate-500">
-            {state.checked.length}/{questions.length}
+            {state.checked.length}/{questions.length} ·{' '}
+            {Math.round((state.checked.length / questions.length) * 100)}%
           </span>
         </div>
       </header>

@@ -58,6 +58,8 @@ export default function NotesPage() {
   }
 
   const read = Boolean(progress.notesRead[note.id]);
+  const notesRead = phase.notes.filter((entry) => progress.notesRead[entry.id]).length;
+  const notesPercent = Math.round((notesRead / phase.notes.length) * 100);
   // Notes are translated file by file, so a page may exist in one language and not another.
   const untranslated = body.locale !== locale && isLocale(body.locale);
 
@@ -75,13 +77,18 @@ export default function NotesPage() {
               {t('notes.heading', { phase: localized(phase.title), note: localized(note.title) })}
             </h1>
           </div>
-          <Button
-            tone={read ? 'pass' : 'primary'}
-            icon={read ? <CheckIcon width={16} height={16} /> : undefined}
-            onClick={() => markNoteRead(note.id, !read)}
-          >
-            {read ? t('notes.read') : t('notes.markRead')}
-          </Button>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-semibold text-slate-500 tabular-nums">
+              {notesRead}/{phase.notes.length} · {notesPercent}%
+            </span>
+            <Button
+              tone={read ? 'pass' : 'primary'}
+              icon={read ? <CheckIcon width={16} height={16} /> : undefined}
+              onClick={() => markNoteRead(note.id, !read)}
+            >
+              {read ? t('notes.read') : t('notes.markRead')}
+            </Button>
+          </div>
         </div>
 
         {untranslated && (

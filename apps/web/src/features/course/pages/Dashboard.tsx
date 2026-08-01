@@ -7,6 +7,7 @@ import {
   CheckIcon,
   ConfirmDialog,
   FlameIcon,
+  LayersIcon,
   LockIcon,
   Progress,
   StudyBuddyArt,
@@ -157,6 +158,22 @@ export default function Dashboard() {
             const practiceState = phase.practice ? progress.practice[phase.practice.id] : undefined;
             const practiceDone = practiceState?.checked.length ?? 0;
             const practiceTotal = phase.practice?.questions.length ?? 0;
+            const notesDone = phase.notes.filter((note) => progress.notesRead[note.id]).length;
+            const notesPercent = phase.notes.length
+              ? Math.round((notesDone / phase.notes.length) * 100)
+              : 0;
+            const practicePercent = practiceTotal
+              ? Math.round((practiceDone / practiceTotal) * 100)
+              : 0;
+            const gateDraft = phase.gateQuiz ? progress.exams[phase.gateQuiz.id] : undefined;
+            const gateAnswered = phase.gateQuiz
+              ? phase.gateQuiz.questions.filter((question) => gateDraft?.answers[question.id]?.length).length
+              : 0;
+            const gatePercent = phase.gateQuiz
+              ? best
+                ? 100
+                : Math.round((gateAnswered / phase.gateQuiz.questions.length) * 100)
+              : 0;
 
             return (
               <m.div key={phase.id} variants={fadeUp}>
@@ -227,15 +244,19 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-1.5 sm:flex sm:flex-wrap sm:justify-end sm:gap-2">
+                    <div className="grid gap-2 sm:flex sm:flex-wrap sm:justify-end">
                       {phase.notes.length > 0 && (
                         <ButtonLink
                           to={url(`/phase/${phase.id}/notes/${phase.notes[0].id}`)}
                           tone="secondary"
                           size="sm"
-                          className="min-h-10 w-full sm:min-h-0 sm:w-auto"
+                          icon={<BookIcon width={15} height={15} />}
+                          className="min-h-10 w-full justify-start sm:min-h-0 sm:w-auto"
                         >
                           {t('dashboard.notes')}
+                          <span className="ml-auto text-[11px] opacity-70 tabular-nums sm:ml-1">
+                            {notesPercent}%
+                          </span>
                         </ButtonLink>
                       )}
                       {phase.practice && (
@@ -243,9 +264,13 @@ export default function Dashboard() {
                           to={url(`/phase/${phase.id}/practice`)}
                           tone="secondary"
                           size="sm"
-                          className="min-h-10 w-full sm:min-h-0 sm:w-auto"
+                          icon={<LayersIcon width={15} height={15} />}
+                          className="min-h-10 w-full justify-start sm:min-h-0 sm:w-auto"
                         >
                           {t('dashboard.practice')}
+                          <span className="ml-auto text-[11px] opacity-70 tabular-nums sm:ml-1">
+                            {practicePercent}%
+                          </span>
                         </ButtonLink>
                       )}
                       {phase.gateQuiz && (
@@ -253,9 +278,13 @@ export default function Dashboard() {
                           to={url(`/exam/${phase.gateQuiz.id}`)}
                           tone={passed ? 'secondary' : 'primary'}
                           size="sm"
-                          className="min-h-10 w-full sm:min-h-0 sm:w-auto"
+                          icon={<TargetIcon width={15} height={15} />}
+                          className="min-h-10 w-full justify-start sm:min-h-0 sm:w-auto"
                         >
                           {t('dashboard.gateQuiz')}
+                          <span className="ml-auto text-[11px] opacity-70 tabular-nums sm:ml-1">
+                            {gatePercent}%
+                          </span>
                         </ButtonLink>
                       )}
                     </div>

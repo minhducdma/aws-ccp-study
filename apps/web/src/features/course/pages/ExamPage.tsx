@@ -37,14 +37,15 @@ export default function ExamPage() {
   const { t } = i18n;
   const { course } = useCourse();
   const exam = getExam(course, examId, i18n);
-  const { progress, saveAttempt } = useProgress(course);
+  const { progress, saveAttempt, saveExam } = useProgress(course);
+  const draft = exam ? progress.exams[exam.id] : undefined;
 
-  const [stage, setStage] = useState<Stage>('intro');
-  const [index, setIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, Letter[]>>({});
-  const [flagged, setFlagged] = useState<Set<string>>(new Set());
-  const [startedAt, setStartedAt] = useState(0);
-  const [deadline, setDeadline] = useState(0);
+  const [stage, setStage] = useState<Stage>(draft ? 'running' : 'intro');
+  const [index, setIndex] = useState(draft?.index ?? 0);
+  const [answers, setAnswers] = useState<Record<string, Letter[]>>(draft?.answers ?? {});
+  const [flagged, setFlagged] = useState<Set<string>>(new Set(draft?.flagged ?? []));
+  const [startedAt, setStartedAt] = useState(draft?.startedAt ?? 0);
+  const [deadline, setDeadline] = useState(draft?.deadline ?? 0);
   const [now, setNow] = useState(Date.now());
   const [result, setResult] = useState<Attempt | null>(null);
 
@@ -81,6 +82,16 @@ export default function ExamPage() {
   }, [stage]);
 
   useEffect(() => {
+    if (!exam || !draft || stage !== 'intro') return;
+    setIndex(draft.index);
+    setAnswers(draft.answers);
+    setFlagged(new Set(draft.flagged));
+    setStartedAt(draft.startedAt);
+    setDeadline(draft.deadline);
+    setStage('running');
+  }, [draft, exam, stage]);
+
+  useEffect(() => {
     if (stage === 'running' && deadline > 0 && now >= deadline) submit(answers);
   }, [stage, deadline, now, answers, submit]);
 
@@ -108,6 +119,13 @@ export default function ExamPage() {
     setNow(ts);
     setResult(null);
     setStage('running');
+    saveExam(exam.id, {
+      index: 0,
+      answers: {},
+      flagged: [],
+      startedAt: ts,
+      deadline: ts + timeLimitMin * 60_000,
+    });
     window.scrollTo({ top: 0 });
   };
 
@@ -152,7 +170,9 @@ export default function ExamPage() {
           ? current.filter((l) => l !== letter)
           : [...current, letter]
         : [letter];
-      return { ...prev, [question.id]: next };
+      const nextAnswers = { ...prev, [question.id]: next };
+      saveExam(exam.id, { answers: nextAnswers });
+      return nextAnswers;
     });
   };
 
@@ -161,8 +181,15 @@ export default function ExamPage() {
       const next = new Set(prev);
       if (next.has(question.id)) next.delete(question.id);
       else next.add(question.id);
+      saveExam(exam.id, { flagged: [...next] });
       return next;
     });
+  };
+
+  const goTo = (nextIndex: number) => {
+    const bounded = Math.max(0, Math.min(questions.length - 1, nextIndex));
+    setIndex(bounded);
+    saveExam(exam.id, { index: bounded });
   };
 
   const submitDialog = (trigger: React.ReactNode) => (
@@ -207,7 +234,8 @@ export default function ExamPage() {
             label={t('exam.answeredLabel')}
           />
           <span className="shrink-0 text-xs text-slate-500">
-            {t('exam.answeredCount', { answered: answeredCount, total: questions.length })}
+            {t('exam.answeredCount', { answered: answeredCount, total: questions.length })} ·{' '}
+            {Math.round((answeredCount / questions.length) * 100)}%
           </span>
         </div>
       </header>
@@ -234,7 +262,7 @@ export default function ExamPage() {
                 aria-current={i === index ? 'true' : undefined}
                 aria-label={t(status, { number: i + 1 })}
                 onClick={() => {
-                  setIndex(i);
+                  goTo(i);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className={`focus-ring relative h-8 rounded-md text-xs font-semibold transition-all duration-200 hover:scale-105 ${
@@ -279,13 +307,13 @@ export default function ExamPage() {
         <Button
           tone="secondary"
           icon={<ArrowLeftIcon width={16} height={16} />}
-          onClick={() => setIndex((i) => Math.max(0, i - 1))}
+          onClick={() => goTo(index - 1)}
           disabled={index === 0}
         >
           {t('common.previousQuestion')}
         </Button>
         {index < questions.length - 1 ? (
-          <Button onClick={() => setIndex((i) => i + 1)}>
+          <Button onClick={() => goTo(index + 1)}>
             {t('common.nextQuestion')}
             <ArrowRightIcon width={16} height={16} />
           </Button>

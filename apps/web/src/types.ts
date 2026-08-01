@@ -40,9 +40,18 @@ export interface PracticeState {
   checked: string[];
 }
 
+export interface ExamProgressState {
+  index: number;
+  answers: Record<string, Letter[]>;
+  flagged: string[];
+  startedAt: number;
+  deadline: number;
+}
+
 export interface CourseProgress {
   notesRead: Record<string, boolean>;
   practice: Record<string, PracticeState>;
+  exams: Record<string, ExamProgressState>;
   attempts: Attempt[];
   wrong: Record<string, number>;
   freeMode: boolean;
@@ -51,7 +60,7 @@ export interface CourseProgress {
 }
 
 /** Pre-v3 Firestore shape, retained only so existing course documents can be migrated. */
-export type LegacyCourseProgressFields = Omit<CourseProgress, 'attempts'>;
+export type LegacyCourseProgressFields = Omit<CourseProgress, 'attempts' | 'exams'>;
 
 export interface CourseProgressSummary {
   freeMode: boolean;

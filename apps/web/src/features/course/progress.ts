@@ -4,6 +4,7 @@ import type {
   Attempt,
   Course,
   CourseProgress,
+  ExamProgressState,
   Letter,
   PracticeState,
   ProgressStore,
@@ -11,17 +12,20 @@ import type {
 import { isCorrect, lookupQuestion } from './content';
 import {
   deleteAttempt as deleteAttemptDoc,
+  deleteExamProgress,
   deleteNoteProgress,
   deletePracticeProgress,
   deleteWrongProgress,
   loadUserProgress,
   saveAttempt as saveAttemptDoc,
   saveCourseSummary,
+  saveExamProgress,
   saveNoteProgress,
   savePracticeProgress,
   saveWrongProgress,
   subscribeToAttempts,
   subscribeToCourses,
+  subscribeToExams,
   subscribeToNotes,
   subscribeToPractice,
   subscribeToWrong,
@@ -37,6 +41,7 @@ const LEGACY_COURSE_ID = 'aws-clf-c02';
 export const emptyCourseProgress: CourseProgress = {
   notesRead: {},
   practice: {},
+  exams: {},
   attempts: [],
   wrong: {},
   freeMode: false,
@@ -45,13 +50,25 @@ export const emptyCourseProgress: CourseProgress = {
 
 const emptyStore: ProgressStore = { version: 2, courses: {} };
 
+function normalizeCourseProgress(progress: Partial<CourseProgress>): CourseProgress {
+  return {
+    ...emptyCourseProgress,
+    ...progress,
+    notesRead: progress.notesRead ?? {},
+    practice: progress.practice ?? {},
+    exams: progress.exams ?? {},
+    attempts: progress.attempts ?? [],
+    wrong: progress.wrong ?? {},
+  };
+}
+
 function migrateLegacy(): ProgressStore | null {
   const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
   if (!raw) return null;
   const legacy = JSON.parse(raw) as Partial<CourseProgress>;
   return {
     version: 2,
-    courses: { [LEGACY_COURSE_ID]: { ...emptyCourseProgress, ...legacy } },
+    courses: { [LEGACY_COURSE_ID]: normalizeCourseProgress(legacy) },
   };
 }
 
@@ -60,7 +77,15 @@ function load(): ProgressStore {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as ProgressStore;
-      return { version: 2, courses: parsed.courses ?? {} };
+      return {
+        version: 2,
+        courses: Object.fromEntries(
+          Object.entries(parsed.courses ?? {}).map(([courseId, progress]) => [
+            courseId,
+            normalizeCourseProgress(progress),
+          ]),
+        ),
+      };
     }
     // The legacy entry is left in place so downgrading does not lose anything.
     const migrated = migrateLegacy();
@@ -77,13 +102,18 @@ function load(): ProgressStore {
 let store: ProgressStore = typeof localStorage === 'undefined' ? emptyStore : load();
 const listeners = new Set<() => void>();
 
+function reportPersistenceError(operation: string, error: unknown) {
+  console.error(`[progress] Firestore ${operation} failed`, error);
+}
+
 /** Applies a store update that already happened elsewhere (Firestore, another tab) — writes the
  * local cache and notifies listeners, but does not push back to Firestore. */
 function applyRemote(next: ProgressStore) {
   store = next;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  } catch {
+  } catch (error) {
+    reportPersistenceError('synchronization', error);
     // Ignore writes rejected when localStorage is unavailable (private mode).
   }
   listeners.forEach((fn) => fn());
@@ -139,6 +169,7 @@ function watchCourseDetails(uid: string, courseId: string) {
   courseUnsubscribes.set(courseId, [
     subscribeToNotes(uid, courseId, (notesRead) => updateRemoteCourse(courseId, { notesRead })),
     subscribeToPractice(uid, courseId, (practice) => updateRemoteCourse(courseId, { practice })),
+    subscribeToExams(uid, courseId, (exams) => updateRemoteCourse(courseId, { exams })),
     subscribeToWrong(uid, courseId, (wrong) => updateRemoteCourse(courseId, { wrong })),
     subscribeToAttempts(uid, courseId, (attempts) => updateRemoteCourse(courseId, { attempts })),
   ]);
@@ -150,6 +181,10 @@ function mergeCourseProgress(local: CourseProgress, remote: CourseProgress): Cou
   for (const [setId, localState] of Object.entries(local.practice)) {
     if (!practice[setId] || localIsNewer) practice[setId] = localState;
   }
+  const exams = { ...remote.exams };
+  for (const [examId, localState] of Object.entries(local.exams)) {
+    if (!exams[examId] || localIsNewer) exams[examId] = localState;
+  }
   const wrong = { ...remote.wrong };
   for (const [questionId, count] of Object.entries(local.wrong)) {
     wrong[questionId] = Math.max(wrong[questionId] ?? 0, count);
@@ -160,6 +195,7 @@ function mergeCourseProgress(local: CourseProgress, remote: CourseProgress): Cou
   return {
     notesRead: { ...remote.notesRead, ...local.notesRead },
     practice,
+    exams,
     wrong,
     attempts: [...attempts.values()],
     freeMode: localIsNewer ? local.freeMode : remote.freeMode,
@@ -188,6 +224,9 @@ async function persistCourse(uid: string, courseId: string, progress: CourseProg
     ),
     ...Object.entries(progress.practice).map(([setId, state]) =>
       savePracticeProgress(uid, courseId, setId, state),
+    ),
+    ...Object.entries(progress.exams).map(([examId, state]) =>
+      saveExamProgress(uid, courseId, examId, state),
     ),
     ...Object.entries(progress.wrong).map(([questionId, count]) =>
       saveWrongProgress(uid, courseId, questionId, count),
@@ -264,7 +303,8 @@ function commitCourse(courseId: string, next: CourseProgress) {
     courses: { ...store.courses, [courseId]: { ...next, updatedAt, attempts } },
   });
   if (currentUid) {
-    saveCourseSummary(currentUid, courseId, { freeMode: next.freeMode, updatedAt }).catch(() => {
+    saveCourseSummary(currentUid, courseId, { freeMode: next.freeMode, updatedAt }).catch((error) => {
+      reportPersistenceError('course summary write', error);
       // The change is already visible locally; Firestore's offline queue retries once the
       // connection is back, and the next courses snapshot reconciles the rest.
     });
@@ -280,7 +320,8 @@ function addAttempt(courseId: string, attempt: Attempt) {
     courses: { ...store.courses, [courseId]: { ...current, attempts: [...current.attempts, attempt] } },
   });
   if (currentUid) {
-    saveAttemptDoc(currentUid, courseId, attempt).catch(() => {
+    saveAttemptDoc(currentUid, courseId, attempt).catch((error) => {
+      reportPersistenceError('attempt write', error);
       // Same offline-queue reasoning as commitCourse.
     });
   }
@@ -317,7 +358,11 @@ export function useProgress(course: Course) {
     (noteId: string, read = true) => {
       const current = courseProgress(courseId);
       commitCourse(courseId, { ...current, notesRead: { ...current.notesRead, [noteId]: read } });
-      if (currentUid) saveNoteProgress(currentUid, courseId, noteId, read).catch(() => {});
+      if (currentUid) {
+        saveNoteProgress(currentUid, courseId, noteId, read).catch((error) =>
+          reportPersistenceError('note write', error),
+        );
+      }
     },
     [courseId],
   );
@@ -331,7 +376,9 @@ export function useProgress(course: Course) {
         practice: { ...current.practice, [setId]: { ...set, ...patch } },
       });
       if (currentUid) {
-        savePracticeProgress(currentUid, courseId, setId, { ...set, ...patch }).catch(() => {});
+        savePracticeProgress(currentUid, courseId, setId, { ...set, ...patch }).catch((error) =>
+          reportPersistenceError('practice write', error),
+        );
       }
     },
     [courseId],
@@ -344,6 +391,41 @@ export function useProgress(course: Course) {
       delete practice[setId];
       commitCourse(courseId, { ...current, practice });
       if (currentUid) deletePracticeProgress(currentUid, courseId, setId).catch(() => {});
+    },
+    [courseId],
+  );
+
+  const saveExam = useCallback(
+    (examId: string, patch: Partial<ExamProgressState>) => {
+      const current = courseProgress(courseId);
+      const exam: ExamProgressState = current.exams[examId] ?? {
+        index: 0,
+        answers: {},
+        flagged: [],
+        startedAt: 0,
+        deadline: 0,
+      };
+      const next = { ...exam, ...patch };
+      commitCourse(courseId, {
+        ...current,
+        exams: { ...current.exams, [examId]: next },
+      });
+      if (currentUid) {
+        saveExamProgress(currentUid, courseId, examId, next).catch((error) =>
+          reportPersistenceError('exam draft write', error),
+        );
+      }
+    },
+    [courseId],
+  );
+
+  const clearExam = useCallback(
+    (examId: string) => {
+      const current = courseProgress(courseId);
+      const exams = { ...current.exams };
+      delete exams[examId];
+      commitCourse(courseId, { ...current, exams });
+      if (currentUid) deleteExamProgress(currentUid, courseId, examId).catch(() => {});
     },
     [courseId],
   );
@@ -376,6 +458,7 @@ export function useProgress(course: Course) {
   const saveAttempt = useCallback(
     (attempt: Attempt) => {
       const current = courseProgress(courseId);
+      if (current.attempts.some((entry) => entry.id === attempt.id)) return;
       const wrong = { ...current.wrong };
       for (const [questionId, selected] of Object.entries(attempt.answers)) {
         const entry = lookupQuestion(course, questionId);
@@ -383,9 +466,12 @@ export function useProgress(course: Course) {
           wrong[questionId] = (wrong[questionId] ?? 0) + 1;
         }
       }
+      const exams = { ...current.exams };
+      delete exams[attempt.examId];
       addAttempt(courseId, attempt);
-      commitCourse(courseId, { ...current, wrong });
+      commitCourse(courseId, { ...current, wrong, exams });
       if (currentUid) {
+        deleteExamProgress(currentUid, courseId, attempt.examId).catch(() => {});
         Object.entries(wrong).forEach(([questionId, count]) =>
           saveWrongProgress(currentUid!, courseId, questionId, count).catch(() => {}),
         );
@@ -412,6 +498,9 @@ export function useProgress(course: Course) {
       Object.keys(current.practice).forEach((setId) =>
         deletePracticeProgress(currentUid!, courseId, setId).catch(() => {}),
       );
+      Object.keys(current.exams).forEach((examId) =>
+        deleteExamProgress(currentUid!, courseId, examId).catch(() => {}),
+      );
       Object.keys(current.wrong).forEach((questionId) =>
         deleteWrongProgress(currentUid!, courseId, questionId).catch(() => {}),
       );
@@ -423,6 +512,8 @@ export function useProgress(course: Course) {
     markNoteRead,
     savePractice,
     resetPractice,
+    saveExam,
+    clearExam,
     recordWrong,
     clearWrong,
     saveAttempt,
