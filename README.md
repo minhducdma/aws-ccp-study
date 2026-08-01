@@ -23,8 +23,8 @@ courses/                       Dữ liệu — mỗi chứng chỉ một thư m�
       mock-1.md                Đề mô phỏng 50 câu / 90 phút
       mock-1.answers.md        Đáp án + phân loại domain từng câu
       annotations.json         Domain và giải thích tiếng Việt cho đề mô phỏng
-    progress-tracker.md        Bảng ghi điểm nếu học trực tiếp bằng markdown
   aws-saa-c03/course.json      Khoá chưa có nội dung: chỉ manifest, catalog tự khoá lại
+  README.md                    Hướng dẫn soạn nội dung: định dạng, quy tắc tên file, script
 
 packages/content/              Pipeline: đọc courses/ và sinh ra content.json
 apps/web/                      Web app React, không biết gì về chứng chỉ cụ thể
@@ -55,7 +55,7 @@ Turborepo cache theo nội dung file: sửa markdown thì cả hai package build
 
 ## Thêm một khoá học mới
 
-Không cần sửa code trong `apps/web/`. Tạo `courses/<id>/course.json`, đổi `status` thành `available`, khai báo các phase rồi đặt markdown vào đúng đường dẫn:
+Hướng dẫn đầy đủ — định dạng markdown cho câu hỏi và đáp án, quy tắc đặt tên file, chạy script nào sau khi soạn — nằm ở [`courses/README.md`](courses/README.md). Tóm tắt: không cần sửa code trong `apps/web/`, chỉ tạo `courses/<id>/course.json`, đổi `status` thành `available`, khai báo các phase rồi đặt markdown vào đúng đường dẫn:
 
 ```json
 {
