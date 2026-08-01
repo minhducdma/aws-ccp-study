@@ -1,6 +1,8 @@
 # @study/web
 
-Web app React + Vite + Tailwind. Toàn bộ dữ liệu lấy từ `@study/content`; app **không** hardcode chứng chỉ nào, nên thêm khoá học không cần sửa gì ở đây.
+Web app React + Vite + Tailwind. Toàn bộ dữ liệu lấy từ `@study/content`, toàn bộ giao diện lấy từ `@study/ui`; app **không** hardcode chứng chỉ nào, nên thêm khoá học không cần sửa gì ở đây.
+
+Trong `src/` chỉ còn component gắn với nghiệp vụ (`QuestionCard`, `CourseLayout`, `Markdown`). Nút, thẻ, badge, hộp thoại và animation nằm ở [`packages/ui`](../../packages/ui/README.md) — cần thêm primitive thì thêm bên đó chứ đừng định nghĩa lại tại đây.
 
 Chạy từ thư mục gốc của repo (`npm run dev`) chứ đừng chạy `vite` trực tiếp trong thư mục này, vì Turborepo cần build nội dung trước.
 

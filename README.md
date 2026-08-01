@@ -27,6 +27,7 @@ courses/                       Dữ liệu — mỗi chứng chỉ một thư m�
   README.md                    Hướng dẫn soạn nội dung: định dạng, quy tắc tên file, script
 
 packages/content/              Pipeline: đọc courses/ và sinh ra content.json
+packages/ui/                   Design system: token, primitive, animation, minh hoạ SVG
 apps/web/                      Web app React, không biết gì về chứng chỉ cụ thể
 ```
 
