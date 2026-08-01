@@ -33,11 +33,6 @@
       { "mock": 2, "upstreamExam": 21 }
     ]
   },
-  "upstream": {
-    "label": "kananinirav/AWS-Certified-Cloud-Practitioner-Notes",
-    "rawBase": "https://raw.githubusercontent.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes/master/practice-exam",
-    "filePattern": "practice-exam-{n}.md"
-  },
   "phases": [
     {
       "id": "phase-1",

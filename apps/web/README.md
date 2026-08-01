@@ -2,7 +2,7 @@
 
 The React web app, built with Vite and Tailwind. All the data comes from `@study/content` and all the interface comes from `@study/ui`. No exam is named in this code, so a new course needs no change here.
 
-Start it from the repo root with `npm run dev`, not with `vite` in this folder, because Turborepo has to build the content first.
+Start it from the repo root with `pnpm run dev`, not with `vite` in this folder, because Turborepo has to build the content first.
 
 ## Routes
 
@@ -68,7 +68,7 @@ They are two different things and they are translated in two different places.
 1. Add the code to `LOCALES` and `LOCALE_INFO` in `i18n/locale.ts`.
 2. Add it to `LOCALES` in `packages/content/scripts/build.mjs`, so a manifest may use it.
 3. Copy `messages/vi.ts` to `messages/<code>.ts`, type it as `Catalog`, translate it, and add it to `CATALOGS` in `i18n/provider.tsx`.
-4. Run `npm run smoke`. It renders every route in every language, so anything left untranslated or formatted with the wrong parameters fails there.
+4. Run `pnpm run smoke`. It renders every route in every language, so anything left untranslated or formatted with the wrong parameters fails there.
 
 Course content is a separate job, and it is optional: an untranslated course still works.
 
@@ -88,8 +88,8 @@ The chosen language sits beside it under `study-locale-v1`. Without that key the
 
 | Command | What it does |
 |---|---|
-| `npm run smoke` | Renders every route, in every language, with SSR, to catch runtime errors that a type check cannot see |
-| `npm run preview:pages` | Serves `dist/` exactly like GitHub Pages, with the base path and the `404.html` fallback |
+| `pnpm run smoke` | Renders every route, in every language, with SSR, to catch runtime errors that a type check cannot see |
+| `pnpm run preview:pages` | Serves `dist/` exactly like GitHub Pages, with the base path and the `404.html` fallback |
 
 The smoke test uses the same providers as `main.tsx`. When you add a provider there, add it to `scripts/smoke-entry.tsx` too, or the routes will fail.
 

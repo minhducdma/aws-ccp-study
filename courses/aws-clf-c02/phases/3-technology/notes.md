@@ -1,6 +1,6 @@
 # Phase 3 — Cloud Technology & Services (Domain 3, 34% đề thi)
 
-> **Domain lớn nhất của CLF-C02.** Khoảng 17/50 câu tính điểm nằm ở đây. Nguồn: `sections/` của repo [kananinirav/AWS-Certified-Cloud-Practitioner-Notes](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes).
+> **Domain lớn nhất của CLF-C02.** Khoảng 17/50 câu tính điểm nằm ở đây.
 >
 > **Cách học file này:** đề CCP hầu như không hỏi "cấu hình thế nào", chỉ hỏi **"service nào làm việc này"** và **"service này khác service kia ở đâu"**. Vì vậy tài liệu dưới đây ưu tiên bảng so sánh thay vì văn xuôi. Với mỗi service bạn chỉ cần nhớ 3 thứ: **nó là gì / dùng khi nào / hay bị nhầm với cái gì**.
 

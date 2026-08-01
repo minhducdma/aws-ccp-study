@@ -1,7 +1,7 @@
 # Phase 2 — Practice Questions (Domain 2: Security & Compliance)
 
 > **Domain 2 — Security & Compliance (30%)** — domain nặng nhất sau Cloud Technology.
-> 55 câu hỏi **thật** được chọn từ các practice exam của repo [kananinirav/AWS-Certified-Cloud-Practitioner-Notes](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes), giữ nguyên câu chữ và đáp án gốc.
+> 55 câu hỏi **thật** được chọn từ các practice exam, giữ nguyên câu chữ và đáp án gốc.
 > Nguồn: **Practice Exam 1, 4, 5, 6** — mỗi câu đều có trích dẫn `(Exam N - QX)` để bạn đối chiếu lại bản gốc.
 >
 > **Cách làm:** làm hết 55 câu, ghi đáp án ra giấy/file riêng theo định dạng `1B, 2A, 3AC, ...`, **rồi mới** mở phần Đáp án ở cuối file. Câu có `(Choose TWO)` / `(Select TWO)` là câu chọn nhiều đáp án.

@@ -1,6 +1,6 @@
 # Phase 4 — Practice Questions (Domain 4: Billing, Pricing & Support)
 
-> **34 câu hỏi thật** lấy nguyên văn từ Practice Exam 1, 13, 14, 15 của repo [kananinirav/AWS-Certified-Cloud-Practitioner-Notes](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes).
+> **34 câu hỏi thật**
 > Trong đó có **4 câu multiple-response** (đề ghi rõ "Choose TWO" / "Select TWO" / "Select three").
 >
 > **Cách làm:** đọc `01-notes.md` trước. Làm hết cả 34 câu, ghi đáp án ra giấy theo định dạng `1D, 2B, 3AC, ...`, rồi mới mở phần Đáp án ở cuối file để tự chấm.

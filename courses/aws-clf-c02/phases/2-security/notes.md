@@ -1,7 +1,6 @@
 # Phase 2 — Security & Compliance (Domain 2, 30% đề thi)
 
 > **Thời lượng đọc mục tiêu:** ~2 giờ (domain nặng thứ hai của kỳ thi).
-> **Nguồn:** `sections/iam.md` · `sections/security_compliance.md` · `sections/advanced_identity.md` (repo kananinirav).
 > **Domain 2 gồm 4 nhóm nhiệm vụ:** (1) AWS Shared Responsibility Model, (2) Security/compliance concepts & governance, (3) Access management (IAM), (4) Các security component & resource.
 
 ---

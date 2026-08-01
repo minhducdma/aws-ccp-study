@@ -1,6 +1,6 @@
 # Phase 3 — Bộ câu hỏi luyện tập (Cloud Technology & Services)
 
-**73 câu hỏi thật** lấy nguyên văn từ practice exam 1, 6, 7, 8, 9, 10, 11, 12 của repo `kananinirav/AWS-Certified-Cloud-Practitioner-Notes`.
+**73 câu hỏi thật**
 
 ## Cách dùng
 

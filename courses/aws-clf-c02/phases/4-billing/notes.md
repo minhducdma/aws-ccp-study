@@ -1,7 +1,6 @@
 # Phase 4 — Billing, Pricing & Support (Domain 4 — 12%)
 
 > **Thời gian học đề xuất:** ~1 giờ
-> **Nguồn:** [sections/account_management_billing_support.md](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes/blob/master/sections/account_management_billing_support.md) + [sections/architecting_and_ecosystem.md](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes/blob/master/sections/architecting_and_ecosystem.md)
 > **Sau khi học xong:** làm `02-practice-questions.md` (34 câu) → `03-gate-quiz.md` (15 câu, cần ≥12/15)
 
 Domain 4 chỉ chiếm 12% (~6 câu tính điểm trên bài thi thật), nhưng đây là domain **dễ ăn điểm nhất** vì kiến thức thuần ghi nhớ, không có tình huống kiến trúc phức tạp. Mục tiêu của phase này là làm đúng gần như 100% Domain 4.

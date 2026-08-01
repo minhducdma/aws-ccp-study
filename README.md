@@ -1,8 +1,6 @@
 # AWS Certification Study Platform
 
-A monorepo of self-study courses for AWS exams. Each course is cut into phases. A phase has notes, practice questions and a gate quiz, and the next phase opens only after you pass that quiz.
-
-One course is ready today: **AWS Certified Cloud Practitioner (CLF-C02)**, with 398 questions, 4 phases and 2 mock exams. The other AWS exams already have a seat in the roadmap, but they are locked.
+A monorepo platform for self-study courses on AWS certification exams. The goal is to make it easy to add a new AWS exam as pure content (Markdown + JSON) without touching the app code, and to give learners a structured way to study: notes, practice questions and a gate quiz per phase, where the next phase only opens after you pass the quiz before it.
 
 Live site: <https://minhducdma.github.io/aws-ccp-study/>
 
@@ -23,16 +21,16 @@ Run all of them from the repo root.
 
 | Command | What it does |
 |---|---|
-| `npm install` | Installs the dependencies of every package |
-| `npm run dev` | Starts the dev server on <http://localhost:5180> |
-| `npm run build` | Builds the static site into `apps/web/dist/` |
-| `npm run check` | Reads the markdown again and prints every warning |
-| `npm run verify` | Downloads the source exams and compares every answer |
-| `npm run smoke` | Renders every route, in every language, with SSR to catch runtime errors |
-| `npm run mock-exams` | Builds the mock exam files again from the source exams |
-| `npm run preview:pages` | Serves the build the same way GitHub Pages does |
+| `pnpm install` | Installs the dependencies of every package |
+| `pnpm run dev` | Starts the dev server on <http://localhost:5180> |
+| `pnpm run build` | Builds the static site into `apps/web/dist/` |
+| `pnpm run check` | Reads the markdown again and prints every warning |
+| `pnpm run verify` | Downloads the source exams and compares every answer |
+| `pnpm run smoke` | Renders every route, in every language, with SSR to catch runtime errors |
+| `pnpm run mock-exams` | Builds the mock exam files again from the source exams |
+| `pnpm run preview:pages` | Serves the build the same way GitHub Pages does |
 
-Turborepo caches by file content. If you edit markdown, both packages run again. If you edit nothing, `npm run build` returns almost at once, because there is nothing to redo.
+Turborepo caches by file content. If you edit markdown, both packages run again. If you edit nothing, `pnpm run build` returns almost at once, because there is nothing to redo.
 
 ## Web app features
 
@@ -46,8 +44,11 @@ Turborepo caches by file content. If you edit markdown, both packages run again.
 | Wrong answers | Keeps every question you failed, and removes it when you get it right |
 | Phase lock | Opens a phase only after the phase before is passed. Free mode turns this off |
 | Language | Vietnamese and English, switched in the header, remembered in the browser |
+| Account | Sign in with email/password or Google. Progress then syncs through Firestore instead of staying on one browser |
 
 Progress is saved in `localStorage`, and it is kept **for each exam on its own**, so two courses never mix. It also belongs to the browser domain, so your progress on localhost and on GitHub Pages are two different copies.
+
+Signing in changes that: your progress is written to Firestore under your own account and read back on every device, live, through `onSnapshot`. `localStorage` is still kept as an offline cache and as the store for guests who never sign in. Firestore's rules only let a signed-in user read or write their own document (`firestore.rules`), so one account can never see another's progress. To run the app locally with sign-in working, copy `apps/web/.env.example` to `apps/web/.env.local` and fill it with your own Firebase project's config.
 
 ## Languages
 
@@ -68,9 +69,9 @@ Read [`apps/web/README.md`](apps/web/README.md#languages) to add a language, and
 
 ## Content quality
 
-`npm run verify` is the check that matters most. It compares every answer in this repo with the `Correct answer` line in the source exam, so a wrong answer is found instead of being taught. Today **398 of 398 questions match**.
+`pnpm run verify` is the check that matters most. It compares every answer in this repo with the `Correct answer` line in the source exam, so a wrong answer is found instead of being taught.
 
-`npm run mock-exams` writes the mock exams. It copies the questions and the answers from the source, so they always match. The domain labels and the Vietnamese explanations come from `annotations.json` in each course.
+`pnpm run mock-exams` writes the mock exams. It copies the questions and the answers from the source, so they always match. The domain labels and the Vietnamese explanations come from `annotations.json` in each course.
 
 ## Deploy to GitHub Pages
 
@@ -82,32 +83,7 @@ Read [`apps/web/README.md`](apps/web/README.md#languages) to add a language, and
 | Router `basename` in `apps/web/src/main.tsx` | Taken from `import.meta.env.BASE_URL` | Never |
 | `404.html` in `apps/web/dist/` | A copy of `index.html`, written at build time | Never |
 
-The `404.html` file is not optional. GitHub Pages only serves static files, so it does not know that `/course/aws-clf-c02/review` is a route of the app. When you open that link, or press F5 in the middle of an exam, Pages returns `404.html`, which is the app itself, and then the router shows the right page. Run `npm run preview:pages` and open <http://localhost:4173/aws-ccp-study/> to test this before you push.
-
-## CLF-C02 exam
-
-| Item | Value |
-|---|---|
-| Questions | 65 (50 scored, 15 not scored) |
-| Time | 90 minutes |
-| Pass score | 700 / 1000, about 70% |
-| Fee | About 100 USD |
-| Format | Online with Pearson VUE OnVUE, or at a test centre |
-
-| Domain | Share | Phase | Hours | Gate quiz |
-|---|---|---|---|---|
-| Cloud Concepts | 24% | 1 | ~2.9 | ≥16/20 in 30 min |
-| Security & Compliance | 30% | 2 | ~3.6 | ≥20/25 in 35 min |
-| Cloud Technology & Services | 34% | 3 | ~4.1 | ≥24/30 in 45 min |
-| Billing, Pricing & Support | 12% | 4 | ~1.4 | ≥12/15 in 20 min |
-
-Do not open the next phase when you fail a quiz. Read the part you got wrong again, then take the quiz one more time. Before the real exam, pass all four gate quizzes, get at least 35 out of 50 in a mock exam, and read the cheat sheet and the "common traps" part of each notes file again.
-
-## Sources
-
-The CLF-C02 notes and questions come from the open source repo [kananinirav/AWS-Certified-Cloud-Practitioner-Notes](https://github.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes), which holds 23 practice exams and about 1,150 questions, together with the official [AWS Certified Cloud Practitioner Exam Guide (CLF-C02)](https://d1.awsstatic.com/training-and-certification/docs-cloud-practitioner/AWS-Certified-Cloud-Practitioner_Exam-Guide_C02.pdf).
-
-This repo has no link with Amazon, and Amazon does not review it or approve it. Brand names and product names are used only to point at them.
+The `404.html` file is not optional. GitHub Pages only serves static files, so it does not know that `/course/aws-clf-c02/review` is a route of the app. When you open that link, or press F5 in the middle of an exam, Pages returns `404.html`, which is the app itself, and then the router shows the right page. Run `pnpm run preview:pages` and open <http://localhost:4173/aws-ccp-study/> to test this before you push.
 
 ## Related docs
 

@@ -89,7 +89,7 @@ Any text above may also be written once per language. The section on [writing in
 | `phases[].dir` | Folder name under `phases/`. Phase order follows the array, not the folder name |
 | `phases[].weight` | Share of this domain in the real exam. It drives the "readiness" number, and the total should be 100 |
 | `phases[].notes` | Reading files and the titles shown in the sidebar |
-| `phases[].quiz.count` | How many questions you expect. `npm run check` warns when the real number is different |
+| `phases[].quiz.count` | How many questions you expect. `pnpm run check` warns when the real number is different |
 
 ## Writing in more than one language
 
@@ -132,7 +132,7 @@ Mock exams are numbered by the app, in the reader's language, so you do not have
 }
 ```
 
-`npm run check` warns about a locale key it does not know, so a typo like `"eng"` is caught before it reaches a reader.
+`pnpm run check` warns about a locale key it does not know, so a typo like `"eng"` is caught before it reaches a reader.
 
 Two blocks are optional. You need them only for the tools that compare and build exams:
 
@@ -149,7 +149,7 @@ Two blocks are optional. You need them only for the tools that compare and build
 }
 ```
 
-`upstream` lets `npm run verify` download the source exam and compare each answer. `mockExams.generateFrom` lets `npm run mock-exams` write the exam files straight from that source.
+`upstream` lets `pnpm run verify` download the source exam and compare each answer. `mockExams.generateFrom` lets `pnpm run mock-exams` write the exam files straight from that source.
 
 ## Question format
 
@@ -177,7 +177,7 @@ Rules the parser needs:
 - The number must look like `**N.**` at the start of the line. Markdown auto numbering (`1.`) does not work.
 - A choice starts with `-` or `*`, then a letter from **A to E**, then `.` or `)`. A question with fewer than two choices is skipped with a warning.
 - For more than one answer, write `(Choose TWO)`, `(Select TWO)`, `(Choose three)`, `(Chọn HAI)` or `(Chọn BA)`. The parser also sees it when the answer has two letters or more, but please still write it, so the learner knows.
-- The source note `(Exam N - QX)` is optional but **strongly advised**. Without it, `npm run verify` cannot compare that question. Backticks or italics both work, and the parser removes it from the text on screen.
+- The source note `(Exam N - QX)` is optional but **strongly advised**. Without it, `pnpm run verify` cannot compare that question. Backticks or italics both work, and the parser removes it from the text on screen.
 - A heading (`#`), a `---` line or a `<details>` tag ends the question that is being read.
 
 ## Answer format
@@ -203,7 +203,7 @@ answer is wrong, because this is what a learner reads after a mistake.
 
 - The **quick answer table** is the source the parser trusts most. It must sit on its own line and follow the shape `1D, 2BE, 3C`, with two questions or more.
 - An explanation title can be `### Câu N — Đáp án: A, E` or `**N. Đáp án: D**`.
-- When the quick table and the explanations disagree, `npm run check` reports it. Do not ignore that warning.
+- When the quick table and the explanations disagree, `pnpm run check` reports it. Do not ignore that warning.
 - Lines that start with `>` are dropped from the explanation, so you can copy the question freely.
 
 The answer file of a mock exam also holds a domain table. The app uses it to draw the score breakdown after you submit:
@@ -221,13 +221,13 @@ Run every command from the repo root.
 
 | Command | When you use it |
 |---|---|
-| `npm run check` | **First.** Reads all the markdown and prints every warning: missing answers, answers that disagree, questions with too few choices, a count that does not match the manifest |
-| `npm run dev` | To look at it in the browser. It reads the markdown again before it starts |
-| `npm run verify` | To download the source exam and compare each answer. Only for a course with an `upstream` block |
-| `npm run mock-exams` | To write the mock exam files again. Add `-- <course-id>` for one course only |
-| `npm run build` | To build the static site before you deploy |
+| `pnpm run check` | **First.** Reads all the markdown and prints every warning: missing answers, answers that disagree, questions with too few choices, a count that does not match the manifest |
+| `pnpm run dev` | To look at it in the browser. It reads the markdown again before it starts |
+| `pnpm run verify` | To download the source exam and compare each answer. Only for a course with an `upstream` block |
+| `pnpm run mock-exams` | To write the mock exam files again. Add `-- <course-id>` for one course only |
+| `pnpm run build` | To build the static site before you deploy |
 
-The short path when you add content: edit the markdown, run `npm run check` until there is no warning, run `npm run verify` if the course has a source, look at it with `npm run dev`, then commit.
+The short path when you add content: edit the markdown, run `pnpm run check` until there is no warning, run `pnpm run verify` if the course has a source, look at it with `pnpm run dev`, then commit.
 
 You never run a command to "register" a new file. The parser walks the folders from the manifest on every build, and Turborepo watches `courses/**`, so a changed file is enough.
 
@@ -235,7 +235,7 @@ You never run a command to "register" a new file. The parser walks the folders f
 
 1. Open `courses/<id>/course.json`, add the `phases` array and set `status` to `available`.
 2. Create the `phases/<dir>/` folders you just declared, and put `notes.md` in them.
-3. Run `npm run check`. You will see warnings about the missing `practice.md` and `gate-quiz.md`. That is normal, and the phase shows "đang soạn nội dung" until all three parts are there.
+3. Run `pnpm run check`. You will see warnings about the missing `practice.md` and `gate-quiz.md`. That is normal, and the phase shows "đang soạn nội dung" until all three parts are there.
 4. Add the missing files one by one until no warning is left.
 
 A phase counts as complete only with notes, practice and a gate quiz. With one part missing the site still works, and that phase only shows a "being written" label.

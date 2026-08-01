@@ -1,7 +1,6 @@
 # Phase 1 — Cloud Concepts (Domain 1, 24% đề thi)
 
 > **Thời lượng đọc mục tiêu:** ~90 phút.
-> **Nguồn:** `sections/cloud_computing.md` + `sections/architecting_and_ecosystem.md` (repo kananinirav).
 > **Domain 1 gồm 4 nhóm nhiệm vụ:** (1) Value proposition của AWS Cloud, (2) Design principles / Well-Architected, (3) Migration & CAF, (4) Cloud economics.
 
 ---
