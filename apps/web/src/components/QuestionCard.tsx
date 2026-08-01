@@ -40,7 +40,7 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
         {question.source && <span className="ml-auto text-xs text-slate-500">{question.source}</span>}
       </div>
 
-      <p className="text-[15px] leading-relaxed font-medium text-white">{question.text}</p>
+      <p className="text-[15px] leading-relaxed font-medium text-slate-900">{question.text}</p>
 
       <div
         className="mt-4 space-y-2"
@@ -60,9 +60,9 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
             style = 'border-brand-500/70 bg-brand-500/10';
           }
 
-          let markerStyle = 'border-slate-600 text-slate-500';
+          let markerStyle = 'border-slate-300 text-slate-500';
           if (revealed && isAnswer) markerStyle = 'border-emerald-400 bg-emerald-500 text-slate-950';
-          else if (revealed && picked) markerStyle = 'border-rose-400 bg-rose-500 text-white';
+          else if (revealed && picked) markerStyle = 'border-rose-400 bg-rose-500 text-slate-900';
           else if (picked) markerStyle = 'border-brand-400 bg-brand-500 text-slate-950';
 
           /* Revealed answers are stated in text as well as in colour, so the result is
@@ -94,7 +94,7 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
               >
                 {option.letter}
               </span>
-              <span className="text-sm leading-relaxed text-slate-200">
+              <span className="text-sm leading-relaxed text-slate-700">
                 {option.text}
                 {revealedNote && <span className="sr-only">{revealedNote}</span>}
               </span>

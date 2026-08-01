@@ -103,10 +103,10 @@ function AvailableCard({ course, progress }: { course: Course; progress: CourseP
           )}
         </div>
 
-        <h3 className="mt-3 font-semibold text-white transition-colors group-hover:text-brand-200">
+        <h3 className="mt-3 font-semibold text-slate-900 transition-colors group-hover:text-brand-700">
           {title}
         </h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{localized(course.summary)}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{localized(course.summary)}</p>
 
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500">
@@ -166,10 +166,10 @@ function PlannedCard({ course }: { course: Course }) {
           </span>
         </div>
 
-        <h3 className="mt-3 font-semibold text-slate-300">{localized(course.title)}</h3>
+        <h3 className="mt-3 font-semibold text-slate-600">{localized(course.title)}</h3>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{localized(course.summary)}</p>
 
-        <p className="mt-4 text-xs text-slate-600">
+        <p className="mt-4 text-xs text-slate-400">
           {t('catalog.plannedMeta', {
             questions: course.exam.totalQuestions,
             minutes: course.exam.durationMin,
@@ -213,10 +213,10 @@ export default function CatalogPage() {
           >
             {t('catalog.eyebrow')}
           </m.p>
-          <m.h1 variants={fadeUp} className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+          <m.h1 variants={fadeUp} className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
             {t('catalog.heading')}
           </m.h1>
-          <m.p variants={fadeUp} className="mt-3 text-sm leading-relaxed text-slate-400">
+          <m.p variants={fadeUp} className="mt-3 text-sm leading-relaxed text-slate-500">
             {t('catalog.intro')}
           </m.p>
         </div>
@@ -226,7 +226,7 @@ export default function CatalogPage() {
       </m.header>
 
       {available.length === 0 && (
-        <Card inset="md" className="mb-10 border-rose-500/30 bg-rose-500/5 text-sm text-slate-300">
+        <Card inset="md" className="mb-10 border-rose-500/30 bg-rose-500/5 text-sm text-slate-600">
           {i18n.tNode(
             'catalog.empty',
             {},
@@ -245,7 +245,7 @@ export default function CatalogPage() {
           return (
             <section key={level} aria-labelledby={`level-${level}`}>
               <div className="mb-4">
-                <h2 id={`level-${level}`} className="flex items-center gap-2 text-lg font-bold text-white">
+                <h2 id={`level-${level}`} className="flex items-center gap-2 text-lg font-bold text-slate-900">
                   <LevelGlyph level={levelKey(level)} />
                   {levelText(level, '', i18n)}
                 </h2>
@@ -281,7 +281,7 @@ export default function CatalogPage() {
           <p className="text-sm font-semibold text-rose-300">
             {t('common.markdownWarnings', { count: content.warnings.length })}
           </p>
-          <ul className="mt-2 space-y-1 text-xs text-slate-400">
+          <ul className="mt-2 space-y-1 text-xs text-slate-500">
             {content.warnings.slice(0, 8).map((w) => (
               <li key={w}>· {w}</li>
             ))}

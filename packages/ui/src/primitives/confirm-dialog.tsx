@@ -42,7 +42,7 @@ export function ConfirmDialog({
           <AlertDialog.Portal forceMount>
             <AlertDialog.Overlay asChild forceMount>
               <m.div
-                className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm"
+                className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-sm"
                 variants={fadeIn}
                 initial="hidden"
                 animate="visible"
@@ -60,8 +60,8 @@ export function ConfirmDialog({
                 animate="visible"
                 exit="exit"
               >
-                <AlertDialog.Title className="text-lg font-bold text-white">{title}</AlertDialog.Title>
-                <AlertDialog.Description className="mt-2 text-sm leading-relaxed text-slate-400">
+                <AlertDialog.Title className="text-lg font-bold text-slate-900">{title}</AlertDialog.Title>
+                <AlertDialog.Description className="mt-2 text-sm leading-relaxed text-slate-500">
                   {description}
                 </AlertDialog.Description>
                 <div className="mt-6 flex justify-end gap-3">

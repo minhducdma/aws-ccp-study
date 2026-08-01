@@ -189,7 +189,7 @@ export default function ExamPage() {
             aria-live={urgent ? 'polite' : 'off'}
             aria-label={t('exam.timeRemaining', { time: formatDuration(remaining) })}
             className={`ml-auto font-mono text-lg font-bold tabular-nums transition-colors ${
-              urgent ? 'animate-pulse text-rose-400' : 'text-white'
+              urgent ? 'animate-pulse text-rose-400' : 'text-slate-900'
             }`}
           >
             {formatDuration(remaining)}
@@ -241,8 +241,8 @@ export default function ExamPage() {
                   i === index
                     ? 'bg-brand-500 text-slate-950'
                     : answered
-                      ? 'bg-slate-700 text-white hover:bg-slate-600'
-                      : 'bg-slate-800/60 text-slate-500 hover:bg-slate-800'
+                      ? 'bg-slate-200 text-slate-900 hover:bg-slate-300'
+                      : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                 }`}
               >
                 {i + 1}
@@ -256,7 +256,7 @@ export default function ExamPage() {
       </Card>
 
       <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-400">
+        <span className="text-slate-500">
           {t('common.questionPosition', { index: index + 1, total: questions.length })}
         </span>
         <Button tone="ghost" size="sm" onClick={toggleFlag} title={t('exam.flagHint')}>
@@ -329,7 +329,7 @@ function ExamIntro({
         <Badge tone={kind === 'mock' ? 'sky' : 'amber'}>
           {t(kind === 'mock' ? 'exam.kindMock' : 'exam.kindGate')}
         </Badge>
-        <h1 className="mt-3 text-2xl font-bold text-white">{label}</h1>
+        <h1 className="mt-3 text-2xl font-bold text-slate-900">{label}</h1>
         {previousPass && <p className="mt-2 text-sm text-emerald-400">{t('exam.alreadyPassed')}</p>}
       </m.header>
 
@@ -348,8 +348,8 @@ function ExamIntro({
 
       <m.div variants={fadeUp}>
         <Card inset="md">
-          <p className="mb-3 text-sm font-semibold text-white">{t('exam.rulesTitle')}</p>
-          <ul className="space-y-2 text-sm text-slate-400">
+          <p className="mb-3 text-sm font-semibold text-slate-900">{t('exam.rulesTitle')}</p>
+          <ul className="space-y-2 text-sm text-slate-500">
             <li>· {t('exam.rule.timer')}</li>
             <li>· {t('exam.rule.noFeedback')}</li>
             <li>· {t('exam.rule.guess')}</li>
@@ -368,16 +368,16 @@ function ExamIntro({
       {history.length > 0 && (
         <m.div variants={fadeUp}>
           <Card inset="md">
-            <p className="mb-3 text-sm font-semibold text-white">{t('exam.historyTitle')}</p>
+            <p className="mb-3 text-sm font-semibold text-slate-900">{t('exam.historyTitle')}</p>
             <div className="space-y-2">
               {history.map((attempt) => (
                 <div
                   key={attempt.id}
                   className="flex items-center justify-between border-b border-line pb-2 text-sm last:border-0 last:pb-0"
                 >
-                  <span className="text-slate-400">
+                  <span className="text-slate-500">
                     {formatDateTime(attempt.startedAt)}
-                    <span className="ml-2 text-xs text-slate-600">
+                    <span className="ml-2 text-xs text-slate-400">
                       {formatDuration(attempt.finishedAt - attempt.startedAt)}
                     </span>
                   </span>
@@ -435,7 +435,7 @@ function ExamResult({
 
   const reviewList = (questions: Question[]) =>
     questions.length === 0 ? (
-      <Card inset="lg" className="text-center text-sm text-slate-400">
+      <Card inset="lg" className="text-center text-sm text-slate-500">
         {t('exam.nothingWrong')}
       </Card>
     ) : (
@@ -469,10 +469,10 @@ function ExamResult({
             <RetryArt label={t('art.failed')} />
           )}
 
-          <p className="mt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">
+          <p className="mt-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">
             {exam.label}
           </p>
-          <p className="mt-3 text-5xl font-bold text-white tabular-nums">
+          <p className="mt-3 text-5xl font-bold text-slate-900 tabular-nums">
             {attempt.score}
             <span className="text-2xl text-slate-500">/{attempt.total}</span>
           </p>
@@ -486,7 +486,7 @@ function ExamResult({
               verdict: t(attempt.passed ? 'exam.resultPassed' : 'exam.resultFailed'),
             })}
           </p>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-2 text-sm text-slate-500">
             {t('exam.resultNeeded', {
               passScore: attempt.passScore,
               total: attempt.total,
@@ -514,7 +514,7 @@ function ExamResult({
 
       {byDomain.length > 1 && (
         <Card inset="md">
-          <p className="mb-4 text-sm font-semibold text-white">{t('exam.domainHeading')}</p>
+          <p className="mb-4 text-sm font-semibold text-slate-900">{t('exam.domainHeading')}</p>
           <div className="space-y-3">
             {byDomain.map(([domain, stat]) => {
               const ratio = stat.correct / stat.total;
@@ -525,7 +525,7 @@ function ExamResult({
               return (
                 <div key={domain}>
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="text-slate-300">{row}</span>
+                    <span className="text-slate-600">{row}</span>
                     <span
                       className={
                         ratio >= 0.7
@@ -553,7 +553,7 @@ function ExamResult({
       )}
 
       <div>
-        <h2 className="mb-4 text-lg font-bold text-white">{t('exam.reviewHeading')}</h2>
+        <h2 className="mb-4 text-lg font-bold text-slate-900">{t('exam.reviewHeading')}</h2>
         <Tabs defaultValue="wrong">
           <TabsList>
             <TabsTrigger value="wrong">

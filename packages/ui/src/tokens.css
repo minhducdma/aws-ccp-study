@@ -20,13 +20,14 @@
   --color-brand-900: #78350f;
   --color-brand-950: #451a03;
 
-  /* Surfaces, from the page backdrop up to floating overlays */
-  --color-canvas: #020617;
-  --color-surface: #0b1220;
-  --color-surface-hover: #101a2e;
-  --color-overlay: #0f172a;
-  --color-line: #1e293b;
-  --color-line-strong: #334155;
+    /* Warm neutral surfaces reduce glare during long study sessions while preserving enough
+      separation between the canvas, cards, and floating overlays. */
+    --color-canvas: #eef0ed;
+    --color-surface: #f8f7f3;
+    --color-surface-hover: #f1efe9;
+    --color-overlay: #fbfaf7;
+    --color-line: #d9ddd8;
+    --color-line-strong: #c5cbc5;
 
   /* Status colours. Referenced by the illustrations, which paint via `var()` rather than
      utility classes and so cannot use Tailwind's own emerald/sky scales. */

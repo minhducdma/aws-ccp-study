@@ -1,11 +1,4 @@
-import {
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  setDoc,
-  type Unsubscribe,
-} from 'firebase/firestore';
+import type { Unsubscribe } from 'firebase/firestore';
 import { useCallback, useEffect, useState } from 'react';
 import type {
   Attempt,
@@ -17,7 +10,13 @@ import type {
   ProgressStore,
 } from '../types';
 import { isCorrect, lookupQuestion } from './content';
-import { db } from './firebase/config';
+import {
+  deleteAttempt as deleteAttemptDoc,
+  saveAttempt as saveAttemptDoc,
+  saveCourseFields,
+  subscribeToAttempts,
+  subscribeToCourses,
+} from './firebase/collections/userProgress';
 
 const STORAGE_KEY = 'study-progress-v2';
 
@@ -81,30 +80,9 @@ function applyRemote(next: ProgressStore) {
   listeners.forEach((fn) => fn());
 }
 
-// --- Firestore layout ------------------------------------------------------
-// userProgress/{uid}/courses/{courseId}                    — CourseProgressFields (no attempts)
-// userProgress/{uid}/courses/{courseId}/attempts/{attemptId} — one document per exam attempt
-//
-// Splitting attempts into their own subcollection means ticking a checkbox or answering one
-// practice question only rewrites the small course document, never the whole exam history, and
-// the console reads as "courses > this course > attempts > this attempt" instead of one opaque
-// blob.
-
-function coursesCollectionRef(uid: string) {
-  return collection(db, 'userProgress', uid, 'courses');
-}
-
-function courseDocRef(uid: string, courseId: string) {
-  return doc(db, 'userProgress', uid, 'courses', courseId);
-}
-
-function attemptsCollectionRef(uid: string, courseId: string) {
-  return collection(db, 'userProgress', uid, 'courses', courseId, 'attempts');
-}
-
-function attemptDocRef(uid: string, courseId: string, attemptId: string) {
-  return doc(db, 'userProgress', uid, 'courses', courseId, 'attempts', attemptId);
-}
+// Firestore access itself (collection/doc refs, reads and writes) lives in
+// lib/firebase/collections/userProgress.ts. This module only owns merging that data with the
+// local cache and exposing it to components.
 
 let currentUid: string | null = null;
 let unsubscribeCourses: Unsubscribe | null = null;
@@ -128,8 +106,7 @@ function applyRemoteCourseFields(courseId: string, fields: CourseProgressFields)
 }
 
 function watchAttempts(uid: string, courseId: string): Unsubscribe {
-  return onSnapshot(attemptsCollectionRef(uid, courseId), (snapshot) => {
-    const attempts = snapshot.docs.map((d) => d.data() as Attempt);
+  return subscribeToAttempts(uid, courseId, (attempts) => {
     const current = store.courses[courseId] ?? emptyCourseProgress;
     applyRemote({
       ...store,
@@ -143,11 +120,11 @@ function watchAttempts(uid: string, courseId: string): Unsubscribe {
 function seedRemoteFromLocalGuest(uid: string) {
   for (const [courseId, progress] of Object.entries(store.courses)) {
     const { attempts, ...fields } = progress;
-    setDoc(courseDocRef(uid, courseId), { ...fields, updatedAt: Date.now() }).catch(() => {
+    saveCourseFields(uid, courseId, { ...fields, updatedAt: Date.now() }).catch(() => {
       // Best-effort seed; if it fails the user keeps their local copy and can retry by editing.
     });
     for (const attempt of attempts) {
-      setDoc(attemptDocRef(uid, courseId, attempt.id), attempt).catch(() => {});
+      saveAttemptDoc(uid, courseId, attempt).catch(() => {});
     }
   }
 }
@@ -168,7 +145,7 @@ export function bindProgressUser(uid: string | null): void {
     return;
   }
 
-  unsubscribeCourses = onSnapshot(coursesCollectionRef(uid), (snapshot) => {
+  unsubscribeCourses = subscribeToCourses(uid, (snapshot) => {
     if (snapshot.empty && Object.keys(store.courses).length > 0) {
       seedRemoteFromLocalGuest(uid);
       return;
@@ -205,7 +182,7 @@ function commitCourse(courseId: string, next: CourseProgress) {
     courses: { ...store.courses, [courseId]: { ...fields, attempts } },
   });
   if (currentUid) {
-    setDoc(courseDocRef(currentUid, courseId), fields).catch(() => {
+    saveCourseFields(currentUid, courseId, fields).catch(() => {
       // The change is already visible locally; Firestore's offline queue retries once the
       // connection is back, and the next courses snapshot reconciles the rest.
     });
@@ -221,7 +198,7 @@ function addAttempt(courseId: string, attempt: Attempt) {
     courses: { ...store.courses, [courseId]: { ...current, attempts: [...current.attempts, attempt] } },
   });
   if (currentUid) {
-    setDoc(attemptDocRef(currentUid, courseId, attempt.id), attempt).catch(() => {
+    saveAttemptDoc(currentUid, courseId, attempt).catch(() => {
       // Same offline-queue reasoning as commitCourse.
     });
   }
@@ -237,7 +214,7 @@ function clearAttempts(courseId: string) {
   });
   if (currentUid) {
     for (const attemptId of attemptIds) {
-      deleteDoc(attemptDocRef(currentUid, courseId, attemptId)).catch(() => {});
+      deleteAttemptDoc(currentUid, courseId, attemptId).catch(() => {});
     }
   }
 }

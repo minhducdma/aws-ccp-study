@@ -7,12 +7,12 @@ export const badgeVariants = cva(
   {
     variants: {
       tone: {
-        slate: 'bg-slate-800 text-slate-300 ring-slate-700',
-        amber: 'bg-brand-500/15 text-brand-300 ring-brand-500/30',
-        green: 'bg-emerald-500/15 text-emerald-300 ring-emerald-500/30',
-        red: 'bg-rose-500/15 text-rose-300 ring-rose-500/30',
-        sky: 'bg-sky-500/15 text-sky-300 ring-sky-500/30',
-        violet: 'bg-violet-500/15 text-violet-300 ring-violet-500/30',
+        slate: 'bg-slate-100 text-slate-600 ring-slate-300',
+        amber: 'bg-brand-500/12 text-brand-700 ring-brand-500/30',
+        green: 'bg-emerald-500/12 text-emerald-700 ring-emerald-500/30',
+        red: 'bg-rose-500/12 text-rose-700 ring-rose-500/30',
+        sky: 'bg-sky-500/12 text-sky-700 ring-sky-500/30',
+        violet: 'bg-violet-500/12 text-violet-700 ring-violet-500/30',
       },
       size: {
         sm: 'px-2 py-0.5 text-[11px]',

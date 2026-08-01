@@ -71,7 +71,7 @@ export default function NotesPage() {
             <p className="text-xs font-semibold tracking-wide text-brand-500 uppercase">
               {t('notes.eyebrow', { order: phase.order, weight: phase.weight })}
             </p>
-            <h1 className="mt-1 text-xl font-bold text-white">
+            <h1 className="mt-1 text-xl font-bold text-slate-900">
               {t('notes.heading', { phase: localized(phase.title), note: localized(note.title) })}
             </h1>
           </div>
@@ -85,7 +85,7 @@ export default function NotesPage() {
         </div>
 
         {untranslated && (
-          <Card inset="sm" className="mb-6 border-brand-500/30 bg-brand-500/5 text-sm text-slate-300">
+          <Card inset="sm" className="mb-6 border-brand-500/30 bg-brand-500/5 text-sm text-slate-600">
             {t('notes.untranslated', {
               language: t(`language.${locale}` as MessageKey),
               original: t(`language.${body.locale}` as MessageKey),
@@ -131,7 +131,7 @@ export default function NotesPage() {
               <li key={item.slug}>
                 <a
                   href={`#${item.slug}`}
-                  className="focus-ring block border-l-2 border-transparent py-1 pl-3 text-xs text-slate-400 transition-all duration-200 hover:border-brand-500 hover:pl-4 hover:text-brand-300"
+                  className="focus-ring block border-l-2 border-transparent py-1 pl-3 text-xs text-slate-500 transition-all duration-200 hover:border-brand-500 hover:pl-4 hover:text-brand-300"
                 >
                   {item.text}
                 </a>

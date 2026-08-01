@@ -32,7 +32,7 @@ export default function LocaleSwitch({ className }: { className?: string }) {
               'focus-ring rounded-md px-2 py-0.5 text-xs font-semibold transition-colors duration-200',
               active
                 ? 'bg-brand-500 text-slate-950'
-                : 'text-slate-400 hover:bg-slate-800 hover:text-slate-200',
+                : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
             ].join(' ')}
           >
             {/* The two letters are the visible name; screen readers get the language in full,

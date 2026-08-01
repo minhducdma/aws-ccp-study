@@ -66,39 +66,39 @@ export function AuthForm({ mode }: AuthFormProps) {
   return (
     <div className="mx-auto max-w-sm px-4 py-14 sm:py-20">
       <Card inset="lg">
-        <h1 className="text-2xl font-bold text-white">
+        <h1 className="text-2xl font-bold text-slate-900">
           {t(mode === 'signIn' ? 'auth.signInHeading' : 'auth.signUpHeading')}
         </h1>
-        <p className="mt-1.5 text-sm text-slate-400">
+        <p className="mt-1.5 text-sm text-slate-500">
           {t(mode === 'signIn' ? 'auth.signInSubheading' : 'auth.signUpSubheading')}
         </p>
 
         <form onSubmit={submit} className="mt-6 space-y-4">
           {mode === 'signUp' && (
             <label className="block text-sm">
-              <span className="mb-1.5 block font-medium text-slate-300">{t('auth.displayName')}</span>
+              <span className="mb-1.5 block font-medium text-slate-600">{t('auth.displayName')}</span>
               <input
                 type="text"
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 autoComplete="name"
-                className="focus-ring w-full rounded-xl border border-line bg-surface/60 px-3.5 py-2.5 text-slate-100 placeholder:text-slate-600"
+                className="focus-ring w-full rounded-xl border border-line bg-surface/60 px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400"
               />
             </label>
           )}
           <label className="block text-sm">
-            <span className="mb-1.5 block font-medium text-slate-300">{t('auth.email')}</span>
+            <span className="mb-1.5 block font-medium text-slate-600">{t('auth.email')}</span>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
-              className="focus-ring w-full rounded-xl border border-line bg-surface/60 px-3.5 py-2.5 text-slate-100 placeholder:text-slate-600"
+              className="focus-ring w-full rounded-xl border border-line bg-surface/60 px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400"
             />
           </label>
           <label className="block text-sm">
-            <span className="mb-1.5 block font-medium text-slate-300">{t('auth.password')}</span>
+            <span className="mb-1.5 block font-medium text-slate-600">{t('auth.password')}</span>
             <input
               type="password"
               required
@@ -106,7 +106,7 @@ export function AuthForm({ mode }: AuthFormProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete={mode === 'signIn' ? 'current-password' : 'new-password'}
-              className="focus-ring w-full rounded-xl border border-line bg-surface/60 px-3.5 py-2.5 text-slate-100 placeholder:text-slate-600"
+              className="focus-ring w-full rounded-xl border border-line bg-surface/60 px-3.5 py-2.5 text-slate-800 placeholder:text-slate-400"
             />
           </label>
 
@@ -121,7 +121,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           </Button>
         </form>
 
-        <div className="my-5 flex items-center gap-3 text-xs text-slate-600">
+        <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
           <span className="h-px flex-1 bg-line" />
           {t('auth.orDivider')}
           <span className="h-px flex-1 bg-line" />
@@ -138,7 +138,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           {t('auth.continueWithGoogle')}
         </Button>
 
-        <p className="mt-6 text-center text-sm text-slate-400">
+        <p className="mt-6 text-center text-sm text-slate-500">
           {t(mode === 'signIn' ? 'auth.noAccount' : 'auth.haveAccount')}{' '}
           <Link
             to={mode === 'signIn' ? '/signup' : '/login'}

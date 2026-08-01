@@ -36,7 +36,7 @@ export function Progress({ value, max, tone = 'amber', className, label }: Progr
       value={value}
       max={max}
       aria-label={label}
-      className={cn('h-2 w-full overflow-hidden rounded-full bg-slate-800', className)}
+      className={cn('h-2 w-full overflow-hidden rounded-full bg-slate-100', className)}
     >
       <ProgressPrimitive.Indicator asChild>
         <m.div
@@ -87,7 +87,7 @@ export function ProgressRing({ value, max, tone = 'amber', size = 56, label, chi
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          className="fill-none stroke-slate-800"
+          className="fill-none stroke-slate-200"
           strokeWidth="5"
         />
         <m.circle
@@ -103,7 +103,7 @@ export function ProgressRing({ value, max, tone = 'amber', size = 56, label, chi
           transition={transition.slow}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+      <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-slate-900">
         {children ?? `${pct}%`}
       </span>
     </div>

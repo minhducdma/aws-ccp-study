@@ -23,12 +23,12 @@ export function StatTile({ label, value, hint, icon, animate, suffix, className 
       )}
     >
       {icon && (
-        <span className="absolute top-3 right-3 text-slate-700 transition-colors duration-200 group-hover:animate-wiggle group-hover:text-brand-500/60">
+        <span className="absolute top-3 right-3 text-slate-400 transition-colors duration-200 group-hover:animate-wiggle group-hover:text-brand-500/60">
           {icon}
         </span>
       )}
       <p className="text-xs font-medium tracking-wide text-slate-500 uppercase">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-white tabular-nums">
+      <p className="mt-1 text-2xl font-bold text-slate-900 tabular-nums">
         {animate && typeof value === 'number' ? <CountUp value={value} suffix={suffix} /> : value}
       </p>
       {hint && <p className="mt-0.5 text-xs text-slate-500">{hint}</p>}

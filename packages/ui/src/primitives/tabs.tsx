@@ -16,8 +16,8 @@ export function TabsTrigger({ className, ...rest }: TabsPrimitive.TabsTriggerPro
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        'focus-ring rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap text-slate-400',
-        'transition-colors duration-200 hover:text-slate-200',
+        'focus-ring rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap text-slate-500',
+        'transition-colors duration-200 hover:text-slate-900',
         'data-[state=active]:bg-brand-500/15 data-[state=active]:text-brand-300',
         className,
       )}

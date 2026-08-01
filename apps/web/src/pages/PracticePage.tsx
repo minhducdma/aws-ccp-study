@@ -78,7 +78,7 @@ export default function PracticePage() {
         <div className="flex flex-wrap items-center gap-2">
           <Badge tone="amber">{t('practice.badge', { order: phase.order })}</Badge>
           <Badge tone="sky">{localized(phase.title)}</Badge>
-          <span className="ml-auto text-sm text-slate-400">
+          <span className="ml-auto text-sm text-slate-500">
             {tNode(
               'practice.checkedSummary',
               { checked: state.checked.length },
@@ -101,7 +101,7 @@ export default function PracticePage() {
       </header>
 
       <div className="flex items-center justify-between text-sm">
-        <span className="text-slate-400">
+        <span className="text-slate-500">
           {t('common.questionPosition', { index: index + 1, total: questions.length })}
         </span>
         <div className="flex gap-2">
@@ -155,7 +155,7 @@ export default function PracticePage() {
                           ? ok
                             ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30'
                             : 'bg-rose-500/20 text-rose-300 hover:bg-rose-500/30'
-                          : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+                          : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                     }`}
                   >
                     {i + 1}
@@ -214,14 +214,14 @@ export default function PracticePage() {
       {state.checked.length === questions.length && phase.gateQuiz && (
         <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card inset="md" className="border-emerald-500/30 bg-emerald-500/5">
-            <p className="font-semibold text-white">
+            <p className="font-semibold text-slate-900">
               {t('practice.doneHeading', {
                 total: questions.length,
                 correct: correctCount,
                 percent: Math.round((correctCount / questions.length) * 100),
               })}
             </p>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-slate-500">
               {correctCount / questions.length >= 0.8
                 ? t('practice.doneReady')
                 : t('practice.doneNotReady')}

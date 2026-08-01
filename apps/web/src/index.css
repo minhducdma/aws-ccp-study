@@ -20,12 +20,12 @@ h3,
 }
 
 html {
-  color-scheme: dark;
+  color-scheme: light;
   scroll-behavior: smooth;
 }
 
 body {
-  @apply bg-canvas text-slate-200 antialiased;
+  @apply bg-canvas text-slate-700 antialiased;
   font-family: var(--font-sans);
 }
 
@@ -45,12 +45,12 @@ body {
 /* Slim scrollbar for long content areas */
 * {
   scrollbar-width: thin;
-  scrollbar-color: theme(colors.slate.700) transparent;
+  scrollbar-color: theme(colors.slate.300) transparent;
 }
 
 /* ---------- Markdown content ---------- */
 .md {
-  @apply text-[15px] leading-relaxed text-slate-300;
+  @apply text-[15px] leading-relaxed text-slate-600;
 }
 
 .md > * + * {
@@ -58,31 +58,31 @@ body {
 }
 
 .md h1 {
-  @apply mt-0 mb-6 text-2xl font-bold text-white;
+  @apply mt-0 mb-6 text-2xl font-bold text-slate-900;
 }
 
 .md h2 {
-  @apply mt-10 mb-3 scroll-mt-24 border-b border-slate-800 pb-2 text-xl font-bold text-white;
+  @apply mt-10 mb-3 scroll-mt-24 border-b border-slate-200 pb-2 text-xl font-bold text-slate-900;
 }
 
 .md h3 {
-  @apply mt-7 mb-2 scroll-mt-24 text-base font-bold text-amber-300;
+  @apply mt-7 mb-2 scroll-mt-24 text-base font-bold text-amber-700;
 }
 
 .md h4 {
-  @apply mt-5 mb-2 text-sm font-bold tracking-wide text-slate-200 uppercase;
+  @apply mt-5 mb-2 text-sm font-bold tracking-wide text-slate-700 uppercase;
 }
 
 .md p {
-  @apply text-slate-300;
+  @apply text-slate-600;
 }
 
 .md strong {
-  @apply font-semibold text-white;
+  @apply font-semibold text-slate-900;
 }
 
 .md em {
-  @apply text-amber-200/90 not-italic;
+  @apply text-amber-700/90 not-italic;
 }
 
 .md a {
@@ -107,15 +107,15 @@ body {
 }
 
 .md code {
-  @apply rounded bg-slate-800/80 px-1.5 py-0.5 text-[0.85em] font-medium text-amber-200;
+  @apply rounded bg-slate-100 px-1.5 py-0.5 text-[0.85em] font-medium text-amber-800;
 }
 
 .md pre {
-  @apply overflow-x-auto rounded-xl border border-slate-800 bg-slate-900/80 p-4;
+  @apply overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-4;
 }
 
 .md pre code {
-  @apply bg-transparent p-0 text-slate-300;
+  @apply bg-transparent p-0 text-slate-700;
 }
 
 .md blockquote {
@@ -127,11 +127,11 @@ body {
 }
 
 .md blockquote p {
-  @apply text-slate-300;
+  @apply text-slate-600;
 }
 
 .md hr {
-  @apply my-8 border-slate-800;
+  @apply my-8 border-slate-200;
 }
 
 .md table {
@@ -139,19 +139,19 @@ body {
 }
 
 .md thead {
-  @apply bg-slate-800/70;
+  @apply bg-slate-100;
 }
 
 .md th {
-  @apply border border-slate-700/70 px-3 py-2 font-semibold text-white;
+  @apply border border-slate-300/70 px-3 py-2 font-semibold text-slate-900;
 }
 
 .md td {
-  @apply border border-slate-800 px-3 py-2 align-top text-slate-300;
+  @apply border border-slate-200 px-3 py-2 align-top text-slate-600;
 }
 
 .md tbody tr:nth-child(even) {
-  @apply bg-slate-900/40;
+  @apply bg-slate-50;
 }
 
 .md table code {
@@ -159,11 +159,11 @@ body {
 }
 
 .md details {
-  @apply rounded-xl border border-slate-800 bg-slate-900/60 p-4;
+  @apply rounded-xl border border-slate-200 bg-slate-50 p-4;
 }
 
 .md summary {
-  @apply cursor-pointer font-semibold text-amber-300;
+  @apply cursor-pointer font-semibold text-amber-700;
 }
 
 .md input[type='checkbox'] {

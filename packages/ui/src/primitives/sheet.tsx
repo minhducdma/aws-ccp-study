@@ -27,7 +27,7 @@ export function Sheet({ open, onOpenChange, title, children }: SheetProps) {
           <Dialog.Portal forceMount>
             <Dialog.Overlay asChild forceMount>
               <m.div
-                className="fixed inset-0 z-40 bg-slate-950/70 backdrop-blur-sm lg:hidden"
+                className="fixed inset-0 z-40 bg-slate-900/70 backdrop-blur-sm lg:hidden"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

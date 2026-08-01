@@ -64,10 +64,10 @@ export default function ReviewPage() {
     <div className="mx-auto max-w-3xl space-y-5">
       <header>
         <Badge tone="red">{t('review.badge')}</Badge>
-        <h1 className="mt-3 text-2xl font-bold text-white">
+        <h1 className="mt-3 text-2xl font-bold text-slate-900">
           {t('review.heading', { count: items.length })}
         </h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-400">{t('review.intro')}</p>
+        <p className="mt-2 max-w-2xl text-sm text-slate-500">{t('review.intro')}</p>
       </header>
 
       <m.div

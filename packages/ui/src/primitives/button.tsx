@@ -23,10 +23,10 @@ export const buttonVariants = cva(
         primary:
           'bg-brand-500 font-semibold text-slate-950 shadow-[0_1px_0_0_rgba(255,255,255,0.25)_inset] hover:bg-brand-400 hover:shadow-[0_8px_24px_-8px_var(--color-brand-500)]',
         secondary:
-          'border border-line-strong bg-surface text-slate-200 hover:border-slate-600 hover:bg-surface-hover',
-        ghost: 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100',
+          'border border-line-strong bg-surface text-slate-700 hover:border-slate-400 hover:bg-surface-hover',
+        ghost: 'text-slate-500 hover:bg-slate-100 hover:text-slate-900',
         danger: 'bg-rose-600/90 font-semibold text-white hover:bg-rose-600',
-        pass: 'bg-emerald-500/15 font-semibold text-emerald-300 ring-1 ring-emerald-500/30 ring-inset hover:bg-emerald-500/25',
+        pass: 'bg-emerald-500/12 font-semibold text-emerald-700 ring-1 ring-emerald-500/30 ring-inset hover:bg-emerald-500/20',
       },
       size: {
         sm: 'px-3 py-1.5 text-xs',

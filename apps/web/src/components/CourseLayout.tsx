@@ -39,10 +39,10 @@ function NavItem({
           'focus-ring relative block rounded-lg px-3 py-1.5 text-sm transition-colors duration-200',
           depth > 0 ? 'ml-3 border-l border-line pl-3' : '',
           isActive
-            ? 'bg-brand-500/15 font-medium text-brand-300'
+            ? 'bg-brand-500/12 font-medium text-brand-700'
             : locked
-              ? 'text-slate-600 hover:text-slate-400'
-              : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200',
+              ? 'text-slate-400 hover:text-slate-500'
+              : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900',
         ].join(' ')
       }
     >
@@ -125,7 +125,7 @@ function CourseShell({
               {passed && <CheckIcon width={13} height={13} className="text-emerald-400" />}
               {locked && <LockIcon width={13} height={13} className="text-slate-600" />}
             </p>
-            <p className="mb-2 px-3 text-sm font-medium text-slate-300">{localized(phase.title)}</p>
+            <p className="mb-2 px-3 text-sm font-medium text-slate-700">{localized(phase.title)}</p>
             <div className="space-y-0.5">
               {phase.notes.map((note) => (
                 <NavItem
@@ -186,7 +186,7 @@ function CourseShell({
           <button
             type="button"
             onClick={() => setMenuOpen(true)}
-            className="focus-ring rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 lg:hidden"
+            className="focus-ring rounded-lg p-2 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-900 lg:hidden"
             aria-label={t('nav.openMenu')}
           >
             <MenuIcon />
@@ -195,7 +195,7 @@ function CourseShell({
             <span className="flex size-8 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-slate-950">
               {course.provider.slice(0, 1)}
             </span>
-            <span className="text-sm font-semibold text-white">
+            <span className="text-sm font-semibold text-slate-900">
               {localized(course.title)}
               <span className="ml-2 hidden text-xs font-normal text-slate-500 sm:inline">
                 {course.code}

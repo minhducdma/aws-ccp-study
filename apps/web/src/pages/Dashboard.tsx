@@ -39,8 +39,8 @@ export default function Dashboard() {
         <p className="text-xs font-semibold tracking-widest text-brand-500 uppercase">
           {t('dashboard.eyebrow', { hours: course.estimatedHours, code: course.code })}
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-white">{localized(course.title)}</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-400">
+        <h1 className="mt-2 text-3xl font-bold text-slate-900">{localized(course.title)}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-slate-600">
           {t('dashboard.intro', { count: course.phases.length })}
         </p>
       </header>
@@ -115,13 +115,13 @@ export default function Dashboard() {
               <p className="text-xs font-semibold tracking-wide text-brand-400 uppercase">
                 {t('dashboard.next.eyebrow')}
               </p>
-              <p className="mt-1 font-semibold text-white">
+              <p className="mt-1 font-semibold text-slate-900">
                 {t('phase.labelWithTitle', {
                   order: nextPhase.order,
                   title: localized(nextPhase.title),
                 })}
               </p>
-              <p className="mt-0.5 text-sm text-slate-400">
+              <p className="mt-0.5 text-sm text-slate-600">
                 {nextPhase.notes.length > 0 && !progress.notesRead[nextPhase.notes[0].id]
                   ? t('dashboard.next.readNotes')
                   : t('dashboard.next.keepPracticing')}
@@ -142,7 +142,7 @@ export default function Dashboard() {
       )}
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-white">
+        <h2 className="text-lg font-bold text-slate-900">
           {t('dashboard.phasesHeading', { count: course.phases.length })}
         </h2>
         <m.div
@@ -188,8 +188,8 @@ export default function Dashboard() {
                         )}
                         {!phase.ready && <Badge tone="slate">{t('phase.draft')}</Badge>}
                       </div>
-                      <h3 className="mt-2 font-semibold text-white">{localized(phase.title)}</h3>
-                      <p className="mt-1 text-sm text-slate-400">
+                      <h3 className="mt-2 font-semibold text-slate-900">{localized(phase.title)}</h3>
+                      <p className="mt-1 text-sm text-slate-600">
                         {tNode(
                           'dashboard.phaseProgress',
                           {
@@ -258,9 +258,9 @@ export default function Dashboard() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-lg font-bold text-white">{t('dashboard.mockHeading')}</h2>
+        <h2 className="text-lg font-bold text-slate-900">{t('dashboard.mockHeading')}</h2>
         {course.mockExams.length === 0 ? (
-          <Card inset="md" className="text-sm text-slate-400">
+          <Card inset="md" className="text-sm text-slate-600">
             {tNode(
               'dashboard.mockEmpty',
               {},
@@ -278,8 +278,8 @@ export default function Dashboard() {
                 className="flex flex-wrap items-center justify-between gap-4"
               >
                 <div>
-                  <h3 className="font-semibold text-white">{mockExamTitle(mock, i18n)}</h3>
-                  <p className="mt-1 text-sm text-slate-400">
+                  <h3 className="font-semibold text-slate-900">{mockExamTitle(mock, i18n)}</h3>
+                  <p className="mt-1 text-sm text-slate-600">
                     {t('dashboard.mockMeta', {
                       questions: mock.questions.length,
                       minutes: mock.timeLimitMin,

@@ -27,7 +27,7 @@ export function Switch({ checked, onCheckedChange, label, description, className
         aria-describedby={descriptionId}
         className={cn(
           'focus-ring relative h-6 w-11 shrink-0 cursor-pointer rounded-full transition-colors duration-200',
-          'bg-slate-700 data-[state=checked]:bg-brand-500',
+          'bg-slate-200 data-[state=checked]:bg-brand-500',
         )}
       >
         <SwitchPrimitive.Thumb
@@ -38,7 +38,7 @@ export function Switch({ checked, onCheckedChange, label, description, className
         />
       </SwitchPrimitive.Root>
       <div className="min-w-0">
-        <label htmlFor={id} className="cursor-pointer text-sm font-medium text-slate-200">
+        <label htmlFor={id} className="cursor-pointer text-sm font-medium text-slate-700">
           {label}
         </label>
         {description && (

@@ -26,7 +26,7 @@ export default function AuthWidget({ className }: { className?: string }) {
   return (
     <div className={`flex items-center gap-2 ${className ?? ''}`}>
       <span
-        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold text-slate-200"
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700"
         title={user.displayName ?? user.email ?? undefined}
         aria-hidden="true"
       >

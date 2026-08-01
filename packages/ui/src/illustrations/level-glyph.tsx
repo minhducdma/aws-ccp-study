@@ -23,7 +23,7 @@ export function LevelGlyph({ level, className }: { level: CourseLevel; className
           key={index}
           className={cn(
             'w-[3px] rounded-full transition-colors duration-300',
-            index < filled ? 'bg-brand-400' : 'bg-slate-700',
+            index < filled ? 'bg-brand-400' : 'bg-slate-200',
           )}
           style={{ height: 6 + index * 3 }}
         />
