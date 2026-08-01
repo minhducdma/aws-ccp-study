@@ -163,27 +163,23 @@ export default function ExamPage() {
   const urgent = remaining < 5 * 60_000;
 
   const toggle = (letter: Letter) => {
-    setAnswers((prev) => {
-      const current = prev[question.id] ?? [];
-      const next = question.multi
-        ? current.includes(letter)
-          ? current.filter((l) => l !== letter)
-          : [...current, letter]
-        : [letter];
-      const nextAnswers = { ...prev, [question.id]: next };
-      saveExam(exam.id, { answers: nextAnswers });
-      return nextAnswers;
-    });
+    const current = answers[question.id] ?? [];
+    const next = question.multi
+      ? current.includes(letter)
+        ? current.filter((entry) => entry !== letter)
+        : [...current, letter]
+      : [letter];
+    const nextAnswers = { ...answers, [question.id]: next };
+    setAnswers(nextAnswers);
+    saveExam(exam.id, { answers: nextAnswers });
   };
 
   const toggleFlag = () => {
-    setFlagged((prev) => {
-      const next = new Set(prev);
-      if (next.has(question.id)) next.delete(question.id);
-      else next.add(question.id);
-      saveExam(exam.id, { flagged: [...next] });
-      return next;
-    });
+    const next = new Set(flagged);
+    if (next.has(question.id)) next.delete(question.id);
+    else next.add(question.id);
+    setFlagged(next);
+    saveExam(exam.id, { flagged: [...next] });
   };
 
   const goTo = (nextIndex: number) => {

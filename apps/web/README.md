@@ -86,7 +86,7 @@ Course content is a separate job, and it is optional: an untranslated course sti
 Progress sits in `localStorage` under the key `study-progress-v2`, and each course is kept apart:
 
 ```
-{ version: 2, courses: { "aws-clf-c02": { notesRead, practice, attempts, wrong, freeMode } } }
+{ version: 2, courses: { "aws-clf-c02": { notesRead, practice, exams, attempts, wrong, freeMode } } }
 ```
 
 A question id is unique inside one course only, so every lookup has to go through `lookupQuestion(course, id)`. Data from the old v1 key (`aws-ccp-progress-v1`, from the days of a single course) moves into the `aws-clf-c02` branch on the first run, and the old key is kept, not deleted.
@@ -110,14 +110,16 @@ Firebase access is split by responsibility:
 `AuthProvider` calls `bindProgressUser(uid | null)` whenever the signed-in user changes. The UI still reads one in-memory course object, but Firestore stores each independently changing part separately:
 
 ```text
+userProgress/{uid}                                          updatedAt
 userProgress/{uid}/courses/{courseId}                       freeMode, updatedAt
 userProgress/{uid}/courses/{courseId}/notes/{noteId}        read, updatedAt
 userProgress/{uid}/courses/{courseId}/practice/{setId}      index, answers, checked, updatedAt
+userProgress/{uid}/courses/{courseId}/exams/{examId}        index, answers, flagged, startedAt, deadline, updatedAt
 userProgress/{uid}/courses/{courseId}/wrong/{questionId}    count, updatedAt
 userProgress/{uid}/courses/{courseId}/attempts/{attemptId}  one completed attempt
 ```
 
-This keeps a single practice answer from rewriting notes, wrong-answer counters, or exam history. Existing course documents with embedded `notesRead`, `practice`, and `wrong` maps are read once, written into the detailed collections, then stripped of those legacy fields.
+This keeps a single practice or exam answer from rewriting notes, wrong-answer counters, or exam history. The root user document makes each account visible when querying `userProgress`; the detailed state stays in its course subcollections. Existing course documents with embedded `notesRead`, `practice`, and `wrong` maps are read once, written into the detailed collections, then stripped of those legacy fields.
 
 The binding function decides where the module-level store reads and writes from:
 

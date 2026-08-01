@@ -51,7 +51,8 @@ function courseStats(course: Course, progress: CourseProgress) {
       passed.length > 0 ||
       progress.attempts.length > 0 ||
       Object.keys(progress.notesRead).length > 0 ||
-      Object.keys(progress.practice).length > 0,
+      Object.keys(progress.practice).length > 0 ||
+      Object.keys(progress.exams).length > 0,
   };
 }
 
