@@ -1,0 +1,25 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["courses/**"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", "generated/**"]
+    },
+    "dev": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "persistent": true
+    },
+    "check": {
+      "cache": false
+    },
+    "verify": {
+      "cache": false
+    },
+    "smoke": {
+      "dependsOn": ["^build"],
+      "cache": false
+    }
+  }
+}

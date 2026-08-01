@@ -1,0 +1,83 @@
+{
+  "id": "aws-clf-c02",
+  "code": "CLF-C02",
+  "title": "AWS Certified Cloud Practitioner",
+  "shortTitle": "Cloud Practitioner",
+  "provider": "AWS",
+  "level": "Foundational",
+  "levelOrder": 1,
+  "status": "available",
+  "summary": "Nền tảng điện toán đám mây, các dịch vụ AWS cốt lõi, mô hình bảo mật chia sẻ trách nhiệm và cách tính chi phí. Không đòi hỏi kinh nghiệm kỹ thuật sâu.",
+  "estimatedHours": 12,
+  "exam": {
+    "totalQuestions": 65,
+    "scoredQuestions": 50,
+    "durationMin": 90,
+    "passScore": 700,
+    "maxScore": 1000
+  },
+  "domainLabels": {
+    "1": "Cloud Concepts",
+    "2": "Security & Compliance",
+    "3": "Cloud Technology & Services",
+    "4": "Billing, Pricing & Support"
+  },
+  "mockExams": {
+    "passRatio": 0.7,
+    "timeLimitMin": 90,
+    "generateFrom": [
+      { "mock": 1, "upstreamExam": 20 },
+      { "mock": 2, "upstreamExam": 21 }
+    ]
+  },
+  "upstream": {
+    "label": "kananinirav/AWS-Certified-Cloud-Practitioner-Notes",
+    "rawBase": "https://raw.githubusercontent.com/kananinirav/AWS-Certified-Cloud-Practitioner-Notes/master/practice-exam",
+    "filePattern": "practice-exam-{n}.md"
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "dir": "1-cloud-concepts",
+      "title": "Cloud Concepts",
+      "domain": 1,
+      "weight": 24,
+      "estimatedHours": 2.9,
+      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
+      "quiz": { "count": 20, "passScore": 16, "timeLimitMin": 30 }
+    },
+    {
+      "id": "phase-2",
+      "dir": "2-security",
+      "title": "Security & Compliance",
+      "domain": 2,
+      "weight": 30,
+      "estimatedHours": 3.6,
+      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
+      "quiz": { "count": 25, "passScore": 20, "timeLimitMin": 35 }
+    },
+    {
+      "id": "phase-3",
+      "dir": "3-technology",
+      "title": "Cloud Technology & Services",
+      "domain": 3,
+      "weight": 34,
+      "estimatedHours": 4.1,
+      "notes": [
+        { "file": "notes.md", "title": "Kiến thức trọng tâm" },
+        { "file": "cheatsheet.md", "title": "Cheat sheet tra nhanh" }
+      ],
+      "quiz": { "count": 30, "passScore": 24, "timeLimitMin": 45 }
+    },
+    {
+      "id": "phase-4",
+      "dir": "4-billing",
+      "title": "Billing, Pricing & Support",
+      "domain": 4,
+      "weight": 12,
+      "estimatedHours": 1.4,
+      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
+      "quiz": { "count": 15, "passScore": 12, "timeLimitMin": 20 }
+    }
+  ]
+}

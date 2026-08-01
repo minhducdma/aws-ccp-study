@@ -1,7 +1,8 @@
 node_modules/
-web/dist/
-web/src/generated/
-web/.cache/
-web/*.tsbuildinfo
+.turbo/
+apps/web/dist/
+packages/content/generated/
+packages/content/.cache/
+*.tsbuildinfo
 .DS_Store
 *.log

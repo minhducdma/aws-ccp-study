@@ -1,0 +1,23 @@
+{
+  "name": "study-platform",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "packageManager": "npm@11.5.1",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check": "turbo run check",
+    "verify": "turbo run verify",
+    "smoke": "turbo run smoke",
+    "mock-exams": "npm run mock-exams --workspace @study/content",
+    "preview:pages": "turbo run build && npm run preview:pages --workspace @study/web"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.8"
+  }
+}
