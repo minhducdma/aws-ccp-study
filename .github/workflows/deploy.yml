@@ -3,6 +3,15 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # Documentation-only commits do not change the site, so they should not spend a deploy.
+    paths:
+      - 'courses/**'
+      - 'apps/**'
+      - 'packages/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'turbo.json'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions:
@@ -20,14 +29,43 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # git diff below needs the previous commit to work out what changed.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
+      # GitHub Pages publishes one artifact for the whole site, so a single course cannot be
+      # deployed on its own. What this cache does buy is skipping the work: if only markdown
+      # changed, turbo replays the cached web build instead of recompiling it, and vice versa.
+      - name: Restore turbo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ github.sha }}
+          restore-keys: turbo-
+
       - name: Install dependencies
         run: npm ci
+
+      - name: Report which courses changed
+        run: |
+          BEFORE="${{ github.event.before }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            echo "Full build: no previous commit to compare against." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          CHANGED=$(git diff --name-only "$BEFORE" "${{ github.sha }}" -- courses/ \
+            | cut -d/ -f2 | sort -u)
+          if [ -z "$CHANGED" ]; then
+            echo "No course content changed; only app or tooling code." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Courses changed in this push:" >> "$GITHUB_STEP_SUMMARY"
+            echo "$CHANGED" | sed 's/^/- /' >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       # turbo builds @study/content first, which re-reads every markdown file under courses/.
       - name: Build
