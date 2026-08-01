@@ -18,10 +18,10 @@ import {
   m,
   stagger,
 } from '@study/ui';
-import { useI18n } from '../i18n';
-import { mockExamTitle } from '../lib/content';
-import { useCourse } from '../lib/course';
-import { bestAttempt, hasPassed, useProgress } from '../lib/progress';
+import { useI18n } from '../../../i18n';
+import { mockExamTitle } from '../content';
+import { useCourse } from '../context';
+import { bestAttempt, hasPassed, useProgress } from '../progress';
 
 export default function Dashboard() {
   const i18n = useI18n();

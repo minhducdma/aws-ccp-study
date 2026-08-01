@@ -30,7 +30,7 @@ import { db } from '../config';
  * Splitting attempts into their own subcollection means ticking a checkbox or answering one
  * practice question only rewrites the small course document, never the whole exam history.
  * This module is only the read/write boundary for the collection — merging local, remote and
- * guest data is `lib/progress.ts`'s job.
+ * guest data is `features/course/progress.ts`'s job.
  */
 
 export function coursesCollectionRef(uid: string) {

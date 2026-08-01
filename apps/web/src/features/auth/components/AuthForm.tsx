@@ -1,8 +1,8 @@
 import { Button, Card, GlobeIcon } from '@study/ui';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useI18n, type MessageKey } from '../i18n';
-import { useAuth } from '../lib/firebase/auth';
+import { useI18n, type MessageKey } from '../../../i18n';
+import { useAuth } from '../provider';
 
 /**
  * Maps the handful of Firebase Auth error codes users actually hit to a translated message.

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { slugify, textFromChildren } from '../lib/slug';
+import { slugify, textFromChildren } from '../../../utils/slug';
 
 interface Props {
   children: string;

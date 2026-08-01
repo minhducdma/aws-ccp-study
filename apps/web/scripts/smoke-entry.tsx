@@ -1,10 +1,11 @@
 import { MotionProvider } from '@study/ui';
 import { renderToString } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
-import App from '../src/App';
+import App from '../src/app/App';
+import { AuthProvider } from '../src/features/auth/provider';
 import { I18nProvider, LOCALES, type Locale } from '../src/i18n';
-import { courses } from '../src/lib/content';
-import { courseUrl } from '../src/lib/course';
+import { courses } from '../src/features/course/content';
+import { courseUrl } from '../src/features/course/context';
 
 export function routes(): string[] {
   const list = ['/'];
@@ -33,11 +34,13 @@ export function locales(): readonly Locale[] {
 export function render(route: string, locale: Locale): string {
   return renderToString(
     <I18nProvider locale={locale}>
-      <MotionProvider>
-        <MemoryRouter initialEntries={[route]}>
-          <App />
-        </MemoryRouter>
-      </MotionProvider>
+      <AuthProvider>
+        <MotionProvider>
+          <MemoryRouter initialEntries={[route]}>
+            <App />
+          </MemoryRouter>
+        </MotionProvider>
+      </AuthProvider>
     </I18nProvider>,
   );
 }

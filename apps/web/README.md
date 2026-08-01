@@ -19,9 +19,18 @@ Start it from the repo root with `pnpm run dev`, not with `vite` in this folder,
 
 A course that does not exist, or one with the `planned` status, is sent back to the roadmap page.
 
-## Components
+## Source structure
 
-Only the parts tied to this product live in `src/`: `QuestionCard`, `CourseLayout` and `Markdown`. Buttons, cards, badges, dialogs and animation belong to [`packages/ui`](../../packages/ui/README.md). When you need a new one, add it there instead of writing it again here.
+| Folder | What it owns |
+|---|---|
+| `src/app/` | Route composition and app-wide shell components |
+| `src/features/auth/` | Authentication provider and account UI |
+| `src/features/course/` | Course pages, study components, content queries, context and progress state |
+| `src/i18n/` | Locale state, messages, formatting and locale controls |
+| `src/services/firebase/` | Firebase setup and Firestore collection access |
+| `src/utils/` | Framework-independent helpers |
+
+Keep code inside the feature that owns it. Cross-feature UI belongs in `src/app/components/`; reusable visual primitives belong in [`packages/ui`](../../packages/ui/README.md). Import a feature's concrete module instead of creating a broad root barrel, because auth and course progress deliberately communicate during session changes and a barrel can turn that relationship into a runtime cycle.
 
 ## Languages
 
@@ -88,14 +97,15 @@ Everything above still describes a signed-out reader. Signing in changes where t
 
 ## Accounts and Firestore sync
 
-`src/lib/firebase/` holds the two pieces that talk to Firebase:
+Firebase access is split by responsibility:
 
 | File | What it holds |
 |---|---|
-| `firebase/config.ts` | Reads `VITE_FIREBASE_*` from the environment and exports `auth` and `db` |
-| `firebase/auth.tsx` | `AuthProvider` and `useAuth()`: sign up, sign in, Google sign-in, sign out |
+| `src/services/firebase/config.ts` | Reads `VITE_FIREBASE_*` from the environment and exports `auth` and `db` |
+| `src/services/firebase/collections/userProgress.ts` | Reads, writes and subscribes to progress documents |
+| `src/features/auth/provider.tsx` | `AuthProvider` and `useAuth()`: sign up, sign in, Google sign-in, sign out |
 
-`AuthProvider` sits in `main.tsx`, above the router, so `useAuth()` works on every screen. `AuthWidget` (`src/components/AuthWidget.tsx`) is the sign-in link or the account initial shown in the header of `CatalogPage` and `CourseLayout`. `AuthForm` (`src/components/AuthForm.tsx`) is the shared component behind `/login` and `/signup`.
+`AuthProvider` sits in `main.tsx`, above the router, so `useAuth()` works on every screen. `AuthWidget` is the sign-in link or account initial used by the app shell. `AuthForm` is the shared component behind `/login` and `/signup`; both live in `src/features/auth/components/`.
 
 `AuthProvider` calls `bindProgressUser(uid | null)` whenever the signed-in user changes. The UI still reads one in-memory course object, but Firestore stores each independently changing part separately:
 

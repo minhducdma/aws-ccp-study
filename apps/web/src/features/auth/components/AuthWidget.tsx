@@ -1,7 +1,7 @@
 import { Button, ButtonLink } from '@study/ui';
 import { useState } from 'react';
-import { useI18n } from '../i18n';
-import { useAuth } from '../lib/firebase/auth';
+import { useI18n } from '../../../i18n';
+import { useAuth } from '../provider';
 
 /**
  * Compact auth status for the header: a sign-in link for guests, or the account's initial plus

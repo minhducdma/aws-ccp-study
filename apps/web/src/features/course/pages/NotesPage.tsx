@@ -11,11 +11,11 @@ import {
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import Markdown from '../components/Markdown';
-import { isLocale, useI18n, type MessageKey } from '../i18n';
-import { getPhase } from '../lib/content';
-import { useCourse } from '../lib/course';
-import { useProgress } from '../lib/progress';
-import { slugify } from '../lib/slug';
+import { isLocale, useI18n, type MessageKey } from '../../../i18n';
+import { getPhase } from '../content';
+import { useCourse } from '../context';
+import { useProgress } from '../progress';
+import { slugify } from '../../../utils/slug';
 
 /** Builds the outline from level-2 headings, skipping headings inside code blocks. */
 function useOutline(markdown: string) {

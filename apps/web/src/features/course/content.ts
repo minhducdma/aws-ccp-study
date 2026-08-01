@@ -1,6 +1,6 @@
 import bundle from '@study/content';
-import type { I18n } from '../i18n';
-import type { Course, MockExam, Phase, Question } from '../types';
+import type { I18n } from '../../i18n';
+import type { Course, MockExam, Phase, Question } from '../../types';
 
 export const content = bundle;
 export const courses = bundle.courses;

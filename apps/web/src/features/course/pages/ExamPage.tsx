@@ -23,11 +23,11 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QuestionCard from '../components/QuestionCard';
-import { useI18n } from '../i18n';
-import { domainLabel, formatDuration, getExam, isCorrect } from '../lib/content';
-import { useCourse } from '../lib/course';
-import { attemptsFor, hasPassed, useProgress } from '../lib/progress';
-import type { Attempt, Course, Letter, Question } from '../types';
+import { useI18n } from '../../../i18n';
+import { domainLabel, formatDuration, getExam, isCorrect } from '../content';
+import { useCourse } from '../context';
+import { attemptsFor, hasPassed, useProgress } from '../progress';
+import type { Attempt, Course, Letter, Question } from '../../../types';
 
 type Stage = 'intro' | 'running' | 'result';
 

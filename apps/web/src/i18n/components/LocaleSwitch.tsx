@@ -1,5 +1,5 @@
 import { GlobeIcon } from '@study/ui';
-import { LOCALE_LIST, useI18n } from '../i18n';
+import { LOCALE_LIST, useI18n } from '..';
 
 /**
  * Segmented control rather than a dropdown: with two languages every option is already visible,

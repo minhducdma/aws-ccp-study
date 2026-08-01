@@ -7,9 +7,9 @@ import {
 } from '@study/ui';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useI18n } from '../i18n';
-import AuthWidget from './AuthWidget';
-import LocaleSwitch from './LocaleSwitch';
+import { useI18n } from '../../i18n';
+import AuthWidget from '../../features/auth/components/AuthWidget';
+import LocaleSwitch from '../../i18n/components/LocaleSwitch';
 
 interface AppHeaderProps {
   title?: string;

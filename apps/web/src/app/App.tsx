@@ -1,12 +1,12 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import { AuthForm } from './components/AuthForm';
-import CourseLayout from './components/CourseLayout';
-import CatalogPage from './pages/CatalogPage';
-import Dashboard from './pages/Dashboard';
-import NotesPage from './pages/NotesPage';
-import PracticePage from './pages/PracticePage';
-import ExamPage from './pages/ExamPage';
-import ReviewPage from './pages/ReviewPage';
+import { AuthForm } from '../features/auth/components/AuthForm';
+import CourseLayout from '../features/course/components/CourseLayout';
+import CatalogPage from '../features/course/pages/CatalogPage';
+import Dashboard from '../features/course/pages/Dashboard';
+import NotesPage from '../features/course/pages/NotesPage';
+import PracticePage from '../features/course/pages/PracticePage';
+import ExamPage from '../features/course/pages/ExamPage';
+import ReviewPage from '../features/course/pages/ReviewPage';
 
 export default function App() {
   return (

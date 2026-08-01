@@ -7,7 +7,7 @@ import type {
   Letter,
   PracticeState,
   ProgressStore,
-} from '../types';
+} from '../../types';
 import { isCorrect, lookupQuestion } from './content';
 import {
   deleteAttempt as deleteAttemptDoc,
@@ -25,7 +25,7 @@ import {
   subscribeToNotes,
   subscribeToPractice,
   subscribeToWrong,
-} from './firebase/collections/userProgress';
+} from '../../services/firebase/collections/userProgress';
 
 const STORAGE_KEY = 'study-progress-v2';
 
@@ -100,8 +100,8 @@ function clearLocalProgress() {
 }
 
 // Firestore access itself (collection/doc refs, reads and writes) lives in
-// lib/firebase/collections/userProgress.ts. This module only owns merging that data with the
-// local cache and exposing it to components.
+// services/firebase/collections/userProgress.ts. This module only owns merging that data with
+// the local cache and exposing it to course components.
 
 let currentUid: string | null = null;
 let unsubscribeCourses: Unsubscribe | null = null;

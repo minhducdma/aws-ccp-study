@@ -1,7 +1,7 @@
 import { Badge, Card, CheckIcon, XIcon, m } from '@study/ui';
-import { useI18n } from '../i18n';
-import { isCorrect } from '../lib/content';
-import type { Letter, Question } from '../types';
+import { useI18n } from '../../../i18n';
+import { isCorrect } from '../content';
+import type { Letter, Question } from '../../../types';
 import Markdown from './Markdown';
 
 interface Props {

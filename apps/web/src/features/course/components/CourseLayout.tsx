@@ -9,13 +9,13 @@ import {
 } from '@study/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
-import { useI18n } from '../i18n';
-import { getCourse, mockExamTitle } from '../lib/content';
-import { CourseContext, courseUrl, useCourse } from '../lib/course';
-import { hasPassed, useProgress } from '../lib/progress';
-import AppHeader from './AppHeader';
-import AuthWidget from './AuthWidget';
-import LocaleSwitch from './LocaleSwitch';
+import { useI18n } from '../../../i18n';
+import { getCourse, mockExamTitle } from '../content';
+import { CourseContext, courseUrl, useCourse } from '../context';
+import { hasPassed, useProgress } from '../progress';
+import AppHeader from '../../../app/components/AppHeader';
+import AuthWidget from '../../auth/components/AuthWidget';
+import LocaleSwitch from '../../../i18n/components/LocaleSwitch';
 
 function NavItem({
   to,

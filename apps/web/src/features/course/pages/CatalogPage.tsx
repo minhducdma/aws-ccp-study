@@ -15,12 +15,12 @@ import {
   type CourseLevel,
 } from '@study/ui';
 import { Link } from 'react-router-dom';
-import AppHeader from '../components/AppHeader';
-import { useI18n, type I18n, type MessageKey } from '../i18n';
-import { content, courses } from '../lib/content';
-import { courseUrl } from '../lib/course';
-import { emptyCourseProgress, hasPassed, useAllProgress } from '../lib/progress';
-import type { Course, CourseProgress } from '../types';
+import AppHeader from '../../../app/components/AppHeader';
+import { useI18n, type I18n, type MessageKey } from '../../../i18n';
+import { content, courses } from '../content';
+import { courseUrl } from '../context';
+import { emptyCourseProgress, hasPassed, useAllProgress } from '../progress';
+import type { Course, CourseProgress } from '../../../types';
 
 const KNOWN_LEVELS = ['Foundational', 'Associate', 'Professional', 'Specialty'] as const;
 

@@ -16,8 +16,8 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { auth } from './config';
-import { bindProgressUser } from '../progress';
+import { auth } from '../../services/firebase/config';
+import { bindProgressUser } from '../course/progress';
 
 export interface AuthValue {
   /** Undefined while Firebase has not resolved the initial session yet. */

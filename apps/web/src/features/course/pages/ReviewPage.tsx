@@ -12,11 +12,11 @@ import {
 } from '@study/ui';
 import { useMemo, useState } from 'react';
 import QuestionCard from '../components/QuestionCard';
-import { useI18n } from '../i18n';
-import { isCorrect, lookupQuestion, originLabel } from '../lib/content';
-import { useCourse } from '../lib/course';
-import { useProgress } from '../lib/progress';
-import type { Letter } from '../types';
+import { useI18n } from '../../../i18n';
+import { isCorrect, lookupQuestion, originLabel } from '../content';
+import { useCourse } from '../context';
+import { useProgress } from '../progress';
+import type { Letter } from '../../../types';
 
 export default function ReviewPage() {
   const i18n = useI18n();
