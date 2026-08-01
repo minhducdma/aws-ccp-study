@@ -230,6 +230,28 @@ export const vi = {
   'content.gateQuizContext': 'Phase {order} — {title} · Gate Quiz',
   'content.unclassifiedDomain': 'Chưa phân loại',
   'content.domain': 'Domain {domain}',
+
+  'auth.signIn': 'Đăng nhập',
+  'auth.signUp': 'Đăng ký',
+  'auth.signOut': 'Đăng xuất',
+  'auth.email': 'Email',
+  'auth.password': 'Mật khẩu',
+  'auth.displayName': 'Tên hiển thị',
+  'auth.continueWithGoogle': 'Tiếp tục với Google',
+  'auth.orDivider': 'hoặc',
+  'auth.noAccount': 'Chưa có tài khoản?',
+  'auth.haveAccount': 'Đã có tài khoản?',
+  'auth.signUpLink': 'Đăng ký ngay',
+  'auth.signInLink': 'Đăng nhập ngay',
+  'auth.signInHeading': 'Đăng nhập để lưu tiến độ',
+  'auth.signUpHeading': 'Tạo tài khoản để lưu tiến độ',
+  'auth.signInSubheading': 'Tiến độ học sẽ được đồng bộ trên mọi thiết bị.',
+  'auth.signUpSubheading': 'Chỉ mất một phút, tiến độ hiện tại của bạn sẽ được giữ lại.',
+  'auth.guestNotice': 'Bạn đang học ở chế độ khách. Đăng nhập để không mất tiến độ khi đổi máy.',
+  'auth.errorGeneric': 'Có lỗi xảy ra, vui lòng thử lại.',
+  'auth.errorInvalidCredential': 'Email hoặc mật khẩu không đúng.',
+  'auth.errorEmailInUse': 'Email này đã được đăng ký.',
+  'auth.errorWeakPassword': 'Mật khẩu cần ít nhất 6 ký tự.',
 } as const satisfies Record<string, MessageValue>;
 
 export type MessageKey = keyof typeof vi;

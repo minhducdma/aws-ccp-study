@@ -11,8 +11,9 @@
     "preview:pages": "node scripts/pages-preview.mjs"
   },
   "dependencies": {
-    "@study/content": "*",
-    "@study/ui": "*",
+    "@study/content": "workspace:*",
+    "@study/ui": "workspace:*",
+    "firebase": "12.17.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "^10.1.0",

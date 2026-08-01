@@ -14,6 +14,7 @@ import { useI18n } from '../i18n';
 import { getCourse, mockExamTitle } from '../lib/content';
 import { CourseContext, courseUrl, useCourse } from '../lib/course';
 import { hasPassed, useProgress } from '../lib/progress';
+import AuthWidget from './AuthWidget';
 import LocaleSwitch from './LocaleSwitch';
 
 function NavItem({
@@ -202,6 +203,7 @@ function CourseShell({
             </span>
           </NavLink>
           <LocaleSwitch className="ml-auto" />
+          <AuthWidget />
         </div>
       </header>
 

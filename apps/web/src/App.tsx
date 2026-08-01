@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { AuthForm } from './components/AuthForm';
 import CourseLayout from './components/CourseLayout';
 import CatalogPage from './pages/CatalogPage';
 import Dashboard from './pages/Dashboard';
@@ -11,6 +12,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<CatalogPage />} />
+      <Route path="/login" element={<AuthForm mode="signIn" />} />
+      <Route path="/signup" element={<AuthForm mode="signUp" />} />
       <Route path="/course/:courseId" element={<CourseLayout />}>
         <Route index element={<Dashboard />} />
         <Route path="review" element={<ReviewPage />} />

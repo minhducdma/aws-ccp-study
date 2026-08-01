@@ -1,6 +1,8 @@
+import { doc, onSnapshot, setDoc, type Unsubscribe } from 'firebase/firestore';
 import { useCallback, useEffect, useState } from 'react';
 import type { Attempt, Course, CourseProgress, Letter, PracticeState, ProgressStore } from '../types';
 import { isCorrect, lookupQuestion } from './content';
+import { db } from './firebase/config';
 
 const STORAGE_KEY = 'study-progress-v2';
 
@@ -51,7 +53,9 @@ function load(): ProgressStore {
 let store: ProgressStore = typeof localStorage === 'undefined' ? emptyStore : load();
 const listeners = new Set<() => void>();
 
-function commit(next: ProgressStore) {
+/** Applies a store update that already happened elsewhere (Firestore, another tab) — writes the
+ * local cache and notifies listeners, but does not push back to Firestore. */
+function applyRemote(next: ProgressStore) {
   store = next;
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
@@ -59,6 +63,53 @@ function commit(next: ProgressStore) {
     // Ignore writes rejected when localStorage is unavailable (private mode).
   }
   listeners.forEach((fn) => fn());
+}
+
+function progressDoc(uid: string) {
+  return doc(db, 'userProgress', uid);
+}
+
+let currentUid: string | null = null;
+let unsubscribeRemote: Unsubscribe | null = null;
+
+/**
+ * Called by AuthProvider whenever the signed-in user changes. Signing in for the first time
+ * carries whatever this browser already had (guest progress) up to Firestore; after that,
+ * Firestore is the source of truth and syncs live to every device. Signing out falls back to
+ * this browser's own localStorage copy.
+ */
+export function bindProgressUser(uid: string | null): void {
+  if (uid === currentUid) return;
+  unsubscribeRemote?.();
+  unsubscribeRemote = null;
+  currentUid = uid;
+
+  if (!uid) {
+    applyRemote(load());
+    return;
+  }
+
+  const ref = progressDoc(uid);
+  unsubscribeRemote = onSnapshot(ref, (snapshot) => {
+    if (snapshot.exists()) {
+      const remote = snapshot.data() as ProgressStore;
+      applyRemote({ version: 2, courses: remote.courses ?? {} });
+    } else {
+      setDoc(ref, store).catch(() => {
+        // Ignore write failures; the next commit (or a later snapshot) will retry.
+      });
+    }
+  });
+}
+
+function commit(next: ProgressStore) {
+  applyRemote(next);
+  if (currentUid) {
+    setDoc(progressDoc(currentUid), next).catch(() => {
+      // The change is already visible locally; Firestore's offline queue retries once the
+      // connection is back, and the next onSnapshot call reconciles the rest.
+    });
+  }
 }
 
 export function courseProgress(courseId: string): CourseProgress {

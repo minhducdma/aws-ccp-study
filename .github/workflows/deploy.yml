@@ -8,9 +8,10 @@ on:
       - 'courses/**'
       - 'apps/**'
       - 'packages/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'turbo.json'
+          - 'package.json'
+          - 'pnpm-lock.yaml'
+          - 'pnpm-workspace.yaml'
+          - 'turbo.json'
       - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
@@ -33,10 +34,14 @@ jobs:
           # git diff below needs the previous commit to work out what changed.
           fetch-depth: 0
 
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.15.1
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       # GitHub Pages publishes one artifact for the whole site, so a single course cannot be
       # deployed on its own. What this cache does buy is skipping the work: if only markdown
@@ -49,7 +54,7 @@ jobs:
           restore-keys: turbo-
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Report which courses changed
         run: |
@@ -69,7 +74,7 @@ jobs:
 
       # turbo builds @study/content first, which re-reads every markdown file under courses/.
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       - uses: actions/configure-pages@v5
 

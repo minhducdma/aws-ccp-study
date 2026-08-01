@@ -84,6 +84,33 @@ A question id is unique inside one course only, so every lookup has to go throug
 
 The chosen language sits beside it under `study-locale-v1`. Without that key the app reads `navigator.languages` and falls back to Vietnamese, so a first visit is already in a language the reader asked for.
 
+Everything above still describes a signed-out reader. Signing in changes where the store's data actually lives — see the next section.
+
+## Accounts and Firestore sync
+
+`src/lib/firebase/` holds the two pieces that talk to Firebase:
+
+| File | What it holds |
+|---|---|
+| `firebase/config.ts` | Reads `VITE_FIREBASE_*` from the environment and exports `auth` and `db` |
+| `firebase/auth.tsx` | `AuthProvider` and `useAuth()`: sign up, sign in, Google sign-in, sign out |
+
+`AuthProvider` sits in `main.tsx`, above the router, so `useAuth()` works on every screen. `AuthWidget` (`src/components/AuthWidget.tsx`) is the sign-in link or the account initial shown in the header of `CatalogPage` and `CourseLayout`. `AuthForm` (`src/components/AuthForm.tsx`) is the shared component behind `/login` and `/signup`.
+
+`lib/progress.ts` does not know about React or Firebase Auth directly. `AuthProvider` calls `bindProgressUser(uid | null)` whenever the signed-in user changes, and that function decides where the module-level store reads and writes from:
+
+- **Signed out** — the store is `localStorage`, exactly as described above.
+- **Signed in** — the store is the Firestore document `userProgress/{uid}`, kept live with `onSnapshot`, so every open tab and every device shows the same progress a moment after a change. `localStorage` keeps a copy too, so the app still has something to show offline.
+- **First sign-in** — if `userProgress/{uid}` does not exist yet, whatever this browser already had (guest progress) is written there, so studying before creating an account is never lost.
+
+`firestore.rules`, at the repo root, is the actual access control: a document under `userProgress/{uid}` can only be read or written by a request whose `auth.uid` matches `uid`. Nothing in the client code enforces that; the rules do. Deploy them with `firebase deploy --only firestore:rules --project <project-id>`.
+
+### Running this locally
+
+1. Copy `.env.example` to `.env.local` and fill it with your Firebase project's web app config (Firebase console → Project settings → General → Your apps).
+2. In the Firebase console, turn on the **Email/Password** and **Google** sign-in providers (Authentication → Sign-in method) and create a **Firestore** database (Firestore Database → Create database). The CLI can deploy rules and list what exists, but it cannot toggle sign-in providers — that step is console-only.
+3. `.env.local` is git-ignored. Never put real keys in `.env.example`, and never commit `.env.local`.
+
 ## Commands
 
 | Command | What it does |
