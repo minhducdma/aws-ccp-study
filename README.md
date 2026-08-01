@@ -74,10 +74,31 @@ Các lệnh khác trong `web/`:
 | `npm run verify` | Tải đề gốc từ GitHub và đối chiếu đáp án của từng câu với bản gốc |
 | `npm run smoke` | Render thử toàn bộ route để phát hiện lỗi |
 | `npm run build` | Build bản tĩnh vào `web/dist/`, deploy được lên bất kỳ static host |
+| `npm run preview:pages` | Chạy thử bản build y hệt cách GitHub Pages phục vụ nó |
 
 `npm run verify` là lớp bảo đảm chất lượng quan trọng nhất: nó so từng đáp án trong tài liệu với dòng `Correct answer` trong practice exam gốc, nên nếu có câu nào bị ghi sai đáp án thì sẽ bị phát hiện thay vì âm thầm dạy sai. Hiện tại **398/398 câu khớp bản gốc**.
 
 Hai đề mô phỏng được sinh bằng `node scripts/make-mock-exams.mjs`: câu hỏi và đáp án lấy nguyên văn từ Practice Exam 20 và 21, còn phân loại domain cùng giải thích tiếng Việt nằm trong `scripts/mock-annotations.json`. Muốn sửa giải thích thì sửa file JSON đó rồi chạy lại script.
+
+## Deploy lên GitHub Pages
+
+Web app là bản tĩnh hoàn toàn nên host miễn phí trên GitHub Pages được. Workflow `.github/workflows/deploy.yml` đã cấu hình sẵn: mỗi lần push lên `main`, GitHub sẽ tự cài dependency, đọc lại markdown, build và publish.
+
+Bật một lần duy nhất trong repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**. Sau lần push kế tiếp, trang sẽ chạy tại `https://minhducdma.github.io/aws-ccp-study/`.
+
+Ba điểm cấu hình cần biết nếu đổi repo hoặc đổi cách host:
+
+| Chỗ | Giá trị hiện tại | Khi nào phải sửa |
+|---|---|---|
+| `BASE_PATH` trong `web/vite.config.ts` | `/aws-ccp-study/` | Đổi tên repo. Dùng domain riêng hoặc repo dạng `<user>.github.io` thì đặt về `/` |
+| `basename` của router (`web/src/main.tsx`) | Lấy tự động từ `import.meta.env.BASE_URL` | Không cần sửa, tự bám theo `BASE_PATH` |
+| `404.html` trong `web/dist/` | Bản sao của `index.html`, sinh tự động khi build | Không cần sửa |
+
+`404.html` là phần bắt buộc: GitHub Pages chỉ phục vụ file tĩnh, không biết các route như `/review` hay `/exam/mock-1` là của app. Khi bạn mở thẳng link đó hoặc F5 giữa bài thi, Pages không tìm thấy file nên trả về `404.html` — vốn chính là app, và router sẽ tự hiển thị đúng trang.
+
+Muốn kiểm tra trước khi push, chạy `npm run preview:pages` rồi mở `http://localhost:4173/aws-ccp-study/`. Server này mô phỏng đúng hành vi của Pages (tiền tố đường dẫn + fallback 404), nên lỗi sai base path sẽ lộ ra ngay tại máy thay vì sau khi deploy.
+
+Lưu ý về dữ liệu: tiến độ học được lưu bằng `localStorage` của trình duyệt, gắn theo domain. Học trên bản localhost rồi chuyển sang bản GitHub Pages thì tiến độ không đi theo, và ngược lại.
 
 ## Cách học (nếu đọc trực tiếp file markdown)
 
