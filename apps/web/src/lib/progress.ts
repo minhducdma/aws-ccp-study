@@ -80,6 +80,16 @@ function applyRemote(next: ProgressStore) {
   listeners.forEach((fn) => fn());
 }
 
+function clearLocalProgress() {
+  store = emptyStore;
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // Ignore removals rejected when localStorage is unavailable (private mode).
+  }
+  listeners.forEach((fn) => fn());
+}
+
 // Firestore access itself (collection/doc refs, reads and writes) lives in
 // lib/firebase/collections/userProgress.ts. This module only owns merging that data with the
 // local cache and exposing it to components.
@@ -132,16 +142,18 @@ function seedRemoteFromLocalGuest(uid: string) {
 /**
  * Called by AuthProvider whenever the signed-in user changes. Signing in for the first time
  * seeds Firestore with whatever this browser already had (guest progress); after that,
- * Firestore is the source of truth and syncs live to every device. Signing out falls back to
- * this browser's own localStorage copy.
+ * Firestore is the source of truth and syncs live to every device. Signing out clears the
+ * account's in-memory and local cache so its progress cannot leak into the guest session.
  */
 export function bindProgressUser(uid: string | null): void {
   if (uid === currentUid) return;
+  const signedOut = currentUid !== null && uid === null;
   stopWatchingRemote();
   currentUid = uid;
 
   if (!uid) {
-    applyRemote(load());
+    if (signedOut) clearLocalProgress();
+    else applyRemote(load());
     return;
   }
 

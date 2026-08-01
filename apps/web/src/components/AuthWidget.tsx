@@ -1,4 +1,5 @@
 import { Button, ButtonLink } from '@study/ui';
+import { useState } from 'react';
 import { useI18n } from '../i18n';
 import { useAuth } from '../lib/firebase/auth';
 
@@ -10,6 +11,7 @@ import { useAuth } from '../lib/firebase/auth';
 export default function AuthWidget({ className }: { className?: string }) {
   const { t } = useI18n();
   const { user, logOut } = useAuth();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   if (user === undefined) return null;
 
@@ -32,7 +34,19 @@ export default function AuthWidget({ className }: { className?: string }) {
       >
         {initial}
       </span>
-      <Button tone="ghost" size="sm" onClick={() => logOut()}>
+      <Button
+        tone="ghost"
+        size="sm"
+        loading={loggingOut}
+        onClick={async () => {
+          setLoggingOut(true);
+          try {
+            await logOut();
+          } finally {
+            setLoggingOut(false);
+          }
+        }}
+      >
         {t('auth.signOut')}
       </Button>
     </div>
