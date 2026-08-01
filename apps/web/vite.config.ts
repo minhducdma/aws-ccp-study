@@ -1,31 +1,14 @@
-import { copyFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-// GitHub Pages serves project sites under /<repo-name>/; override with BASE_PATH when needed.
-const BASE_PATH = process.env.BASE_PATH ?? '/aws-ccp-study/';
-
-/**
- * GitHub Pages has no SPA fallback: opening /review directly, or refreshing mid-exam,
- * lands on its 404 page. Copying index.html to 404.html makes Pages hand the app back
- * so the router can resolve the path itself.
- */
-function spaFallback(): Plugin {
-  return {
-    name: 'spa-fallback-404',
-    apply: 'build',
-    closeBundle() {
-      const dist = resolve(import.meta.dirname, 'dist');
-      copyFileSync(resolve(dist, 'index.html'), resolve(dist, '404.html'));
-    },
-  };
-}
+// Firebase Hosting serves the site from the domain root; override with BASE_PATH
+// only if you ever host this app under a sub-path.
+const BASE_PATH = process.env.BASE_PATH ?? '/';
 
 export default defineConfig(({ command }) => ({
   base: command === 'build' ? BASE_PATH : '/',
-  plugins: [react(), tailwindcss(), spaFallback()],
+  plugins: [react(), tailwindcss()],
   server: { port: 5180, open: true },
   build: {
     rollupOptions: {

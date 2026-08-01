@@ -2,7 +2,7 @@
 
 A monorepo platform for self-study courses on AWS certification exams. The goal is to make it easy to add a new AWS exam as pure content (Markdown + JSON) without touching the app code, and to give learners a structured way to study: notes, practice questions and a gate quiz per phase, where the next phase only opens after you pass the quiz before it.
 
-Live site: <https://minhducdma.github.io/aws-ccp-study/>
+Live site: <https://aws-certificate-77a3d.web.app/>
 
 ## Repo layout
 
@@ -28,7 +28,7 @@ Run all of them from the repo root.
 | `pnpm run verify` | Downloads the source exams and compares every answer |
 | `pnpm run smoke` | Renders every route, in every language, with SSR to catch runtime errors |
 | `pnpm run mock-exams` | Builds the mock exam files again from the source exams |
-| `pnpm run preview:pages` | Serves the build the same way GitHub Pages does |
+| `pnpm run preview:pages` | Serves the build the same way Firebase Hosting does |
 
 Turborepo caches by file content. If you edit markdown, both packages run again. If you edit nothing, `pnpm run build` returns almost at once, because there is nothing to redo.
 
@@ -46,7 +46,7 @@ Turborepo caches by file content. If you edit markdown, both packages run again.
 | Language | Vietnamese and English, switched in the header, remembered in the browser |
 | Account | Sign in with email/password or Google. Progress then syncs through Firestore instead of staying on one browser |
 
-Progress is saved in `localStorage`, and it is kept **for each exam on its own**, so two courses never mix. It also belongs to the browser domain, so your progress on localhost and on GitHub Pages are two different copies.
+Progress is saved in `localStorage`, and it is kept **for each exam on its own**, so two courses never mix. It also belongs to the browser domain, so your progress on localhost and on the deployed site are two different copies.
 
 Signing in changes that: your progress is written to Firestore under your own account and read back on every device, live, through `onSnapshot`. `localStorage` is still kept as an offline cache and as the store for guests who never sign in. Firestore's rules only let a signed-in user read or write their own document (`firestore.rules`), so one account can never see another's progress. To run the app locally with sign-in working, copy `apps/web/.env.example` to `apps/web/.env.local` and fill it with your own Firebase project's config.
 
@@ -73,17 +73,22 @@ Read [`apps/web/README.md`](apps/web/README.md#languages) to add a language, and
 
 `pnpm run mock-exams` writes the mock exams. It copies the questions and the answers from the source, so they always match. The domain labels and the Vietnamese explanations come from `annotations.json` in each course.
 
-## Deploy to GitHub Pages
+## Deploy to Firebase Hosting
 
-`.github/workflows/deploy.yml` runs on every push to `main`. It installs, reads the markdown, builds and publishes. You turn it on once in the repo: **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+`.github/workflows/deploy.yml` runs on every push to `main`. It installs, reads the markdown, builds and deploys to Firebase Hosting on the `aws-certificate-77a3d` project.
 
-| Setting | Value now | When to change it |
-|---|---|---|
-| `BASE_PATH` in `apps/web/vite.config.ts` | `/aws-ccp-study/` | You rename the repo. Use `/` for a custom domain or a `<user>.github.io` repo |
-| Router `basename` in `apps/web/src/main.tsx` | Taken from `import.meta.env.BASE_URL` | Never |
-| `404.html` in `apps/web/dist/` | A copy of `index.html`, written at build time | Never |
+The workflow needs these repo secrets (**Settings → Secrets and variables → Actions**):
 
-The `404.html` file is not optional. GitHub Pages only serves static files, so it does not know that `/course/aws-clf-c02/review` is a route of the app. When you open that link, or press F5 in the middle of an exam, Pages returns `404.html`, which is the app itself, and then the router shows the right page. Run `pnpm run preview:pages` and open <http://localhost:4173/aws-ccp-study/> to test this before you push.
+| Secret | What it is |
+|---|---|
+| `FIREBASE_SERVICE_ACCOUNT` | A Firebase service account JSON, used by `FirebaseExtended/action-hosting-deploy` to authenticate |
+| `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, `VITE_FIREBASE_APP_ID` | The same values as `apps/web/.env.local`, so sign-in works in the deployed build |
+
+To create the service account: Firebase console → Project settings → Service accounts → Generate new private key. Paste the whole JSON as the value of `FIREBASE_SERVICE_ACCOUNT`.
+
+`firebase.json` points hosting at `apps/web/dist` and rewrites every path to `index.html`, so client-side routes like `/course/aws-clf-c02/review` resolve correctly and a refresh mid-exam does not 404. Run `pnpm run preview:pages` and open <http://localhost:4173/> to test the build locally before you push.
+
+To deploy by hand instead of through CI: `firebase deploy --only hosting --project aws-certificate-77a3d` after `pnpm run build`.
 
 ## Related docs
 

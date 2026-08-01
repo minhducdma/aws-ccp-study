@@ -116,13 +116,13 @@ Everything above still describes a signed-out reader. Signing in changes where t
 | Command | What it does |
 |---|---|
 | `pnpm run smoke` | Renders every route, in every language, with SSR, to catch runtime errors that a type check cannot see |
-| `pnpm run preview:pages` | Serves `dist/` exactly like GitHub Pages, with the base path and the `404.html` fallback |
+| `pnpm run preview:pages` | Serves `dist/` exactly like Firebase Hosting, with the SPA rewrite to `index.html` |
 
 The smoke test uses the same providers as `main.tsx`. When you add a provider there, add it to `scripts/smoke-entry.tsx` too, or the routes will fail.
 
-## GitHub Pages
+## Firebase Hosting
 
-`vite.config.ts` holds two things that exist only for GitHub Pages: the `BASE_PATH` variable, and a plugin that copies `index.html` to `404.html` at build time. Read the deploy part of the [root README](../../README.md) before you change either of them.
+The app is served from the domain root, so `vite.config.ts` builds with `base: '/'` by default (override with the `BASE_PATH` env var if you ever need a sub-path). `firebase.json`, at the repo root, rewrites every path to `index.html`, which is what lets a client-side route like `/course/aws-clf-c02/review` survive a page refresh. Read the deploy part of the [root README](../../README.md) before you change either of them.
 
 The build is also split into three chunks. Study material changes far more often than the libraries, so `content`, `vendor` and the app entry are kept apart, and a returning learner keeps the big vendor chunk in cache when only the markdown moved.
 

@@ -1,14 +1,15 @@
 /**
- * Previews the build the way GitHub Pages serves it: dist/ mounted under the /<repo>/
- * prefix, with 404.html returned for any path that is not a static file.
- * Use it to check the base path and deep links before deploying:
+ * Previews the build the way Firebase Hosting serves it: dist/ mounted at the domain
+ * root, with index.html returned for any path that is not a static file (matching the
+ * SPA rewrite in firebase.json).
+ * Use it to check deep links before deploying:
  *   node scripts/pages-preview.mjs
  */
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize, resolve } from 'node:path';
 
-const BASE = process.env.BASE_PATH ?? '/aws-ccp-study/';
+const BASE = process.env.BASE_PATH ?? '/';
 const PORT = Number(process.env.PORT ?? 4173);
 const DIST = resolve(import.meta.dirname, '..', 'dist');
 
@@ -34,8 +35,8 @@ const server = createServer(async (req, res) => {
     const body = await readFile(join(DIST, target));
     res.writeHead(200, { 'content-type': MIME[extname(target)] ?? 'application/octet-stream' }).end(body);
   } catch {
-    // GitHub Pages returns 404.html for unknown paths; the SPA then routes itself.
-    res.writeHead(404, { 'content-type': MIME['.html'] }).end(await readFile(join(DIST, '404.html')));
+    // Firebase Hosting's rewrite sends unknown paths to index.html; the SPA then routes itself.
+    res.writeHead(200, { 'content-type': MIME['.html'] }).end(await readFile(join(DIST, 'index.html')));
   }
 });
 
