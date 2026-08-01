@@ -262,6 +262,7 @@ export const vi = {
   'auth.signUpSubheading': 'Chỉ mất một phút, tiến độ hiện tại của bạn sẽ được giữ lại.',
   'auth.guestNotice': 'Bạn đang học ở chế độ khách. Đăng nhập để không mất tiến độ khi đổi máy.',
   'auth.errorGeneric': 'Có lỗi xảy ra, vui lòng thử lại.',
+  'auth.errorSignOut': 'Không thể đăng xuất. Vui lòng thử lại.',
   'auth.errorInvalidCredential': 'Email hoặc mật khẩu không đúng.',
   'auth.errorEmailInUse': 'Email này đã được đăng ký.',
   'auth.errorWeakPassword': 'Mật khẩu cần ít nhất 6 ký tự.',

@@ -25,6 +25,8 @@ export default function AuthWidget({ className }: { className?: string }) {
   const { t } = useI18n();
   const { user, logOut, loading } = useAuth();
   const [dialogMode, setDialogMode] = useState<AuthMode | null>(null);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
 
   if (user === undefined) return null;
 
@@ -64,7 +66,13 @@ export default function AuthWidget({ className }: { className?: string }) {
   const name = user.displayName?.trim() || user.email?.split('@')[0] || t('auth.account');
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      open={accountMenuOpen}
+      onOpenChange={(open) => {
+        setAccountMenuOpen(open);
+        if (open) setSignOutError(null);
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <button
           type="button"
@@ -100,13 +108,25 @@ export default function AuthWidget({ className }: { className?: string }) {
         <DropdownMenuItem
           disabled={loading}
           className="text-rose-600 data-[highlighted]:bg-rose-50 data-[highlighted]:text-rose-700"
-          onSelect={() => {
-            void logOut().catch((error) => console.error('[auth] sign-out failed:', error));
+          onSelect={(event) => {
+            event.preventDefault();
+            setSignOutError(null);
+            void logOut()
+              .then(() => setAccountMenuOpen(false))
+              .catch((error) => {
+                console.error('[auth] sign-out failed:', error);
+                setSignOutError(t('auth.errorSignOut'));
+              });
           }}
         >
           <LogOutIcon size={16} aria-hidden="true" />
           {t('auth.signOut')}
         </DropdownMenuItem>
+        {signOutError && (
+          <p role="alert" className="px-3 py-2 text-xs leading-relaxed text-rose-600">
+            {signOutError}
+          </p>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -294,6 +294,7 @@ export const en: Catalog = {
   'auth.signUpSubheading': 'Takes a minute, and your current progress is kept.',
   'auth.guestNotice': "You're studying as a guest. Sign in so your progress survives a new device.",
   'auth.errorGeneric': 'Something went wrong, please try again.',
+  'auth.errorSignOut': 'Could not sign out. Please try again.',
   'auth.errorInvalidCredential': 'Wrong email or password.',
   'auth.errorEmailInUse': 'This email is already registered.',
   'auth.errorWeakPassword': 'Password needs at least 6 characters.',

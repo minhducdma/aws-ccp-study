@@ -172,7 +172,9 @@ export default function Dashboard() {
             const gatePercent = phase.gateQuiz
               ? best
                 ? 100
-                : Math.round((gateAnswered / phase.gateQuiz.questions.length) * 100)
+                : phase.gateQuiz.questions.length
+                  ? Math.round((gateAnswered / phase.gateQuiz.questions.length) * 100)
+                  : 0
               : 0;
 
             return (

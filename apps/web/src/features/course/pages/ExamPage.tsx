@@ -20,7 +20,7 @@ import {
   m,
   stagger,
 } from '@study/ui';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QuestionCard from '../components/QuestionCard';
 import { useI18n } from '../../../i18n';
@@ -48,6 +48,8 @@ export default function ExamPage() {
   const [deadline, setDeadline] = useState(draft?.deadline ?? 0);
   const [now, setNow] = useState(Date.now());
   const [result, setResult] = useState<Attempt | null>(null);
+  const answersRef = useRef(answers);
+  const flaggedRef = useRef(flagged);
 
   const submit = useCallback(
     (finalAnswers: Record<string, Letter[]>) => {
@@ -85,7 +87,10 @@ export default function ExamPage() {
     if (!exam || !draft || stage !== 'intro') return;
     setIndex(draft.index);
     setAnswers(draft.answers);
-    setFlagged(new Set(draft.flagged));
+    answersRef.current = draft.answers;
+    const restoredFlags = new Set(draft.flagged);
+    setFlagged(restoredFlags);
+    flaggedRef.current = restoredFlags;
     setStartedAt(draft.startedAt);
     setDeadline(draft.deadline);
     setStage('running');
@@ -112,7 +117,10 @@ export default function ExamPage() {
   const start = () => {
     const ts = Date.now();
     setAnswers({});
-    setFlagged(new Set());
+    answersRef.current = {};
+    const emptyFlags = new Set<string>();
+    setFlagged(emptyFlags);
+    flaggedRef.current = emptyFlags;
     setIndex(0);
     setStartedAt(ts);
     setDeadline(ts + timeLimitMin * 60_000);
@@ -163,21 +171,23 @@ export default function ExamPage() {
   const urgent = remaining < 5 * 60_000;
 
   const toggle = (letter: Letter) => {
-    const current = answers[question.id] ?? [];
+    const current = answersRef.current[question.id] ?? [];
     const next = question.multi
       ? current.includes(letter)
         ? current.filter((entry) => entry !== letter)
         : [...current, letter]
       : [letter];
-    const nextAnswers = { ...answers, [question.id]: next };
+    const nextAnswers = { ...answersRef.current, [question.id]: next };
+    answersRef.current = nextAnswers;
     setAnswers(nextAnswers);
     saveExam(exam.id, { answers: nextAnswers });
   };
 
   const toggleFlag = () => {
-    const next = new Set(flagged);
+    const next = new Set(flaggedRef.current);
     if (next.has(question.id)) next.delete(question.id);
     else next.add(question.id);
+    flaggedRef.current = next;
     setFlagged(next);
     saveExam(exam.id, { flagged: [...next] });
   };
@@ -198,7 +208,7 @@ export default function ExamPage() {
       confirmLabel={t('exam.submit')}
       cancelLabel={t('common.cancel')}
       tone={unanswered > 0 ? 'danger' : 'primary'}
-      onConfirm={() => submit(answers)}
+      onConfirm={() => submit(answersRef.current)}
     />
   );
 
