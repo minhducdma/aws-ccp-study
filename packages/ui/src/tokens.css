@@ -1,0 +1,132 @@
+/**
+ * Design tokens for the study platform.
+ *
+ * Imported once by the consuming app after `@import 'tailwindcss'`, so every token below
+ * also becomes a Tailwind utility: `--color-brand-500` gives `bg-brand-500`, `--ease-out-expo`
+ * gives `ease-out-expo`, `--animate-shimmer` gives `animate-shimmer`.
+ */
+
+@theme {
+  /* Brand — the AWS amber the app has always used, promoted to a named scale */
+  --color-brand-50: #fffbeb;
+  --color-brand-100: #fef3c7;
+  --color-brand-200: #fde68a;
+  --color-brand-300: #fcd34d;
+  --color-brand-400: #fbbf24;
+  --color-brand-500: #f59e0b;
+  --color-brand-600: #d97706;
+  --color-brand-700: #b45309;
+  --color-brand-800: #92400e;
+  --color-brand-900: #78350f;
+  --color-brand-950: #451a03;
+
+  /* Surfaces, from the page backdrop up to floating overlays */
+  --color-canvas: #020617;
+  --color-surface: #0b1220;
+  --color-surface-hover: #101a2e;
+  --color-overlay: #0f172a;
+  --color-line: #1e293b;
+  --color-line-strong: #334155;
+
+  /* Status colours. Referenced by the illustrations, which paint via `var()` rather than
+     utility classes and so cannot use Tailwind's own emerald/sky scales. */
+  --color-pass: #10b981;
+  --color-info: #0ea5e9;
+
+  /* Motion. Durations stay short enough to feel instant; expo easing does the polish. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-back: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --duration-instant: 120ms;
+  --duration-quick: 200ms;
+  --duration-normal: 320ms;
+  --duration-slow: 560ms;
+
+  /* Ambient animations. Anything infinite lives in CSS rather than JS so it costs no main thread. */
+  --animate-shimmer: shimmer 1.8s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-pulse-ring: pulse-ring 2.4s var(--ease-out-expo) infinite;
+  --animate-draw: draw 1.4s var(--ease-out-expo) forwards;
+  --animate-spin-slow: spin 14s linear infinite;
+
+  /* Radix drives these through its `data-state` attributes rather than through Motion. */
+  --animate-pop-in: pop-in 150ms var(--ease-out-expo);
+  --animate-pop-out: pop-out 120ms ease-in forwards;
+
+  @keyframes pop-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  @keyframes pop-out {
+    to {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-8px);
+    }
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      opacity: 0.55;
+      transform: scale(0.92);
+    }
+    70%,
+    100% {
+      opacity: 0;
+      transform: scale(1.35);
+    }
+  }
+
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+}
+
+/**
+ * Accessibility backstop. Users who ask their OS to reduce motion get the end state of every
+ * animation instead of the journey — including the Motion-driven ones, which read this same
+ * media query through `useReducedMotion`.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* A single focus treatment for every interactive element in the design system. */
+@utility focus-ring {
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 2px;
+    border-radius: inherit;
+  }
+}
