@@ -2,13 +2,13 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import type { HTMLAttributes } from 'react';
 import { cn } from '../lib/cn';
 
-export const cardVariants = cva('rounded-2xl border transition-colors duration-200 ease-out-expo', {
+export const cardVariants = cva('rounded-3xl border transition-all duration-200 ease-out-back', {
   variants: {
     variant: {
       default: 'border-line bg-surface/60',
-      /** For cards that are themselves a link or button. */
+      /** For cards that are themselves a link or button — lifts and overshoots slightly. */
       interactive:
-        'border-line bg-surface/60 hover:border-brand-500/40 hover:bg-surface-hover focus-within:border-brand-500/40',
+        'border-line bg-surface/60 hover:-translate-y-1 hover:border-brand-500/40 hover:bg-surface-hover hover:shadow-xl hover:shadow-black/20 focus-within:border-brand-500/40',
       /** Sits above other content — used by dialogs and the mobile nav. */
       raised: 'border-line-strong bg-overlay shadow-2xl shadow-black/40',
       /** Reads as inactive: locked courses, unavailable actions. */
