@@ -4,12 +4,14 @@ import { easeOutExpo } from '../motion/presets';
 
 interface ArtProps {
   className?: string;
+  /** The alternative text. Required, because the design system carries no copy to translate. */
+  label: string;
 }
 
 const frame = (className?: string) => cn('h-auto w-40', className);
 
 /** Shown after a passing score: a summit reached, with a short confetti burst. */
-export function SummitArt({ className }: ArtProps) {
+export function SummitArt({ className, label }: ArtProps) {
   const confetti = [
     { x: -46, y: -30, tone: 'var(--color-brand-400)', rotate: -40 },
     { x: -24, y: -52, tone: 'var(--color-info)', rotate: 20 },
@@ -19,7 +21,7 @@ export function SummitArt({ className }: ArtProps) {
   ];
 
   return (
-    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label="Đã đạt">
+    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label={label}>
       <ellipse cx="100" cy="140" rx="66" ry="8" fill="var(--color-pass)" opacity="0.12" />
 
       <path d="M40 140 100 46l60 94Z" fill="var(--color-surface)" stroke="var(--color-line-strong)" strokeWidth="2" />
@@ -54,9 +56,9 @@ export function SummitArt({ className }: ArtProps) {
 }
 
 /** Shown after a failing score. Deliberately reads as "one more go", not as an error. */
-export function RetryArt({ className }: ArtProps) {
+export function RetryArt({ className, label }: ArtProps) {
   return (
-    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label="Chưa đạt">
+    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label={label}>
       <ellipse cx="100" cy="142" rx="58" ry="7" fill="var(--color-brand-500)" opacity="0.1" />
 
       <circle cx="100" cy="80" r="52" fill="var(--color-surface)" stroke="var(--color-line-strong)" strokeWidth="2" />
@@ -86,11 +88,11 @@ export function RetryArt({ className }: ArtProps) {
 }
 
 /** Empty state for the review page when nothing is left to fix. */
-export function AllClearArt({ className }: ArtProps) {
+export function AllClearArt({ className, label }: ArtProps) {
   const rows = [0, 1, 2];
 
   return (
-    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label="Không còn câu sai">
+    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label={label}>
       <rect
         x="44"
         y="24"
@@ -127,9 +129,9 @@ export function AllClearArt({ className }: ArtProps) {
 }
 
 /** Content that has not been authored yet, or a route that points at nothing. */
-export function MissingArt({ className }: ArtProps) {
+export function MissingArt({ className, label }: ArtProps) {
   return (
-    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label="Không có nội dung">
+    <svg viewBox="0 0 200 160" fill="none" className={frame(className)} role="img" aria-label={label}>
       <m.g
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}

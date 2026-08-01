@@ -9,6 +9,13 @@ export type Letter = 'A' | 'B' | 'C' | 'D' | 'E';
 /** A course with authored material is "available"; one that only has a manifest is "planned". */
 export type CourseStatus = 'available' | 'planned';
 
+/**
+ * Authored text keyed by locale. A manifest may write a plain string, which the generator
+ * normalises to `{ [defaultLocale]: text }`, so a reader always finds the same shape. A locale
+ * is present only when someone wrote that translation, so readers must fall back.
+ */
+export type LocalizedText = Record<string, string>;
+
 export interface Option {
   letter: Letter;
   text: string;
@@ -28,8 +35,9 @@ export interface Question {
 
 export interface NoteDoc {
   id: string;
-  title: string;
-  markdown: string;
+  title: LocalizedText;
+  /** One markdown body per translated file. Untranslated notes hold the default locale only. */
+  markdown: LocalizedText;
 }
 
 export interface QuestionSet {
@@ -46,7 +54,7 @@ export interface Phase {
   id: string;
   slug: string;
   order: number;
-  title: string;
+  title: LocalizedText;
   domain: number;
   weight: number;
   estimatedHours: number;
@@ -58,7 +66,9 @@ export interface Phase {
 
 export interface MockExam {
   id: string;
-  title: string;
+  num: number;
+  /** Null unless the manifest names it; the app then numbers it in the reader's language. */
+  title: LocalizedText | null;
   questions: Question[];
   passScore: number;
   timeLimitMin: number;
@@ -76,16 +86,17 @@ export interface ExamInfo {
 export interface Course {
   id: string;
   code: string;
-  title: string;
-  shortTitle: string;
+  title: LocalizedText;
+  shortTitle: LocalizedText;
   provider: string;
+  /** A stable key such as "Foundational"; the app names it in the reader's language. */
   level: string;
   levelOrder: number;
   status: CourseStatus;
-  summary: string;
+  summary: LocalizedText;
   estimatedHours: number;
   exam: ExamInfo;
-  domainLabels: Record<string, string>;
+  domainLabels: Record<string, LocalizedText>;
   phases: Phase[];
   mockExams: MockExam[];
   questionCount: number;
@@ -94,6 +105,9 @@ export interface Course {
 
 export interface ContentBundle {
   generatedAt: string;
+  /** Locale keys the generator accepts in a manifest, most preferred fallback first. */
+  locales: string[];
+  defaultLocale: string;
   courses: Course[];
   warnings: string[];
 }

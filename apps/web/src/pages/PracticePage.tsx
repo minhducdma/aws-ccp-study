@@ -15,6 +15,7 @@ import {
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QuestionCard from '../components/QuestionCard';
+import { useI18n } from '../i18n';
 import { getPhase, isCorrect } from '../lib/content';
 import { useCourse } from '../lib/course';
 import { useProgress } from '../lib/progress';
@@ -22,6 +23,7 @@ import type { Letter } from '../types';
 
 export default function PracticePage() {
   const { phaseId } = useParams();
+  const { t, tNode, localized } = useI18n();
   const { course, url } = useCourse();
   const phase = getPhase(course, phaseId);
   const { progress, savePractice, resetPractice, recordWrong, clearWrong } = useProgress(course);
@@ -30,9 +32,9 @@ export default function PracticePage() {
   if (!phase?.practice) {
     return (
       <EmptyState
-        illustration={<MissingArt />}
-        title="Chưa có câu luyện tập"
-        description="Bộ câu hỏi của phase này chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện."
+        illustration={<MissingArt label={t('art.missing')} />}
+        title={t('practice.emptyTitle')}
+        description={t('practice.emptyDescription')}
       />
     );
   }
@@ -74,18 +76,23 @@ export default function PracticePage() {
     <div className="mx-auto max-w-3xl space-y-5">
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge tone="amber">Phase {phase.order} · Luyện tập</Badge>
-          <Badge tone="sky">{phase.title}</Badge>
+          <Badge tone="amber">{t('practice.badge', { order: phase.order })}</Badge>
+          <Badge tone="sky">{localized(phase.title)}</Badge>
           <span className="ml-auto text-sm text-slate-400">
-            Đúng <span className="font-semibold text-emerald-400">{correctCount}</span>/
-            {state.checked.length} đã kiểm tra
+            {tNode(
+              'practice.checkedSummary',
+              { checked: state.checked.length },
+              {
+                correct: <span className="font-semibold text-emerald-400">{correctCount}</span>,
+              },
+            )}
           </span>
         </div>
         <div className="flex items-center gap-3">
           <Progress
             value={state.checked.length}
             max={questions.length}
-            label={`Tiến độ luyện tập phase ${phase.order}`}
+            label={t('practice.progressLabel', { order: phase.order })}
           />
           <span className="shrink-0 text-xs text-slate-500">
             {state.checked.length}/{questions.length}
@@ -95,7 +102,7 @@ export default function PracticePage() {
 
       <div className="flex items-center justify-between text-sm">
         <span className="text-slate-400">
-          Câu {index + 1} / {questions.length}
+          {t('common.questionPosition', { index: index + 1, total: questions.length })}
         </span>
         <div className="flex gap-2">
           <Button
@@ -105,17 +112,18 @@ export default function PracticePage() {
             aria-expanded={showGrid}
             aria-controls="practice-grid"
           >
-            {showGrid ? 'Ẩn danh sách' : 'Xem danh sách câu'}
+            {showGrid ? t('practice.hideGrid') : t('practice.showGrid')}
           </Button>
           <ConfirmDialog
             trigger={
               <Button tone="ghost" size="sm" icon={<RotateIcon width={14} height={14} />}>
-                Làm lại từ đầu
+                {t('practice.restart')}
               </Button>
             }
-            title="Làm lại bộ luyện tập này từ đầu?"
-            description={`Đáp án đã chọn và ${state.checked.length} câu đã kiểm tra của bộ này sẽ bị xoá. Sổ tay câu sai vẫn được giữ nguyên.`}
-            confirmLabel="Làm lại"
+            title={t('practice.restartTitle')}
+            description={t('practice.restartDescription', { count: state.checked.length })}
+            confirmLabel={t('common.retry')}
+            cancelLabel={t('common.cancel')}
             onConfirm={() => resetPractice(setId)}
           />
         </div>
@@ -124,17 +132,22 @@ export default function PracticePage() {
       {showGrid && (
         <m.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}>
           <Card inset="sm">
-            <nav id="practice-grid" aria-label="Danh sách câu luyện tập" className="grid grid-cols-8 gap-1.5 sm:grid-cols-12">
+            <nav id="practice-grid" aria-label={t('practice.gridLabel')} className="grid grid-cols-8 gap-1.5 sm:grid-cols-12">
               {questions.map((q, i) => {
                 const done = state.checked.includes(q.id);
                 const ok = done && isCorrect(q, state.answers[q.id]);
+                const status = done
+                  ? ok
+                    ? ('practice.gridCorrect' as const)
+                    : ('practice.gridWrong' as const)
+                  : ('practice.gridTodo' as const);
                 return (
                   <button
                     key={q.id}
                     type="button"
                     onClick={() => goTo(i)}
                     aria-current={i === index ? 'true' : undefined}
-                    aria-label={`Câu ${i + 1}${done ? (ok ? ', đã đúng' : ', đã sai') : ', chưa làm'}`}
+                    aria-label={t(status, { number: i + 1 })}
                     className={`focus-ring h-8 rounded-md text-xs font-semibold transition-all duration-200 hover:scale-105 ${
                       i === index
                         ? 'bg-brand-500 text-slate-950'
@@ -175,22 +188,22 @@ export default function PracticePage() {
           onClick={() => goTo(index - 1)}
           disabled={index === 0}
         >
-          Câu trước
+          {t('common.previousQuestion')}
         </Button>
         <div className="flex gap-2">
           {!checked ? (
             <Button onClick={check} disabled={selected.length === 0}>
-              Kiểm tra đáp án
+              {t('practice.check')}
             </Button>
           ) : index < questions.length - 1 ? (
             <Button onClick={() => goTo(index + 1)}>
-              Câu tiếp
+              {t('common.nextQuestion')}
               <ArrowRightIcon width={16} height={16} />
             </Button>
           ) : (
             phase.gateQuiz && (
               <ButtonLink to={url(`/exam/${phase.gateQuiz.id}`)}>
-                Làm Gate Quiz
+                {t('practice.toGateQuiz')}
                 <ArrowRightIcon width={16} height={16} />
               </ButtonLink>
             )
@@ -202,18 +215,23 @@ export default function PracticePage() {
         <m.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <Card inset="md" className="border-emerald-500/30 bg-emerald-500/5">
             <p className="font-semibold text-white">
-              Xong toàn bộ {questions.length} câu luyện tập — đúng {correctCount} câu (
-              {Math.round((correctCount / questions.length) * 100)}%)
+              {t('practice.doneHeading', {
+                total: questions.length,
+                correct: correctCount,
+                percent: Math.round((correctCount / questions.length) * 100),
+              })}
             </p>
             <p className="mt-1 text-sm text-slate-400">
               {correctCount / questions.length >= 0.8
-                ? 'Tỉ lệ này đủ tốt để làm Gate Quiz.'
-                : 'Nên đọc lại notes và ôn phần câu sai trước khi vào Gate Quiz.'}
+                ? t('practice.doneReady')
+                : t('practice.doneNotReady')}
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <ButtonLink to={url(`/exam/${phase.gateQuiz.id}`)}>Làm Gate Quiz</ButtonLink>
+              <ButtonLink to={url(`/exam/${phase.gateQuiz.id}`)}>
+                {t('practice.toGateQuiz')}
+              </ButtonLink>
               <ButtonLink to={url('/review')} tone="secondary">
-                Ôn câu sai
+                {t('exam.toReview')}
               </ButtonLink>
             </div>
           </Card>

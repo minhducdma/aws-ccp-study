@@ -14,23 +14,30 @@ import {
   type CourseLevel,
 } from '@study/ui';
 import { Link } from 'react-router-dom';
+import LocaleSwitch from '../components/LocaleSwitch';
+import { useI18n, type I18n, type MessageKey } from '../i18n';
 import { content, courses } from '../lib/content';
 import { courseUrl } from '../lib/course';
 import { emptyCourseProgress, hasPassed, useAllProgress } from '../lib/progress';
 import type { Course, CourseProgress } from '../types';
 
-const LEVEL_BLURB: Record<string, string> = {
-  Foundational: 'Không cần kinh nghiệm nền tảng. Điểm khởi đầu cho người mới vào AWS.',
-  Associate: 'Cần khoảng một năm làm việc thực tế với AWS.',
-  Professional: 'Dành cho người đã có hai năm trở lên vận hành hệ thống lớn trên AWS.',
-  Specialty: 'Đi sâu vào một lĩnh vực hẹp, thường học sau khi đã có chứng chỉ Associate.',
-};
+const KNOWN_LEVELS = ['Foundational', 'Associate', 'Professional', 'Specialty'] as const;
 
 function levelKey(level: string): CourseLevel {
   const key = level.toLowerCase();
   return (['foundational', 'associate', 'professional', 'specialty'].includes(key)
     ? key
     : 'foundational') as CourseLevel;
+}
+
+/**
+ * A level is a fixed key in the manifest, so it is named from the catalogue. An unknown level is
+ * shown as authored rather than dropped.
+ */
+function levelText(level: string, suffix: '' | '.blurb', i18n: I18n): string {
+  const known = (KNOWN_LEVELS as readonly string[]).includes(level);
+  if (!known) return suffix === '' ? level : '';
+  return i18n.t(`level.${level}${suffix}` as MessageKey);
 }
 
 function courseStats(course: Course, progress: CourseProgress) {
@@ -48,7 +55,10 @@ function courseStats(course: Course, progress: CourseProgress) {
 }
 
 function AvailableCard({ course, progress }: { course: Course; progress: CourseProgress }) {
+  const i18n = useI18n();
+  const { t, localized } = i18n;
   const stats = courseStats(course, progress);
+  const title = localized(course.title);
 
   return (
     <m.li variants={fadeUp} whileHover={{ y: -4 }} whileTap={{ scale: 0.99 }} className="list-none">
@@ -71,14 +81,14 @@ function AvailableCard({ course, progress }: { course: Course; progress: CourseP
             <Badge tone="amber">{course.code}</Badge>
             <Badge tone="sky" className="gap-1.5">
               <LevelGlyph level={levelKey(course.level)} />
-              {course.level}
+              {levelText(course.level, '', i18n)}
             </Badge>
             {stats.started ? (
               <Badge tone="green" dot>
-                Đang học
+                {t('catalog.inProgress')}
               </Badge>
             ) : (
-              <Badge tone="slate">Sẵn sàng</Badge>
+              <Badge tone="slate">{t('catalog.notStarted')}</Badge>
             )}
           </div>
           {stats.readiness > 0 && (
@@ -86,35 +96,43 @@ function AvailableCard({ course, progress }: { course: Course; progress: CourseP
               value={stats.readiness}
               max={100}
               size={52}
-              label={`Mức sẵn sàng ${course.code}`}
+              label={t('catalog.readinessRing', { code: course.code })}
             />
           )}
         </div>
 
         <h3 className="mt-3 font-semibold text-white transition-colors group-hover:text-brand-200">
-          {course.title}
+          {title}
         </h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{course.summary}</p>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{localized(course.summary)}</p>
 
         <div className="mt-4 space-y-2">
           <div className="flex items-center justify-between text-xs text-slate-500">
             <span>
-              {stats.passedPhases}/{stats.totalPhases} phase đã pass
+              {t('catalog.phasesPassed', {
+                passed: stats.passedPhases,
+                total: stats.totalPhases,
+                count: stats.totalPhases,
+              })}
             </span>
-            <span>{stats.readiness}% đề thi đã nắm</span>
+            <span>{t('catalog.examCovered', { percent: stats.readiness })}</span>
           </div>
           <Progress
             value={stats.readiness}
             max={100}
             tone="amber"
-            label={`Mức sẵn sàng cho ${course.title}`}
+            label={t('catalog.readinessBar', { title })}
           />
         </div>
 
         <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
           <span className="inline-flex items-center gap-1.5">
             <ClockIcon width={14} height={14} />
-            {course.questionCount} câu · {course.mockExams.length} đề thử · ~{course.estimatedHours} giờ
+            {t('catalog.courseMeta', {
+              questions: course.questionCount,
+              mocks: course.mockExams.length,
+              hours: course.estimatedHours,
+            })}
           </span>
           <ChevronRightIcon
             width={16}
@@ -128,6 +146,9 @@ function AvailableCard({ course, progress }: { course: Course; progress: CourseP
 }
 
 function PlannedCard({ course }: { course: Course }) {
+  const i18n = useI18n();
+  const { t, localized } = i18n;
+
   return (
     <m.li variants={fadeUp} className="list-none">
       <Card variant="muted" inset="md" className="h-full">
@@ -135,20 +156,22 @@ function PlannedCard({ course }: { course: Course }) {
           <Badge tone="slate">{course.code}</Badge>
           <Badge tone="slate" className="gap-1.5">
             <LevelGlyph level={levelKey(course.level)} />
-            {course.level}
+            {levelText(course.level, '', i18n)}
           </Badge>
           <span className="ml-auto text-slate-600">
             <LockIcon width={16} height={16} />
-            <span className="sr-only">Chưa mở</span>
+            <span className="sr-only">{t('catalog.locked')}</span>
           </span>
         </div>
 
-        <h3 className="mt-3 font-semibold text-slate-300">{course.title}</h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{course.summary}</p>
+        <h3 className="mt-3 font-semibold text-slate-300">{localized(course.title)}</h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{localized(course.summary)}</p>
 
         <p className="mt-4 text-xs text-slate-600">
-          Chưa mở vì nội dung đang được soạn · {course.exam.totalQuestions} câu ·{' '}
-          {course.exam.durationMin} phút
+          {t('catalog.plannedMeta', {
+            questions: course.exam.totalQuestions,
+            minutes: course.exam.durationMin,
+          })}
         </p>
       </Card>
     </m.li>
@@ -156,6 +179,8 @@ function PlannedCard({ course }: { course: Course }) {
 }
 
 export default function CatalogPage() {
+  const i18n = useI18n();
+  const { t } = i18n;
   const store = useAllProgress();
 
   const levels = [...new Set(courses.map((c) => c.level))].sort(
@@ -168,6 +193,10 @@ export default function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-8 sm:py-14">
+      <div className="mb-6 flex justify-end">
+        <LocaleSwitch />
+      </div>
+
       <m.header
         className="mb-12 grid items-center gap-8 md:grid-cols-[1.1fr_0.9fr]"
         variants={stagger(0.08)}
@@ -179,42 +208,45 @@ export default function CatalogPage() {
             variants={fadeUp}
             className="text-xs font-semibold tracking-widest text-brand-500 uppercase"
           >
-            Lộ trình chứng chỉ AWS
+            {t('catalog.eyebrow')}
           </m.p>
           <m.h1 variants={fadeUp} className="mt-2 text-3xl font-bold text-white sm:text-4xl">
-            Chọn chứng chỉ để bắt đầu
+            {t('catalog.heading')}
           </m.h1>
           <m.p variants={fadeUp} className="mt-3 text-sm leading-relaxed text-slate-400">
-            Mỗi chứng chỉ là một khoá học độc lập: chia phase theo đúng trọng số domain của kỳ thi, có
-            notes, ngân hàng câu hỏi lấy từ đề gốc, gate quiz chặn giữa các phase và đề thi thử bấm giờ.
-            Tiến độ được lưu riêng cho từng chứng chỉ.
+            {t('catalog.intro')}
           </m.p>
         </div>
         <m.div variants={fadeUp} className="hidden md:block">
-          <RoadmapArt />
+          <RoadmapArt label={t('art.roadmap')} />
         </m.div>
       </m.header>
 
       {available.length === 0 && (
         <Card inset="md" className="mb-10 border-rose-500/30 bg-rose-500/5 text-sm text-slate-300">
-          Chưa có khoá học nào sẵn sàng. Thêm nội dung vào <code>courses/&lt;id&gt;/</code> rồi chạy lại{' '}
-          <code className="text-brand-300">npm run build</code>.
+          {i18n.tNode(
+            'catalog.empty',
+            {},
+            {
+              path: <code>courses/&lt;id&gt;/</code>,
+              command: <code className="text-brand-300">npm run build</code>,
+            },
+          )}
         </Card>
       )}
 
       <div className="space-y-10">
         {levels.map((level) => {
           const group = courses.filter((c) => c.level === level);
+          const blurb = levelText(level, '.blurb', i18n);
           return (
             <section key={level} aria-labelledby={`level-${level}`}>
               <div className="mb-4">
                 <h2 id={`level-${level}`} className="flex items-center gap-2 text-lg font-bold text-white">
                   <LevelGlyph level={levelKey(level)} />
-                  {level}
+                  {levelText(level, '', i18n)}
                 </h2>
-                {LEVEL_BLURB[level] && (
-                  <p className="mt-0.5 text-sm text-slate-500">{LEVEL_BLURB[level]}</p>
-                )}
+                {blurb && <p className="mt-0.5 text-sm text-slate-500">{blurb}</p>}
               </div>
 
               <m.ul
@@ -244,7 +276,7 @@ export default function CatalogPage() {
       {content.warnings.length > 0 && (
         <Card inset="md" className="mt-10 border-rose-500/30 bg-rose-500/5">
           <p className="text-sm font-semibold text-rose-300">
-            {content.warnings.length} cảnh báo khi đọc nội dung markdown
+            {t('common.markdownWarnings', { count: content.warnings.length })}
           </p>
           <ul className="mt-2 space-y-1 text-xs text-slate-400">
             {content.warnings.slice(0, 8).map((w) => (

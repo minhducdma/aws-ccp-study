@@ -2,6 +2,7 @@ import { MotionProvider } from '@study/ui';
 import { renderToString } from 'react-dom/server';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../src/App';
+import { I18nProvider, LOCALES, type Locale } from '../src/i18n';
 import { courses } from '../src/lib/content';
 import { courseUrl } from '../src/lib/course';
 
@@ -24,13 +25,19 @@ export function routes(): string[] {
   return list;
 }
 
+export function locales(): readonly Locale[] {
+  return LOCALES;
+}
+
 /** Mirrors the provider stack in main.tsx, otherwise the `m` components throw. */
-export function render(route: string): string {
+export function render(route: string, locale: Locale): string {
   return renderToString(
-    <MotionProvider>
-      <MemoryRouter initialEntries={[route]}>
-        <App />
-      </MemoryRouter>
-    </MotionProvider>,
+    <I18nProvider locale={locale}>
+      <MotionProvider>
+        <MemoryRouter initialEntries={[route]}>
+          <App />
+        </MemoryRouter>
+      </MotionProvider>
+    </I18nProvider>,
   );
 }

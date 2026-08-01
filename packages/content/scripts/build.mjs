@@ -15,6 +15,39 @@ const VERBOSE = process.argv.includes('--verbose');
 const read = (path) => (existsSync(path) ? readFileSync(path, 'utf8') : null);
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
 
+// Locales the manifests may write. The web app reads this list back from the bundle, so both
+// sides always agree on what a locale key means.
+const LOCALES = ['vi', 'en'];
+const DEFAULT_LOCALE = 'vi';
+
+// Used when a phase declares no notes entry of its own.
+const DEFAULT_NOTE_TITLE = { vi: 'Kiến thức trọng tâm', en: 'Core concepts' };
+
+/**
+ * A manifest string is either plain text or an object keyed by locale:
+ *   "summary": "Nền tảng…"
+ *   "summary": { "vi": "Nền tảng…", "en": "Cloud fundamentals…" }
+ * Both are normalised to the object form, so the app only ever resolves one shape.
+ */
+function localized(value, { label, field, warn }) {
+  if (value == null) return null;
+  if (typeof value === 'string') return { [DEFAULT_LOCALE]: value };
+
+  const out = {};
+  for (const [locale, text] of Object.entries(value)) {
+    if (!LOCALES.includes(locale)) {
+      warn?.(`${label}: ${field} uses locale "${locale}", which is not one of ${LOCALES.join(', ')}.`);
+      continue;
+    }
+    if (typeof text === 'string' && text.trim()) out[locale] = text;
+  }
+  if (!out[DEFAULT_LOCALE] && Object.keys(out).length === 0) {
+    warn?.(`${label}: ${field} has no text in any known locale.`);
+    return null;
+  }
+  return out;
+}
+
 const MULTI_HINTS = [
   /\(choose\s+two\)/i,
   /\(select\s+two\)/i,
@@ -245,21 +278,47 @@ function loadPhase(courseDir, courseId, phaseConfig, order, warn) {
 
   if (!existsSync(dir)) {
     warn(`${label}: phase directory is missing, the phase will show as unfinished.`);
-    return { ...phaseConfig, order, notes: [], practice: null, gateQuiz: null, ready: false };
+    return {
+      ...phaseConfig,
+      slug: phaseConfig.dir,
+      order,
+      title: localized(phaseConfig.title, { label, field: 'title', warn }),
+      notes: [],
+      practice: null,
+      gateQuiz: null,
+      ready: false,
+    };
   }
 
   const notes = [];
-  for (const note of phaseConfig.notes ?? [{ file: 'notes.md', title: 'Kiến thức trọng tâm' }]) {
-    const markdown = read(join(dir, note.file));
-    if (markdown) {
-      notes.push({
-        id: `${phaseConfig.id}-${note.file.replace(/\.md$/, '')}`,
-        title: note.title,
-        markdown,
-      });
-    } else {
-      warn(`${label}: ${note.file} is missing.`);
+  for (const note of phaseConfig.notes ?? [{ file: 'notes.md', title: DEFAULT_NOTE_TITLE }]) {
+    // `file` names one markdown file per locale. The default-locale file is the one that must
+    // exist; a translation is optional and the app falls back when it is not there.
+    const files =
+      typeof note.file === 'string' ? { [DEFAULT_LOCALE]: note.file } : (note.file ?? {});
+    const baseFile = files[DEFAULT_LOCALE] ?? Object.values(files)[0];
+    if (!baseFile) {
+      warn(`${label}: a notes entry declares no file.`);
+      continue;
     }
+
+    const markdown = {};
+    for (const [locale, file] of Object.entries(files)) {
+      if (!LOCALES.includes(locale)) {
+        warn(`${label}: ${file} is listed under locale "${locale}", which is not one of ${LOCALES.join(', ')}.`);
+        continue;
+      }
+      const text = read(join(dir, file));
+      if (text) markdown[locale] = text;
+      else warn(`${label}: ${file} is missing.`);
+    }
+
+    if (Object.keys(markdown).length === 0) continue;
+    notes.push({
+      id: `${phaseConfig.id}-${baseFile.replace(/\.md$/, '')}`,
+      title: localized(note.title, { label, field: `notes/${baseFile} title`, warn }) ?? DEFAULT_NOTE_TITLE,
+      markdown,
+    });
   }
 
   const practiceQuestions = buildQuestionSet({
@@ -289,7 +348,7 @@ function loadPhase(courseDir, courseId, phaseConfig, order, warn) {
     id: phaseConfig.id,
     slug: phaseConfig.dir,
     order,
-    title: phaseConfig.title,
+    title: localized(phaseConfig.title, { label, field: 'title', warn }),
     domain: phaseConfig.domain,
     weight: phaseConfig.weight,
     estimatedHours: phaseConfig.estimatedHours,
@@ -327,7 +386,14 @@ function loadMockExams(courseDir, courseId, config, warn) {
       if (!questions) return null;
       return {
         id: `mock-${num}`,
-        title: `Mock Exam ${num}`,
+        num,
+        // Left null unless the manifest names the exam, so the app can write "Đề thi thử 1" or
+        // "Mock exam 1" from its own catalogue instead of freezing one language into the data.
+        title: localized(config.titles?.[String(num)], {
+          label: `${courseId}/mock-exams`,
+          field: `title of mock ${num}`,
+          warn,
+        }),
         questions,
         passScore: Math.ceil(questions.length * (config.passRatio ?? 0.7)),
         timeLimitMin: config.timeLimitMin ?? 90,
@@ -344,20 +410,26 @@ function loadCourse(courseId) {
   const manifest = readJson(manifestPath);
   const warnings = [];
   const warn = (msg) => warnings.push(msg);
+  const text = (value, field) => localized(value, { label: courseId, field, warn });
 
   const base = {
     id: manifest.id ?? courseId,
     code: manifest.code,
-    title: manifest.title,
-    shortTitle: manifest.shortTitle ?? manifest.title,
+    title: text(manifest.title, 'title'),
+    shortTitle: text(manifest.shortTitle ?? manifest.title, 'shortTitle'),
     provider: manifest.provider ?? 'AWS',
     level: manifest.level ?? 'Foundational',
     levelOrder: manifest.levelOrder ?? 1,
     status: manifest.status ?? 'planned',
-    summary: manifest.summary ?? '',
+    summary: text(manifest.summary, 'summary') ?? {},
     estimatedHours: manifest.estimatedHours ?? 0,
     exam: { code: manifest.code, ...manifest.exam },
-    domainLabels: manifest.domainLabels ?? {},
+    domainLabels: Object.fromEntries(
+      Object.entries(manifest.domainLabels ?? {}).map(([domain, value]) => [
+        domain,
+        text(value, `domainLabels.${domain}`),
+      ]),
+    ),
   };
 
   // A planned course only has a manifest; the catalog shows it locked.
@@ -391,6 +463,8 @@ const warnings = courses.flatMap((c) => c.warnings);
 
 const content = {
   generatedAt: new Date().toISOString(),
+  locales: LOCALES,
+  defaultLocale: DEFAULT_LOCALE,
   courses,
   warnings,
 };

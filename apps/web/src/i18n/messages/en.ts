@@ -1,0 +1,265 @@
+import type { Catalog } from './vi';
+
+/**
+ * English. The type comes from the Vietnamese catalogue, so adding a key there without
+ * translating it here fails the build instead of showing a blank label to a reader.
+ */
+export const en: Catalog = {
+  'app.title': 'AWS certification study platform',
+  'app.description':
+    'Self-study courses for the AWS exams, with notes, a question bank, gate quizzes and timed mock exams.',
+
+  'locale.label': 'Language',
+  'locale.switchTo': 'Switch to {name}',
+  'language.vi': 'Vietnamese',
+  'language.en': 'English',
+
+  'common.cancel': 'Cancel',
+  'common.check': 'Check',
+  'common.retry': 'Try again',
+  'common.previousQuestion': 'Previous',
+  'common.nextQuestion': 'Next',
+  'common.questionPosition': 'Question {index} of {total}',
+  'common.questionNumber': 'Question {number}',
+  'common.markdownWarnings': {
+    one: '{count} warning while reading the markdown',
+    other: '{count} warnings while reading the markdown',
+  },
+
+  'level.Foundational': 'Foundational',
+  'level.Associate': 'Associate',
+  'level.Professional': 'Professional',
+  'level.Specialty': 'Specialty',
+  'level.Foundational.blurb':
+    'No background needed. This is where you start if AWS is new to you.',
+  'level.Associate.blurb': 'Expects about a year of hands-on work with AWS.',
+  'level.Professional.blurb':
+    'For people who have run large systems on AWS for two years or more.',
+  'level.Specialty.blurb':
+    'Goes deep into one narrow field, usually after an Associate certification.',
+
+  'art.passed': 'Passed',
+  'art.failed': 'Not passed',
+  'art.allClear': 'No wrong answers left',
+  'art.missing': 'No content',
+  'art.roadmap': 'A study path climbing through four stages',
+
+  'nav.skip': 'Skip navigation',
+  'nav.openMenu': 'Open the navigation menu',
+  'nav.courseContents': 'Course contents',
+  'nav.courseNavigation': 'Course navigation',
+  'nav.allCertifications': 'All certifications',
+  'nav.overview': 'Overview',
+  'nav.wrongAnswers': 'Wrong answers',
+  'nav.practice': 'Practice ({count})',
+  'nav.gateQuiz': 'Gate quiz ({count})',
+  'nav.mockExams': 'Mock exams',
+  'nav.mockExam': {
+    one: '{title} ({count} question)',
+    other: '{title} ({count} questions)',
+  },
+  'nav.beingWritten': 'Being written…',
+
+  'phase.label': 'Phase {order}',
+  'phase.labelWithTitle': 'Phase {order}: {title}',
+  'phase.headerSummary': 'Phase {order} · {weight}%',
+  'phase.weightOfExam': '{weight}% of the exam',
+  'phase.passed': 'Passed',
+  'phase.locked': 'Locked',
+  'phase.draft': 'Draft',
+
+  'catalog.eyebrow': 'AWS certification roadmap',
+  'catalog.heading': 'Pick a certification to start',
+  'catalog.intro':
+    'Every certification is a course of its own: phases follow the domain weights of the real exam, each with notes, questions taken from the source exams, a gate quiz between phases and timed mock exams. Progress is kept separately for each certification.',
+  'catalog.inProgress': 'In progress',
+  'catalog.notStarted': 'Ready',
+  'catalog.locked': 'Locked',
+  'catalog.readinessRing': '{code} readiness',
+  'catalog.readinessBar': 'Readiness for {title}',
+  'catalog.phasesPassed': {
+    one: '{passed}/{total} phase passed',
+    other: '{passed}/{total} phases passed',
+  },
+  'catalog.examCovered': '{percent}% of the exam covered',
+  'catalog.courseMeta': '{questions} questions · {mocks} mock exams · ~{hours} h',
+  'catalog.plannedMeta':
+    'Locked while the content is being written · {questions} questions · {minutes} minutes',
+  'catalog.empty': 'No course is ready yet. Add content under {path}, then run {command} again.',
+
+  'dashboard.eyebrow': '~{hours} h of study · {code}',
+  'dashboard.intro': {
+    one: '{count} phase, weighted like the domains of the real exam. Read the notes, work through real questions, then pass the gate quiz to open the next phase.',
+    other:
+      '{count} phases, weighted like the domains of the real exam. In each one you read the notes, work through real questions, then pass the gate quiz to open the next phase.',
+  },
+  'dashboard.stat.readiness': 'Readiness',
+  'dashboard.stat.questions': 'Questions in the course',
+  'dashboard.stat.questionsHint': 'taken from the source practice exams',
+  'dashboard.stat.wrong': 'Still wrong',
+  'dashboard.stat.wrongHint': 'waiting to be reviewed',
+  'dashboard.stat.passScore': 'Real pass score',
+  'dashboard.stat.passScoreHint': '{questions} questions · {minutes} minutes',
+  'dashboard.next.eyebrow': 'Up next',
+  'dashboard.next.readNotes': 'Start with the core concepts.',
+  'dashboard.next.keepPracticing': 'Keep practising, then take the gate quiz.',
+  'dashboard.next.cta': 'Keep studying',
+  'dashboard.phasesHeading': {
+    one: '{count} phase',
+    other: '{count} phases',
+  },
+  'dashboard.phaseProgress':
+    'Notes {notesRead}/{notesTotal} · Practice {checked}/{practiceTotal} · Gate quiz {gateScore}',
+  'dashboard.gateQuizNotTaken': 'not taken',
+  'dashboard.practiceProgressLabel': 'Practice progress of phase {order}',
+  'dashboard.notes': 'Notes',
+  'dashboard.practice': 'Practice',
+  'dashboard.gateQuiz': 'Gate quiz',
+  'dashboard.mockHeading': 'Mock exams',
+  'dashboard.mockEmpty':
+    'The mock exams are being written. Run {command} again once the markdown files are there.',
+  'dashboard.mockMeta': '{questions} questions · {minutes} minutes · needs ≥{passScore} right',
+  'dashboard.mockBest': ' · best score {score}',
+  'dashboard.mockRetake': 'Take it again',
+  'dashboard.mockStart': 'Start',
+  'dashboard.freeMode': 'Free study mode',
+  'dashboard.freeModeHint':
+    'Unlocks every phase so you can jump anywhere. Gate quiz pass marks are still recorded the same way.',
+  'dashboard.reset': 'Clear progress',
+  'dashboard.resetTitle': 'Clear all progress for {code}?',
+  'dashboard.resetDescription':
+    'Gate quiz scores, mock exam history, notes marked as read and the wrong-answer notebook of this course are lost. Other certifications are untouched.',
+
+  'notes.emptyTitle': 'Nothing here yet',
+  'notes.emptyDescription':
+    'The notes of this phase are still being written. Run npm run build again once the markdown files are there.',
+  'notes.eyebrow': 'Phase {order} · {weight}% of the exam',
+  'notes.heading': '{phase} — {note}',
+  'notes.markRead': 'Mark as read',
+  'notes.read': 'Read',
+  'notes.toPractice': {
+    one: 'Go to practice ({count} question)',
+    other: 'Go to practice ({count} questions)',
+  },
+  'notes.outline': 'Table of contents',
+  'notes.inThisPage': 'On this page',
+  'notes.untranslated': 'This page has no {language} version yet, so it is shown in {original}.',
+
+  'practice.emptyTitle': 'No practice questions yet',
+  'practice.emptyDescription':
+    'The question set of this phase is still being written. Run npm run build again once the markdown files are there.',
+  'practice.badge': 'Phase {order} · Practice',
+  'practice.checkedSummary': '{correct}/{checked} checked answers right',
+  'practice.progressLabel': 'Practice progress of phase {order}',
+  'practice.showGrid': 'Show the question list',
+  'practice.hideGrid': 'Hide the list',
+  'practice.gridLabel': 'Practice question list',
+  'practice.gridCorrect': 'Question {number}, answered right',
+  'practice.gridWrong': 'Question {number}, answered wrong',
+  'practice.gridTodo': 'Question {number}, not answered yet',
+  'practice.restart': 'Start over',
+  'practice.restartTitle': 'Start this practice set over?',
+  'practice.restartDescription': {
+    one: 'The answers you picked and the {count} question you checked in this set are cleared. The wrong-answer notebook is kept.',
+    other:
+      'The answers you picked and the {count} questions you checked in this set are cleared. The wrong-answer notebook is kept.',
+  },
+  'practice.check': 'Check the answer',
+  'practice.toGateQuiz': 'Take the gate quiz',
+  'practice.doneHeading':
+    'All {total} practice questions done — {correct} right ({percent}%)',
+  'practice.doneReady': 'That is good enough to take the gate quiz.',
+  'practice.doneNotReady':
+    'Read the notes again and go through your wrong answers before the gate quiz.',
+
+  'exam.mockTitle': 'Mock exam {number}',
+  'exam.gateLabel': 'Gate quiz — Phase {order}: {title}',
+  'exam.emptyTitle': 'This exam does not exist yet',
+  'exam.emptyDescription':
+    'The exam is still being written. Run npm run build again once the markdown files are there.',
+  'exam.kindMock': 'Mock exam',
+  'exam.kindGate': 'Gate quiz',
+  'exam.alreadyPassed': 'You already passed this one. Take it again to revise.',
+  'exam.statQuestions': 'Questions',
+  'exam.statTime': 'Time',
+  'exam.statTimeValue': '{minutes} min',
+  'exam.statNeeded': 'Needed',
+  'exam.rulesTitle': 'Rules',
+  'exam.rule.timer': 'The clock never stops, and the exam is submitted for you when time runs out.',
+  'exam.rule.noFeedback':
+    'No right-or-wrong feedback while you answer — you see the result only after you submit.',
+  'exam.rule.guess':
+    'An unanswered question counts as wrong, and a wrong guess costs nothing extra, so answer everything.',
+  'exam.rule.multi': 'A multiple-answer question scores only when every right choice is picked.',
+  'exam.rule.doNotClose':
+    'Closing the tab loses your answers, so set aside {minutes} uninterrupted minutes.',
+  'exam.start': 'Start the exam',
+  'exam.historyTitle': 'Past attempts',
+  'exam.historyPass': '· Passed',
+  'exam.historyFail': '· Not passed',
+  'exam.timeRemaining': '{time} remaining',
+  'exam.submit': 'Submit',
+  'exam.submitTitle': 'Submit and see the result?',
+  'exam.submitUnanswered': {
+    one: '{count} question is still unanswered and will count as wrong. Submit anyway?',
+    other: '{count} questions are still unanswered and will count as wrong. Submit anyway?',
+  },
+  'exam.submitComplete': 'You answered every question. Nothing can be changed after you submit.',
+  'exam.answeredLabel': 'Questions answered',
+  'exam.answeredCount': '{answered}/{total} answered',
+  'exam.questionListLabel': 'Question list',
+  'exam.gridAnswered': 'Question {number}, answered',
+  'exam.gridUnanswered': 'Question {number}, not answered',
+  'exam.gridAnsweredFlagged': 'Question {number}, answered, flagged',
+  'exam.gridUnansweredFlagged': 'Question {number}, not answered, flagged',
+  'exam.flag': '○ Flag for review',
+  'exam.unflag': '● Remove the flag',
+  'exam.flagHint': 'A flagged question shows a blue dot on the grid so you can come back to it.',
+  'exam.resultPassed': 'PASSED',
+  'exam.resultFailed': 'NOT PASSED',
+  'exam.resultScore': '{percent}% — {verdict}',
+  'exam.resultNeeded': 'Needed ≥{passScore}/{total} · finished in {duration}',
+  'exam.toNextPhase': 'Go to phase {order}',
+  'exam.toReview': 'Review wrong answers',
+  'exam.toOverview': 'Back to the overview',
+  'exam.domainHeading': 'Breakdown by domain',
+  'exam.domainRow': 'Domain {domain} — {label}',
+  'exam.domainHint':
+    'Read the notes of the matching phase again for any domain below 70% before the real exam.',
+  'exam.reviewHeading': 'Review your answers',
+  'exam.tabWrong': 'Wrong ({count})',
+  'exam.tabAll': 'All ({count})',
+  'exam.nothingWrong': 'Nothing wrong. Well done.',
+
+  'question.multiAnswer': 'More than one answer',
+  'question.correct': 'Right',
+  'question.wrong': 'Wrong',
+  'question.groupMulti': 'Pick one or more answers',
+  'question.groupSingle': 'Pick one answer',
+  'question.optionCorrect': ' (correct answer)',
+  'question.optionPickedWrong': ' (you picked this, it is wrong)',
+  'question.answerIs': 'Answer: {letters}',
+  'question.noExplanation': 'No explanation was written for this question.',
+
+  'review.emptyTitle': 'No wrong answers yet',
+  'review.emptyDescription':
+    'Every question you get wrong in practice, in a gate quiz or in a mock exam lands here to be reviewed. Answer it right once more and it leaves the list.',
+  'review.badge': 'Wrong-answer notebook',
+  'review.heading': {
+    one: '{count} question to review',
+    other: '{count} questions to review',
+  },
+  'review.intro':
+    'These are the questions you have answered wrong, the most-missed one first. Answer one right again and it leaves the list. Read this list once more right before the real exam.',
+  'review.timesWrong': {
+    one: 'Wrong {count} time',
+    other: 'Wrong {count} times',
+  },
+  'review.tryAgain': 'Try again',
+  'review.markKnown': 'Mark as learned',
+
+  'content.practiceContext': 'Phase {order} — {title} · Practice',
+  'content.gateQuizContext': 'Phase {order} — {title} · Gate quiz',
+  'content.unclassifiedDomain': 'Unclassified',
+  'content.domain': 'Domain {domain}',
+};

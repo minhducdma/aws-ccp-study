@@ -10,9 +10,11 @@ import {
 } from '@study/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Navigate, Outlet, useLocation, useParams } from 'react-router-dom';
-import { getCourse } from '../lib/content';
+import { useI18n } from '../i18n';
+import { getCourse, mockExamTitle } from '../lib/content';
 import { CourseContext, courseUrl, useCourse } from '../lib/course';
 import { hasPassed, useProgress } from '../lib/progress';
+import LocaleSwitch from './LocaleSwitch';
 
 function NavItem({
   to,
@@ -76,6 +78,8 @@ function CourseShell({
   setMenuOpen: (open: boolean) => void;
   pathname: string;
 }) {
+  const i18n = useI18n();
+  const { t, localized } = i18n;
   const { course, url } = useCourse();
   const { progress } = useProgress(course);
   const wrongCount = Object.keys(progress.wrong).length;
@@ -84,20 +88,20 @@ function CourseShell({
   useEffect(() => setMenuOpen(false), [pathname, setMenuOpen]);
 
   const sidebar = (
-    <nav className="space-y-6 p-4" aria-label="Nội dung khoá học">
+    <nav className="space-y-6 p-4" aria-label={t('nav.courseContents')}>
       <div className="space-y-1">
         <NavItem to="/" end>
           <span className="inline-flex items-center gap-2">
             <ArrowLeftIcon width={14} height={14} />
-            Tất cả chứng chỉ
+            {t('nav.allCertifications')}
           </span>
         </NavItem>
         <NavItem to={url()} end>
-          Tổng quan
+          {t('nav.overview')}
         </NavItem>
         <NavItem to={url('/review')}>
           <span className="inline-flex items-center gap-2">
-            Ôn câu sai
+            {t('nav.wrongAnswers')}
             {wrongCount > 0 && (
               <Badge tone="red" size="sm">
                 {wrongCount}
@@ -116,13 +120,11 @@ function CourseShell({
         return (
           <div key={phase.id}>
             <p className="mb-1.5 flex items-center gap-2 px-3 text-xs font-semibold tracking-wide text-slate-500 uppercase">
-              <span>
-                Phase {phase.order} · {phase.weight}%
-              </span>
+              <span>{t('phase.headerSummary', { order: phase.order, weight: phase.weight })}</span>
               {passed && <CheckIcon width={13} height={13} className="text-emerald-400" />}
               {locked && <LockIcon width={13} height={13} className="text-slate-600" />}
             </p>
-            <p className="mb-2 px-3 text-sm font-medium text-slate-300">{phase.title}</p>
+            <p className="mb-2 px-3 text-sm font-medium text-slate-300">{localized(phase.title)}</p>
             <div className="space-y-0.5">
               {phase.notes.map((note) => (
                 <NavItem
@@ -131,21 +133,21 @@ function CourseShell({
                   depth={1}
                   locked={locked}
                 >
-                  {note.title}
+                  {localized(note.title)}
                 </NavItem>
               ))}
               {phase.practice && (
                 <NavItem to={url(`/phase/${phase.id}/practice`)} depth={1} locked={locked}>
-                  Luyện tập ({phase.practice.questions.length})
+                  {t('nav.practice', { count: phase.practice.questions.length })}
                 </NavItem>
               )}
               {phase.gateQuiz && (
                 <NavItem to={url(`/exam/${phase.gateQuiz.id}`)} depth={1} locked={locked}>
-                  Gate Quiz ({phase.gateQuiz.questions.length})
+                  {t('nav.gateQuiz', { count: phase.gateQuiz.questions.length })}
                 </NavItem>
               )}
               {!phase.ready && (
-                <p className="ml-6 py-1 text-xs text-slate-600 italic">Đang soạn nội dung…</p>
+                <p className="ml-6 py-1 text-xs text-slate-600 italic">{t('nav.beingWritten')}</p>
               )}
             </div>
           </div>
@@ -155,12 +157,15 @@ function CourseShell({
       {course.mockExams.length > 0 && (
         <div>
           <p className="mb-2 px-3 text-xs font-semibold tracking-wide text-slate-500 uppercase">
-            Thi thử
+            {t('nav.mockExams')}
           </p>
           <div className="space-y-0.5">
             {course.mockExams.map((mock) => (
               <NavItem key={mock.id} to={url(`/exam/${mock.id}`)} depth={1}>
-                {mock.title} ({mock.questions.length} câu)
+                {t('nav.mockExam', {
+                  title: mockExamTitle(mock, i18n),
+                  count: mock.questions.length,
+                })}
               </NavItem>
             ))}
           </div>
@@ -172,7 +177,7 @@ function CourseShell({
   return (
     <div className="min-h-screen">
       <a href="#main" className="skip-link">
-        Bỏ qua điều hướng
+        {t('nav.skip')}
       </a>
 
       <header className="sticky top-0 z-30 border-b border-line bg-canvas/90 backdrop-blur">
@@ -181,7 +186,7 @@ function CourseShell({
             type="button"
             onClick={() => setMenuOpen(true)}
             className="focus-ring rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-200 lg:hidden"
-            aria-label="Mở menu điều hướng"
+            aria-label={t('nav.openMenu')}
           >
             <MenuIcon />
           </button>
@@ -190,12 +195,13 @@ function CourseShell({
               {course.provider.slice(0, 1)}
             </span>
             <span className="text-sm font-semibold text-white">
-              {course.title}
+              {localized(course.title)}
               <span className="ml-2 hidden text-xs font-normal text-slate-500 sm:inline">
                 {course.code}
               </span>
             </span>
           </NavLink>
+          <LocaleSwitch className="ml-auto" />
         </div>
       </header>
 
@@ -204,7 +210,7 @@ function CourseShell({
           {sidebar}
         </aside>
 
-        <Sheet open={menuOpen} onOpenChange={setMenuOpen} title="Điều hướng khoá học">
+        <Sheet open={menuOpen} onOpenChange={setMenuOpen} title={t('nav.courseNavigation')}>
           {sidebar}
         </Sheet>
 

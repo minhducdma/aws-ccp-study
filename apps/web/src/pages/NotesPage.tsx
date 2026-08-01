@@ -2,6 +2,7 @@ import {
   ArrowRightIcon,
   Button,
   ButtonLink,
+  Card,
   CheckIcon,
   EmptyState,
   MissingArt,
@@ -10,6 +11,7 @@ import {
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import Markdown from '../components/Markdown';
+import { isLocale, useI18n, type MessageKey } from '../i18n';
 import { getPhase } from '../lib/content';
 import { useCourse } from '../lib/course';
 import { useProgress } from '../lib/progress';
@@ -37,23 +39,27 @@ function useOutline(markdown: string) {
 
 export default function NotesPage() {
   const { phaseId, noteId } = useParams();
+  const { t, locale, localized, localizedWithLocale } = useI18n();
   const { course, url } = useCourse();
   const phase = getPhase(course, phaseId);
   const note = phase?.notes.find((n) => n.id === noteId) ?? phase?.notes[0];
   const { progress, markNoteRead } = useProgress(course);
-  const outline = useOutline(note?.markdown ?? '');
+  const body = localizedWithLocale(note?.markdown);
+  const outline = useOutline(body?.text ?? '');
 
-  if (!phase || !note) {
+  if (!phase || !note || !body) {
     return (
       <EmptyState
-        illustration={<MissingArt />}
-        title="Chưa có nội dung"
-        description="Phần notes của phase này chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện."
+        illustration={<MissingArt label={t('art.missing')} />}
+        title={t('notes.emptyTitle')}
+        description={t('notes.emptyDescription')}
       />
     );
   }
 
   const read = Boolean(progress.notesRead[note.id]);
+  // Notes are translated file by file, so a page may exist in one language and not another.
+  const untranslated = body.locale !== locale && isLocale(body.locale);
 
   return (
     <div className="mx-auto flex max-w-6xl gap-10">
@@ -63,10 +69,10 @@ export default function NotesPage() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line pb-4">
           <div>
             <p className="text-xs font-semibold tracking-wide text-brand-500 uppercase">
-              Phase {phase.order} · {phase.weight}% đề thi
+              {t('notes.eyebrow', { order: phase.order, weight: phase.weight })}
             </p>
             <h1 className="mt-1 text-xl font-bold text-white">
-              {phase.title} — {note.title}
+              {t('notes.heading', { phase: localized(phase.title), note: localized(note.title) })}
             </h1>
           </div>
           <Button
@@ -74,11 +80,22 @@ export default function NotesPage() {
             icon={read ? <CheckIcon width={16} height={16} /> : undefined}
             onClick={() => markNoteRead(note.id, !read)}
           >
-            {read ? 'Đã đọc' : 'Đánh dấu đã đọc'}
+            {read ? t('notes.read') : t('notes.markRead')}
           </Button>
         </div>
 
-        <Markdown className="md-scroll">{note.markdown}</Markdown>
+        {untranslated && (
+          <Card inset="sm" className="mb-6 border-brand-500/30 bg-brand-500/5 text-sm text-slate-300">
+            {t('notes.untranslated', {
+              language: t(`language.${locale}` as MessageKey),
+              original: t(`language.${body.locale}` as MessageKey),
+            })}
+          </Card>
+        )}
+
+        <Markdown className="md-scroll" lang={untranslated ? body.locale : undefined}>
+          {body.text}
+        </Markdown>
 
         <div className="mt-10 flex flex-wrap gap-3 border-t border-line pt-6">
           {phase.notes
@@ -89,12 +106,12 @@ export default function NotesPage() {
                 to={url(`/phase/${phase.id}/notes/${other.id}`)}
                 tone="secondary"
               >
-                {other.title}
+                {localized(other.title)}
               </ButtonLink>
             ))}
           {phase.practice && (
             <ButtonLink to={url(`/phase/${phase.id}/practice`)}>
-              Sang luyện tập ({phase.practice.questions.length} câu)
+              {t('notes.toPractice', { count: phase.practice.questions.length })}
               <ArrowRightIcon width={16} height={16} />
             </ButtonLink>
           )}
@@ -103,10 +120,12 @@ export default function NotesPage() {
 
       {outline.length > 2 && (
         <nav
-          aria-label="Mục lục bài viết"
+          aria-label={t('notes.outline')}
           className="sticky top-[89px] hidden h-fit max-h-[calc(100vh-140px)] w-56 shrink-0 overflow-y-auto xl:block"
         >
-          <p className="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">Trong bài</p>
+          <p className="mb-2 text-xs font-semibold tracking-wide text-slate-500 uppercase">
+            {t('notes.inThisPage')}
+          </p>
           <ul className="space-y-1 border-l border-line">
             {outline.map((item) => (
               <li key={item.slug}>

@@ -1,4 +1,5 @@
 import { Badge, Card, CheckIcon, XIcon, m } from '@study/ui';
+import { useI18n } from '../i18n';
 import { isCorrect } from '../lib/content';
 import type { Letter, Question } from '../types';
 import Markdown from './Markdown';
@@ -12,6 +13,7 @@ interface Props {
 }
 
 export default function QuestionCard({ question, selected, onToggle, revealed = false, label }: Props) {
+  const { t } = useI18n();
   const correct = isCorrect(question, selected);
   const interactive = Boolean(onToggle) && !revealed;
 
@@ -22,17 +24,17 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
         {/* Never reveal how many answers are correct: the question text already says
             "(Choose TWO)" when it matters, so stating the count would make this easier
             than the real exam. */}
-        {question.multi && <Badge tone="amber">Chọn nhiều đáp án</Badge>}
+        {question.multi && <Badge tone="amber">{t('question.multiAnswer')}</Badge>}
         {revealed &&
           (correct ? (
             <Badge tone="green">
               <CheckIcon width={12} height={12} />
-              Đúng
+              {t('question.correct')}
             </Badge>
           ) : (
             <Badge tone="red">
               <XIcon width={12} height={12} />
-              Sai
+              {t('question.wrong')}
             </Badge>
           ))}
         {question.source && <span className="ml-auto text-xs text-slate-500">{question.source}</span>}
@@ -43,7 +45,7 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
       <div
         className="mt-4 space-y-2"
         role="group"
-        aria-label={question.multi ? 'Chọn một hoặc nhiều đáp án' : 'Chọn một đáp án'}
+        aria-label={t(question.multi ? 'question.groupMulti' : 'question.groupSingle')}
       >
         {question.options.map((option) => {
           const picked = selected.includes(option.letter);
@@ -67,9 +69,9 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
              still readable without colour vision. */
           const revealedNote = revealed
             ? isAnswer
-              ? ' (đáp án đúng)'
+              ? t('question.optionCorrect')
               : picked
-                ? ' (bạn đã chọn, sai)'
+                ? t('question.optionPickedWrong')
                 : ''
             : '';
 
@@ -109,12 +111,12 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
           transition={{ duration: 0.25 }}
         >
           <p className="mb-1.5 text-xs font-semibold tracking-wide text-brand-300 uppercase">
-            Đáp án: {question.correct.join(', ')}
+            {t('question.answerIs', { letters: question.correct.join(', ') })}
           </p>
           {question.explanation ? (
             <Markdown className="text-sm">{question.explanation}</Markdown>
           ) : (
-            <p className="text-sm text-slate-500">Chưa có giải thích cho câu này.</p>
+            <p className="text-sm text-slate-500">{t('question.noExplanation')}</p>
           )}
         </m.div>
       )}

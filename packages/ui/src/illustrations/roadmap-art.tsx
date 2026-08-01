@@ -14,7 +14,7 @@ const MILESTONES = [
  * Hero art for the catalog: a climbing path across four milestones, matching the four phases a
  * course is split into. The route draws itself once on mount, then the clouds keep drifting.
  */
-export function RoadmapArt({ className }: { className?: string }) {
+export function RoadmapArt({ className, label }: { className?: string; label: string }) {
   const uid = useId().replace(/:/g, '');
   const glowAmber = `${uid}-glow-amber`;
   const glowSky = `${uid}-glow-sky`;
@@ -26,7 +26,7 @@ export function RoadmapArt({ className }: { className?: string }) {
       fill="none"
       className={cn('h-auto w-full', className)}
       role="img"
-      aria-label="Lộ trình học đi lên qua bốn chặng"
+      aria-label={label}
     >
       <defs>
         <radialGradient id={glowAmber} cx="50%" cy="50%">

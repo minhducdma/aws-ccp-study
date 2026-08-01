@@ -7,6 +7,7 @@ export type {
   ExamInfo,
   GateQuiz,
   Letter,
+  LocalizedText,
   MockExam,
   NoteDoc,
   Option,

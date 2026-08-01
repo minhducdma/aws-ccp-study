@@ -128,6 +128,14 @@ export const SparkleIcon = (p: IconProps) => (
   </Icon>
 );
 
+export const GlobeIcon = (p: IconProps) => (
+  <Icon {...p}>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M3.5 12h17" />
+    <path d="M12 3.5c2.2 2.3 3.4 5.3 3.4 8.5s-1.2 6.2-3.4 8.5c-2.2-2.3-3.4-5.3-3.4-8.5s1.2-6.2 3.4-8.5Z" />
+  </Icon>
+);
+
 export const LayersIcon = (p: IconProps) => (
   <Icon {...p}>
     <path d="m12 3.5 8 4.2-8 4.2-8-4.2Z" />

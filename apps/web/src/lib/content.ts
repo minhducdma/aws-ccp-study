@@ -1,4 +1,5 @@
 import bundle from '@study/content';
+import type { I18n } from '../i18n';
 import type { Course, MockExam, Phase, Question } from '../types';
 
 export const content = bundle;
@@ -16,14 +17,22 @@ export function getMockExam(course: Course, examId: string | undefined): MockExa
   return course.mockExams.find((m) => m.id === examId);
 }
 
+/** A manifest may name a mock exam; otherwise it is numbered in the reader's language. */
+export function mockExamTitle(mock: MockExam, i18n: I18n): string {
+  return i18n.localized(mock.title) || i18n.t('exam.mockTitle', { number: mock.num });
+}
+
 /** A gate quiz or a mock exam; both are rendered by the same exam screen. */
-export function getExam(course: Course, examId: string | undefined) {
+export function getExam(course: Course, examId: string | undefined, i18n: I18n) {
   const phase = course.phases.find((p) => p.gateQuiz?.id === examId);
   if (phase?.gateQuiz) {
     return {
       kind: 'gate' as const,
       id: phase.gateQuiz.id,
-      label: `Gate Quiz — Phase ${phase.order}: ${phase.title}`,
+      label: i18n.t('exam.gateLabel', {
+        order: phase.order,
+        title: i18n.localized(phase.title),
+      }),
       questions: phase.gateQuiz.questions,
       passScore: phase.gateQuiz.passScore,
       timeLimitMin: phase.gateQuiz.timeLimitMin,
@@ -35,7 +44,7 @@ export function getExam(course: Course, examId: string | undefined) {
     return {
       kind: 'mock' as const,
       id: mock.id,
-      label: mock.title,
+      label: mockExamTitle(mock, i18n),
       questions: mock.questions,
       passScore: mock.passScore,
       timeLimitMin: mock.timeLimitMin,
@@ -45,7 +54,18 @@ export function getExam(course: Course, examId: string | undefined) {
   return undefined;
 }
 
-type QuestionEntry = { question: Question; context: string };
+/**
+ * Where a question came from, kept as data rather than as a sentence, so the same index serves
+ * every language.
+ */
+export type QuestionOrigin =
+  | { kind: 'practice' | 'gate'; phase: Phase }
+  | { kind: 'mock'; mock: MockExam };
+
+export interface QuestionEntry {
+  question: Question;
+  origin: QuestionOrigin;
+}
 
 // Built once per course on first lookup: question ids are only unique within a course.
 const questionIndexes = new Map<string, Map<string, QuestionEntry>>();
@@ -56,17 +76,16 @@ function questionIndex(course: Course): Map<string, QuestionEntry> {
 
   const index = new Map<string, QuestionEntry>();
   for (const phase of course.phases) {
-    const label = `Phase ${phase.order} — ${phase.title}`;
     for (const q of phase.practice?.questions ?? []) {
-      index.set(q.id, { question: q, context: `${label} · Luyện tập` });
+      index.set(q.id, { question: q, origin: { kind: 'practice', phase } });
     }
     for (const q of phase.gateQuiz?.questions ?? []) {
-      index.set(q.id, { question: q, context: `${label} · Gate Quiz` });
+      index.set(q.id, { question: q, origin: { kind: 'gate', phase } });
     }
   }
   for (const mock of course.mockExams) {
     for (const q of mock.questions) {
-      index.set(q.id, { question: q, context: mock.title });
+      index.set(q.id, { question: q, origin: { kind: 'mock', mock } });
     }
   }
   questionIndexes.set(course.id, index);
@@ -77,9 +96,16 @@ export function lookupQuestion(course: Course, id: string): QuestionEntry | unde
   return questionIndex(course).get(id);
 }
 
-export function domainLabel(course: Course, domain: number | null): string {
-  if (domain == null) return 'Chưa phân loại';
-  return course.domainLabels[String(domain)] ?? `Domain ${domain}`;
+export function originLabel(origin: QuestionOrigin, i18n: I18n): string {
+  if (origin.kind === 'mock') return mockExamTitle(origin.mock, i18n);
+  const params = { order: origin.phase.order, title: i18n.localized(origin.phase.title) };
+  return i18n.t(origin.kind === 'gate' ? 'content.gateQuizContext' : 'content.practiceContext', params);
+}
+
+export function domainLabel(course: Course, domain: number | null, i18n: I18n): string {
+  if (domain == null) return i18n.t('content.unclassifiedDomain');
+  const label = i18n.localized(course.domainLabels[String(domain)]);
+  return label || i18n.t('content.domain', { domain });
 }
 
 export function isCorrect(question: Question, selected: string[] | undefined): boolean {
@@ -88,6 +114,7 @@ export function isCorrect(question: Question, selected: string[] | undefined): b
   return question.correct.every((letter) => selected.includes(letter));
 }
 
+/** MM:SS, which reads the same in every language this app supports. */
 export function formatDuration(ms: number): string {
   const totalSeconds = Math.max(0, Math.round(ms / 1000));
   const minutes = Math.floor(totalSeconds / 60);

@@ -12,12 +12,15 @@ import {
 } from '@study/ui';
 import { useMemo, useState } from 'react';
 import QuestionCard from '../components/QuestionCard';
-import { isCorrect, lookupQuestion } from '../lib/content';
+import { useI18n } from '../i18n';
+import { isCorrect, lookupQuestion, originLabel } from '../lib/content';
 import { useCourse } from '../lib/course';
 import { useProgress } from '../lib/progress';
 import type { Letter } from '../types';
 
 export default function ReviewPage() {
+  const i18n = useI18n();
+  const { t } = i18n;
   const { course, url } = useCourse();
   const { progress, clearWrong, recordWrong } = useProgress(course);
   const [attempts, setAttempts] = useState<Record<string, Letter[]>>({});
@@ -36,10 +39,10 @@ export default function ReviewPage() {
     return (
       <div className="mx-auto max-w-2xl">
         <EmptyState
-          illustration={<AllClearArt />}
-          title="Chưa có câu sai nào"
-          description="Mỗi khi bạn trả lời sai ở phần luyện tập, Gate Quiz hay thi thử, câu đó sẽ tự động xuất hiện ở đây để ôn lại. Trả lời đúng lần nữa thì câu được xoá khỏi danh sách."
-          action={<ButtonLink to={url()}>Về tổng quan</ButtonLink>}
+          illustration={<AllClearArt label={t('art.allClear')} />}
+          title={t('review.emptyTitle')}
+          description={t('review.emptyDescription')}
+          action={<ButtonLink to={url()}>{t('exam.toOverview')}</ButtonLink>}
         />
       </div>
     );
@@ -60,12 +63,11 @@ export default function ReviewPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <header>
-        <Badge tone="red">Sổ tay câu sai</Badge>
-        <h1 className="mt-3 text-2xl font-bold text-white">{items.length} câu cần ôn lại</h1>
-        <p className="mt-2 max-w-2xl text-sm text-slate-400">
-          Đây là những câu bạn từng trả lời sai, xếp theo số lần sai nhiều nhất. Trả lời đúng một lần
-          nữa thì câu sẽ được xoá khỏi danh sách. Đọc lại danh sách này ngay trước khi thi thật.
-        </p>
+        <Badge tone="red">{t('review.badge')}</Badge>
+        <h1 className="mt-3 text-2xl font-bold text-white">
+          {t('review.heading', { count: items.length })}
+        </h1>
+        <p className="mt-2 max-w-2xl text-sm text-slate-400">{t('review.intro')}</p>
       </header>
 
       <m.div
@@ -83,8 +85,10 @@ export default function ReviewPage() {
           return (
             <m.div key={item.id} variants={fadeUp} className="space-y-2">
               <div className="flex flex-wrap items-center gap-2 text-xs">
-                <span className="text-slate-500">{item.context}</span>
-                <Badge tone="red">Sai {item.times} lần</Badge>
+                <span className="text-slate-500">
+                  {item.origin && originLabel(item.origin, i18n)}
+                </span>
+                <Badge tone="red">{t('review.timesWrong', { count: item.times })}</Badge>
               </div>
 
               <QuestionCard
@@ -105,7 +109,7 @@ export default function ReviewPage() {
                       else recordWrong([item.id]);
                     }}
                   >
-                    Kiểm tra
+                    {t('common.check')}
                   </Button>
                 ) : (
                   <>
@@ -121,7 +125,7 @@ export default function ReviewPage() {
                         })
                       }
                     >
-                      Thử lại
+                      {t('review.tryAgain')}
                     </Button>
                     <Button
                       tone="ghost"
@@ -129,7 +133,7 @@ export default function ReviewPage() {
                       icon={<CheckIcon width={14} height={14} />}
                       onClick={() => clearWrong(item.id)}
                     >
-                      Đánh dấu đã thuộc
+                      {t('review.markKnown')}
                     </Button>
                   </>
                 )}

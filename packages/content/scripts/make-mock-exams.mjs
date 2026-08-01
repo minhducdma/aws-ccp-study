@@ -12,6 +12,13 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const PACKAGE_DIR = join(HERE, '..');
 const COURSES_DIR = join(PACKAGE_DIR, '..', '..', 'courses');
 
+// The files written here are Vietnamese, so manifest fields that may carry several
+// translations are read in Vietnamese first.
+function vi(value) {
+  if (value == null) return '';
+  return typeof value === 'string' ? value : (value.vi ?? Object.values(value)[0] ?? '');
+}
+
 async function loadExam(upstream, cacheDir, num) {
   mkdirSync(cacheDir, { recursive: true });
   const cached = join(cacheDir, `exam-${num}.md`);
@@ -153,9 +160,9 @@ function renderAnswers({ mockNum, examNum, questions, annotations, course }) {
   lines.push('', '## Tổng hợp domain', '', '| Domain | Số câu trong đề | Tỉ lệ đề thật | Nếu sai nhiều thì ôn lại |', '|---|---|---|---|');
   for (const phase of course.phases) {
     const count = domainCounts.get(phase.domain) ?? 0;
-    const notesFile = (phase.notes ?? [{ file: 'notes.md' }])[0].file;
+    const notesFile = vi((phase.notes ?? [{ file: 'notes.md' }])[0].file) || 'notes.md';
     lines.push(
-      `| ${phase.domain} — ${course.domainLabels[phase.domain]} | ${count} | ${phase.weight}% | \`phases/${phase.dir}/${notesFile}\` |`,
+      `| ${phase.domain} — ${vi(course.domainLabels[phase.domain])} | ${count} | ${phase.weight}% | \`phases/${phase.dir}/${notesFile}\` |`,
     );
   }
 

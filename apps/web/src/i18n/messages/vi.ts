@@ -1,0 +1,238 @@
+import type { MessageValue } from '../translate';
+
+/**
+ * Vietnamese is the reference catalogue: it defines the key set, and every other language is
+ * typed against it, so a missing or misspelled key is a compile error rather than a blank label.
+ *
+ * Keys are grouped by the screen they belong to. A message that counts something uses the plural
+ * object form, even in Vietnamese where every count reads the same, so translators of a language
+ * with real plural rules have somewhere to put them.
+ */
+export const vi = {
+  'app.title': 'Lộ trình luyện thi chứng chỉ AWS',
+  'app.description':
+    'Khoá tự luyện chứng chỉ AWS với notes, ngân hàng câu hỏi, gate quiz và đề thi thử bấm giờ.',
+
+  'locale.label': 'Ngôn ngữ',
+  'locale.switchTo': 'Chuyển sang {name}',
+  'language.vi': 'tiếng Việt',
+  'language.en': 'tiếng Anh',
+
+  'common.cancel': 'Huỷ',
+  'common.check': 'Kiểm tra',
+  'common.retry': 'Làm lại',
+  'common.previousQuestion': 'Câu trước',
+  'common.nextQuestion': 'Câu tiếp',
+  'common.questionPosition': 'Câu {index} / {total}',
+  'common.questionNumber': 'Câu {number}',
+  'common.markdownWarnings': '{count} cảnh báo khi đọc nội dung markdown',
+
+  'level.Foundational': 'Foundational',
+  'level.Associate': 'Associate',
+  'level.Professional': 'Professional',
+  'level.Specialty': 'Specialty',
+  'level.Foundational.blurb': 'Không cần kinh nghiệm nền tảng. Điểm khởi đầu cho người mới vào AWS.',
+  'level.Associate.blurb': 'Cần khoảng một năm làm việc thực tế với AWS.',
+  'level.Professional.blurb':
+    'Dành cho người đã có hai năm trở lên vận hành hệ thống lớn trên AWS.',
+  'level.Specialty.blurb':
+    'Đi sâu vào một lĩnh vực hẹp, thường học sau khi đã có chứng chỉ Associate.',
+
+  'art.passed': 'Đã đạt',
+  'art.failed': 'Chưa đạt',
+  'art.allClear': 'Không còn câu sai',
+  'art.missing': 'Không có nội dung',
+  'art.roadmap': 'Lộ trình học đi lên qua bốn chặng',
+
+  'nav.skip': 'Bỏ qua điều hướng',
+  'nav.openMenu': 'Mở menu điều hướng',
+  'nav.courseContents': 'Nội dung khoá học',
+  'nav.courseNavigation': 'Điều hướng khoá học',
+  'nav.allCertifications': 'Tất cả chứng chỉ',
+  'nav.overview': 'Tổng quan',
+  'nav.wrongAnswers': 'Ôn câu sai',
+  'nav.practice': 'Luyện tập ({count})',
+  'nav.gateQuiz': 'Gate Quiz ({count})',
+  'nav.mockExams': 'Thi thử',
+  'nav.mockExam': '{title} ({count} câu)',
+  'nav.beingWritten': 'Đang soạn nội dung…',
+
+  'phase.label': 'Phase {order}',
+  'phase.labelWithTitle': 'Phase {order}: {title}',
+  'phase.headerSummary': 'Phase {order} · {weight}%',
+  'phase.weightOfExam': '{weight}% đề thi',
+  'phase.passed': 'Đã pass',
+  'phase.locked': 'Chưa mở',
+  'phase.draft': 'Đang soạn',
+
+  'catalog.eyebrow': 'Lộ trình chứng chỉ AWS',
+  'catalog.heading': 'Chọn chứng chỉ để bắt đầu',
+  'catalog.intro':
+    'Mỗi chứng chỉ là một khoá học độc lập: chia phase theo đúng trọng số domain của kỳ thi, có notes, ngân hàng câu hỏi lấy từ đề gốc, gate quiz chặn giữa các phase và đề thi thử bấm giờ. Tiến độ được lưu riêng cho từng chứng chỉ.',
+  'catalog.inProgress': 'Đang học',
+  'catalog.notStarted': 'Sẵn sàng',
+  'catalog.locked': 'Chưa mở',
+  'catalog.readinessRing': 'Mức sẵn sàng {code}',
+  'catalog.readinessBar': 'Mức sẵn sàng cho {title}',
+  'catalog.phasesPassed': '{passed}/{total} phase đã pass',
+  'catalog.examCovered': '{percent}% đề thi đã nắm',
+  'catalog.courseMeta': '{questions} câu · {mocks} đề thử · ~{hours} giờ',
+  'catalog.plannedMeta': 'Chưa mở vì nội dung đang được soạn · {questions} câu · {minutes} phút',
+  'catalog.empty': 'Chưa có khoá học nào sẵn sàng. Thêm nội dung vào {path} rồi chạy lại {command}.',
+
+  'dashboard.eyebrow': 'Lộ trình ~{hours} giờ · {code}',
+  'dashboard.intro':
+    '{count} phase chia theo đúng tỉ lệ các domain của kỳ thi. Mỗi phase học notes, luyện câu hỏi thật, rồi làm Gate Quiz đạt ngưỡng mới sang phase kế tiếp.',
+  'dashboard.stat.readiness': 'Độ sẵn sàng',
+  'dashboard.stat.questions': 'Câu hỏi trong khoá',
+  'dashboard.stat.questionsHint': 'lấy từ practice exam gốc',
+  'dashboard.stat.wrong': 'Câu đang sai',
+  'dashboard.stat.wrongHint': 'cần ôn lại',
+  'dashboard.stat.passScore': 'Điểm đậu thật',
+  'dashboard.stat.passScoreHint': '{questions} câu · {minutes} phút',
+  'dashboard.next.eyebrow': 'Việc tiếp theo',
+  'dashboard.next.readNotes': 'Bắt đầu bằng phần kiến thức trọng tâm.',
+  'dashboard.next.keepPracticing': 'Tiếp tục luyện tập rồi làm Gate Quiz.',
+  'dashboard.next.cta': 'Tiếp tục học',
+  'dashboard.phasesHeading': '{count} phase',
+  'dashboard.phaseProgress':
+    'Notes {notesRead}/{notesTotal} · Luyện tập {checked}/{practiceTotal} · Gate Quiz {gateScore}',
+  'dashboard.gateQuizNotTaken': 'chưa làm',
+  'dashboard.practiceProgressLabel': 'Tiến độ luyện tập phase {order}',
+  'dashboard.notes': 'Notes',
+  'dashboard.practice': 'Luyện tập',
+  'dashboard.gateQuiz': 'Gate Quiz',
+  'dashboard.mockHeading': 'Thi thử',
+  'dashboard.mockEmpty':
+    'Đề mô phỏng đang được soạn. Chạy lại {command} sau khi file markdown xuất hiện.',
+  'dashboard.mockMeta': '{questions} câu · {minutes} phút · cần ≥{passScore} câu',
+  'dashboard.mockBest': ' · điểm tốt nhất {score}',
+  'dashboard.mockRetake': 'Làm lại',
+  'dashboard.mockStart': 'Bắt đầu',
+  'dashboard.freeMode': 'Chế độ học tự do',
+  'dashboard.freeModeHint':
+    'Bỏ khoá thứ tự phase để vào bất kỳ phần nào. Ngưỡng pass Gate Quiz vẫn được ghi nhận như cũ.',
+  'dashboard.reset': 'Xoá tiến độ',
+  'dashboard.resetTitle': 'Xoá toàn bộ tiến độ của {code}?',
+  'dashboard.resetDescription':
+    'Điểm Gate Quiz, lịch sử thi thử, notes đã đọc và sổ tay câu sai của khoá này sẽ mất. Tiến độ của các chứng chỉ khác không bị ảnh hưởng.',
+
+  'notes.emptyTitle': 'Chưa có nội dung',
+  'notes.emptyDescription':
+    'Phần notes của phase này chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện.',
+  'notes.eyebrow': 'Phase {order} · {weight}% đề thi',
+  'notes.heading': '{phase} — {note}',
+  'notes.markRead': 'Đánh dấu đã đọc',
+  'notes.read': 'Đã đọc',
+  'notes.toPractice': 'Sang luyện tập ({count} câu)',
+  'notes.outline': 'Mục lục bài viết',
+  'notes.inThisPage': 'Trong bài',
+  'notes.untranslated': 'Bài này chưa có bản {language}, nội dung dưới đây là bản {original}.',
+
+  'practice.emptyTitle': 'Chưa có câu luyện tập',
+  'practice.emptyDescription':
+    'Bộ câu hỏi của phase này chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện.',
+  'practice.badge': 'Phase {order} · Luyện tập',
+  'practice.checkedSummary': 'Đúng {correct}/{checked} đã kiểm tra',
+  'practice.progressLabel': 'Tiến độ luyện tập phase {order}',
+  'practice.showGrid': 'Xem danh sách câu',
+  'practice.hideGrid': 'Ẩn danh sách',
+  'practice.gridLabel': 'Danh sách câu luyện tập',
+  'practice.gridCorrect': 'Câu {number}, đã đúng',
+  'practice.gridWrong': 'Câu {number}, đã sai',
+  'practice.gridTodo': 'Câu {number}, chưa làm',
+  'practice.restart': 'Làm lại từ đầu',
+  'practice.restartTitle': 'Làm lại bộ luyện tập này từ đầu?',
+  'practice.restartDescription':
+    'Đáp án đã chọn và {count} câu đã kiểm tra của bộ này sẽ bị xoá. Sổ tay câu sai vẫn được giữ nguyên.',
+  'practice.check': 'Kiểm tra đáp án',
+  'practice.toGateQuiz': 'Làm Gate Quiz',
+  'practice.doneHeading': 'Xong toàn bộ {total} câu luyện tập — đúng {correct} câu ({percent}%)',
+  'practice.doneReady': 'Tỉ lệ này đủ tốt để làm Gate Quiz.',
+  'practice.doneNotReady': 'Nên đọc lại notes và ôn phần câu sai trước khi vào Gate Quiz.',
+
+  'exam.mockTitle': 'Đề thi thử {number}',
+  'exam.gateLabel': 'Gate Quiz — Phase {order}: {title}',
+  'exam.emptyTitle': 'Chưa có bài thi này',
+  'exam.emptyDescription':
+    'Nội dung đề chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện.',
+  'exam.kindMock': 'Thi thử',
+  'exam.kindGate': 'Gate Quiz',
+  'exam.alreadyPassed': 'Bạn đã pass bài này. Có thể làm lại để ôn.',
+  'exam.statQuestions': 'Số câu',
+  'exam.statTime': 'Thời gian',
+  'exam.statTimeValue': '{minutes}′',
+  'exam.statNeeded': 'Cần đúng',
+  'exam.rulesTitle': 'Luật làm bài',
+  'exam.rule.timer': 'Đồng hồ chạy liên tục, hết giờ hệ thống tự nộp bài.',
+  'exam.rule.noFeedback': 'Không có phản hồi đúng/sai trong lúc làm — chỉ xem kết quả sau khi nộp.',
+  'exam.rule.guess': 'Câu chưa trả lời tính là sai, không bị trừ điểm thêm nên hãy đoán hết.',
+  'exam.rule.multi': 'Câu nhiều đáp án phải chọn đúng tất cả mới được tính điểm.',
+  'exam.rule.doNotClose':
+    'Đóng tab giữa bài sẽ mất bài làm, hãy chuẩn bị đủ {minutes} phút liền mạch.',
+  'exam.start': 'Bắt đầu làm bài',
+  'exam.historyTitle': 'Lịch sử làm bài',
+  'exam.historyPass': '· Pass',
+  'exam.historyFail': '· Chưa đạt',
+  'exam.timeRemaining': 'Thời gian còn lại {time}',
+  'exam.submit': 'Nộp bài',
+  'exam.submitTitle': 'Nộp bài và xem kết quả?',
+  'exam.submitUnanswered':
+    'Còn {count} câu chưa trả lời và sẽ được tính là sai. Bạn vẫn muốn nộp bài chứ?',
+  'exam.submitComplete': 'Bạn đã trả lời hết các câu. Sau khi nộp sẽ không sửa được nữa.',
+  'exam.answeredLabel': 'Số câu đã trả lời',
+  'exam.answeredCount': '{answered}/{total} đã trả lời',
+  'exam.questionListLabel': 'Danh sách câu hỏi',
+  'exam.gridAnswered': 'Câu {number}, đã trả lời',
+  'exam.gridUnanswered': 'Câu {number}, chưa trả lời',
+  'exam.gridAnsweredFlagged': 'Câu {number}, đã trả lời, đã đánh dấu',
+  'exam.gridUnansweredFlagged': 'Câu {number}, chưa trả lời, đã đánh dấu',
+  'exam.flag': '○ Đánh dấu xem lại',
+  'exam.unflag': '● Bỏ đánh dấu',
+  'exam.flagHint': 'Câu được đánh dấu hiện chấm xanh trên lưới để bạn quay lại nhanh.',
+  'exam.resultPassed': 'ĐẠT',
+  'exam.resultFailed': 'CHƯA ĐẠT',
+  'exam.resultScore': '{percent}% — {verdict}',
+  'exam.resultNeeded': 'Cần ≥{passScore}/{total} · làm trong {duration}',
+  'exam.toNextPhase': 'Sang Phase {order}',
+  'exam.toReview': 'Ôn câu sai',
+  'exam.toOverview': 'Về tổng quan',
+  'exam.domainHeading': 'Phân tích theo domain',
+  'exam.domainRow': 'Domain {domain} — {label}',
+  'exam.domainHint': 'Domain nào dưới 70% thì đọc lại notes của phase tương ứng trước khi thi thật.',
+  'exam.reviewHeading': 'Xem lại bài làm',
+  'exam.tabWrong': 'Câu sai ({count})',
+  'exam.tabAll': 'Tất cả ({count})',
+  'exam.nothingWrong': 'Không sai câu nào. Rất tốt.',
+
+  'question.multiAnswer': 'Chọn nhiều đáp án',
+  'question.correct': 'Đúng',
+  'question.wrong': 'Sai',
+  'question.groupMulti': 'Chọn một hoặc nhiều đáp án',
+  'question.groupSingle': 'Chọn một đáp án',
+  'question.optionCorrect': ' (đáp án đúng)',
+  'question.optionPickedWrong': ' (bạn đã chọn, sai)',
+  'question.answerIs': 'Đáp án: {letters}',
+  'question.noExplanation': 'Chưa có giải thích cho câu này.',
+
+  'review.emptyTitle': 'Chưa có câu sai nào',
+  'review.emptyDescription':
+    'Mỗi khi bạn trả lời sai ở phần luyện tập, Gate Quiz hay thi thử, câu đó sẽ tự động xuất hiện ở đây để ôn lại. Trả lời đúng lần nữa thì câu được xoá khỏi danh sách.',
+  'review.badge': 'Sổ tay câu sai',
+  'review.heading': '{count} câu cần ôn lại',
+  'review.intro':
+    'Đây là những câu bạn từng trả lời sai, xếp theo số lần sai nhiều nhất. Trả lời đúng một lần nữa thì câu sẽ được xoá khỏi danh sách. Đọc lại danh sách này ngay trước khi thi thật.',
+  'review.timesWrong': 'Sai {count} lần',
+  'review.tryAgain': 'Thử lại',
+  'review.markKnown': 'Đánh dấu đã thuộc',
+
+  'content.practiceContext': 'Phase {order} — {title} · Luyện tập',
+  'content.gateQuizContext': 'Phase {order} — {title} · Gate Quiz',
+  'content.unclassifiedDomain': 'Chưa phân loại',
+  'content.domain': 'Domain {domain}',
+} as const satisfies Record<string, MessageValue>;
+
+export type MessageKey = keyof typeof vi;
+
+/** Every language must answer the same keys; a catalogue that does not will not compile. */
+export type Catalog = Record<MessageKey, MessageValue>;

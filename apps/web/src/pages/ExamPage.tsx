@@ -23,6 +23,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import QuestionCard from '../components/QuestionCard';
+import { useI18n } from '../i18n';
 import { domainLabel, formatDuration, getExam, isCorrect } from '../lib/content';
 import { useCourse } from '../lib/course';
 import { attemptsFor, hasPassed, useProgress } from '../lib/progress';
@@ -32,8 +33,10 @@ type Stage = 'intro' | 'running' | 'result';
 
 export default function ExamPage() {
   const { examId } = useParams();
+  const i18n = useI18n();
+  const { t } = i18n;
   const { course } = useCourse();
-  const exam = getExam(course, examId);
+  const exam = getExam(course, examId, i18n);
   const { progress, saveAttempt } = useProgress(course);
 
   const [stage, setStage] = useState<Stage>('intro');
@@ -53,6 +56,7 @@ export default function ExamPage() {
         id: `${exam.id}-${Date.now()}`,
         examId: exam.id,
         kind: exam.kind,
+        // Kept for older entries that were saved before the label was derived at render time.
         label: exam.label,
         startedAt,
         finishedAt: Date.now(),
@@ -83,9 +87,9 @@ export default function ExamPage() {
   if (!exam) {
     return (
       <EmptyState
-        illustration={<MissingArt />}
-        title="Chưa có bài thi này"
-        description="Nội dung đề chưa được soạn xong. Chạy lại npm run build sau khi file markdown xuất hiện."
+        illustration={<MissingArt label={t('art.missing')} />}
+        title={t('exam.emptyTitle')}
+        description={t('exam.emptyDescription')}
       />
     );
   }
@@ -123,7 +127,14 @@ export default function ExamPage() {
   }
 
   if (stage === 'result' && result) {
-    return <ExamResult course={course} exam={{ ...exam, questions }} attempt={result} onRetry={start} />;
+    return (
+      <ExamResult
+        course={course}
+        exam={{ ...exam, questions }}
+        attempt={result}
+        onRetry={start}
+      />
+    );
   }
 
   const question = questions[index];
@@ -157,13 +168,12 @@ export default function ExamPage() {
   const submitDialog = (trigger: React.ReactNode) => (
     <ConfirmDialog
       trigger={trigger}
-      title="Nộp bài và xem kết quả?"
+      title={t('exam.submitTitle')}
       description={
-        unanswered > 0
-          ? `Còn ${unanswered} câu chưa trả lời và sẽ được tính là sai. Bạn vẫn muốn nộp bài chứ?`
-          : 'Bạn đã trả lời hết các câu. Sau khi nộp sẽ không sửa được nữa.'
+        unanswered > 0 ? t('exam.submitUnanswered', { count: unanswered }) : t('exam.submitComplete')
       }
-      confirmLabel="Nộp bài"
+      confirmLabel={t('exam.submit')}
+      cancelLabel={t('common.cancel')}
       tone={unanswered > 0 ? 'danger' : 'primary'}
       onConfirm={() => submit(answers)}
     />
@@ -177,7 +187,7 @@ export default function ExamPage() {
           <span
             role="timer"
             aria-live={urgent ? 'polite' : 'off'}
-            aria-label={`Thời gian còn lại ${formatDuration(remaining)}`}
+            aria-label={t('exam.timeRemaining', { time: formatDuration(remaining) })}
             className={`ml-auto font-mono text-lg font-bold tabular-nums transition-colors ${
               urgent ? 'animate-pulse text-rose-400' : 'text-white'
             }`}
@@ -186,34 +196,43 @@ export default function ExamPage() {
           </span>
           {submitDialog(
             <Button tone="secondary" size="sm">
-              Nộp bài
+              {t('exam.submit')}
             </Button>,
           )}
         </div>
         <div className="mt-2 flex items-center gap-3">
-          <Progress value={answeredCount} max={questions.length} label="Số câu đã trả lời" />
+          <Progress
+            value={answeredCount}
+            max={questions.length}
+            label={t('exam.answeredLabel')}
+          />
           <span className="shrink-0 text-xs text-slate-500">
-            {answeredCount}/{questions.length} đã trả lời
+            {t('exam.answeredCount', { answered: answeredCount, total: questions.length })}
           </span>
         </div>
       </header>
 
       <Card inset="sm">
         <nav
-          aria-label="Danh sách câu hỏi"
+          aria-label={t('exam.questionListLabel')}
           className="grid grid-cols-8 gap-1.5 sm:grid-cols-12 lg:grid-cols-[repeat(15,minmax(0,1fr))]"
         >
           {questions.map((q, i) => {
             const answered = (answers[q.id]?.length ?? 0) > 0;
             const isFlagged = flagged.has(q.id);
+            const status = isFlagged
+              ? answered
+                ? ('exam.gridAnsweredFlagged' as const)
+                : ('exam.gridUnansweredFlagged' as const)
+              : answered
+                ? ('exam.gridAnswered' as const)
+                : ('exam.gridUnanswered' as const);
             return (
               <button
                 key={q.id}
                 type="button"
                 aria-current={i === index ? 'true' : undefined}
-                aria-label={`Câu ${i + 1}${answered ? ', đã trả lời' : ', chưa trả lời'}${
-                  isFlagged ? ', đã đánh dấu' : ''
-                }`}
+                aria-label={t(status, { number: i + 1 })}
                 onClick={() => {
                   setIndex(i);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -238,15 +257,10 @@ export default function ExamPage() {
 
       <div className="flex items-center justify-between text-sm">
         <span className="text-slate-400">
-          Câu {index + 1} / {questions.length}
+          {t('common.questionPosition', { index: index + 1, total: questions.length })}
         </span>
-        <Button
-          tone="ghost"
-          size="sm"
-          onClick={toggleFlag}
-          title="Câu được đánh dấu hiện chấm xanh trên lưới để bạn quay lại nhanh."
-        >
-          {flagged.has(question.id) ? '● Bỏ đánh dấu' : '○ Đánh dấu xem lại'}
+        <Button tone="ghost" size="sm" onClick={toggleFlag} title={t('exam.flagHint')}>
+          {flagged.has(question.id) ? t('exam.unflag') : t('exam.flag')}
         </Button>
       </div>
 
@@ -268,15 +282,15 @@ export default function ExamPage() {
           onClick={() => setIndex((i) => Math.max(0, i - 1))}
           disabled={index === 0}
         >
-          Câu trước
+          {t('common.previousQuestion')}
         </Button>
         {index < questions.length - 1 ? (
           <Button onClick={() => setIndex((i) => i + 1)}>
-            Câu tiếp
+            {t('common.nextQuestion')}
             <ArrowRightIcon width={16} height={16} />
           </Button>
         ) : (
-          submitDialog(<Button>Nộp bài</Button>)
+          submitDialog(<Button>{t('exam.submit')}</Button>)
         )}
       </div>
     </div>
@@ -302,6 +316,8 @@ function ExamIntro({
   history: Attempt[];
   onStart: () => void;
 }) {
+  const { t, formatDateTime } = useI18n();
+
   return (
     <m.div
       className="mx-auto max-w-2xl space-y-6"
@@ -311,19 +327,20 @@ function ExamIntro({
     >
       <m.header variants={fadeUp}>
         <Badge tone={kind === 'mock' ? 'sky' : 'amber'}>
-          {kind === 'mock' ? 'Thi thử' : 'Gate Quiz'}
+          {t(kind === 'mock' ? 'exam.kindMock' : 'exam.kindGate')}
         </Badge>
         <h1 className="mt-3 text-2xl font-bold text-white">{label}</h1>
-        {previousPass && (
-          <p className="mt-2 text-sm text-emerald-400">Bạn đã pass bài này. Có thể làm lại để ôn.</p>
-        )}
+        {previousPass && <p className="mt-2 text-sm text-emerald-400">{t('exam.alreadyPassed')}</p>}
       </m.header>
 
       <m.div variants={fadeUp} className="grid gap-3 sm:grid-cols-3">
-        <StatTile label="Số câu" value={total} animate />
-        <StatTile label="Thời gian" value={`${timeLimitMin}′`} />
+        <StatTile label={t('exam.statQuestions')} value={total} animate />
         <StatTile
-          label="Cần đúng"
+          label={t('exam.statTime')}
+          value={t('exam.statTimeValue', { minutes: timeLimitMin })}
+        />
+        <StatTile
+          label={t('exam.statNeeded')}
           value={`≥${passScore}`}
           hint={`${Math.round((passScore / total) * 100)}%`}
         />
@@ -331,27 +348,27 @@ function ExamIntro({
 
       <m.div variants={fadeUp}>
         <Card inset="md">
-          <p className="mb-3 text-sm font-semibold text-white">Luật làm bài</p>
+          <p className="mb-3 text-sm font-semibold text-white">{t('exam.rulesTitle')}</p>
           <ul className="space-y-2 text-sm text-slate-400">
-            <li>· Đồng hồ chạy liên tục, hết giờ hệ thống tự nộp bài.</li>
-            <li>· Không có phản hồi đúng/sai trong lúc làm — chỉ xem kết quả sau khi nộp.</li>
-            <li>· Câu chưa trả lời tính là sai, không bị trừ điểm thêm nên hãy đoán hết.</li>
-            <li>· Câu nhiều đáp án phải chọn đúng tất cả mới được tính điểm.</li>
-            <li>· Đóng tab giữa bài sẽ mất bài làm, hãy chuẩn bị đủ {timeLimitMin} phút liền mạch.</li>
+            <li>· {t('exam.rule.timer')}</li>
+            <li>· {t('exam.rule.noFeedback')}</li>
+            <li>· {t('exam.rule.guess')}</li>
+            <li>· {t('exam.rule.multi')}</li>
+            <li>· {t('exam.rule.doNotClose', { minutes: timeLimitMin })}</li>
           </ul>
         </Card>
       </m.div>
 
       <m.div variants={fadeUp}>
         <Button onClick={onStart} size="lg" block>
-          Bắt đầu làm bài
+          {t('exam.start')}
         </Button>
       </m.div>
 
       {history.length > 0 && (
         <m.div variants={fadeUp}>
           <Card inset="md">
-            <p className="mb-3 text-sm font-semibold text-white">Lịch sử làm bài</p>
+            <p className="mb-3 text-sm font-semibold text-white">{t('exam.historyTitle')}</p>
             <div className="space-y-2">
               {history.map((attempt) => (
                 <div
@@ -359,18 +376,14 @@ function ExamIntro({
                   className="flex items-center justify-between border-b border-line pb-2 text-sm last:border-0 last:pb-0"
                 >
                   <span className="text-slate-400">
-                    {new Date(attempt.startedAt).toLocaleString('vi-VN', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {formatDateTime(attempt.startedAt)}
                     <span className="ml-2 text-xs text-slate-600">
                       {formatDuration(attempt.finishedAt - attempt.startedAt)}
                     </span>
                   </span>
                   <span className={attempt.passed ? 'text-emerald-400' : 'text-rose-400'}>
-                    {attempt.score}/{attempt.total} {attempt.passed ? '· Pass' : '· Chưa đạt'}
+                    {attempt.score}/{attempt.total}{' '}
+                    {t(attempt.passed ? 'exam.historyPass' : 'exam.historyFail')}
                   </span>
                 </div>
               ))}
@@ -389,10 +402,18 @@ function ExamResult({
   onRetry,
 }: {
   course: Course;
-  exam: { id: string; label: string; kind: 'gate' | 'mock'; questions: Question[]; passScore: number };
+  exam: {
+    id: string;
+    label: string;
+    kind: 'gate' | 'mock';
+    questions: Question[];
+    passScore: number;
+  };
   attempt: Attempt;
   onRetry: () => void;
 }) {
+  const i18n = useI18n();
+  const { t } = i18n;
   const { url } = useCourse();
 
   const byDomain = useMemo(() => {
@@ -415,7 +436,7 @@ function ExamResult({
   const reviewList = (questions: Question[]) =>
     questions.length === 0 ? (
       <Card inset="lg" className="text-center text-sm text-slate-400">
-        Không sai câu nào. Rất tốt.
+        {t('exam.nothingWrong')}
       </Card>
     ) : (
       <div className="space-y-4">
@@ -425,7 +446,7 @@ function ExamResult({
             question={q}
             selected={attempt.answers[q.id] ?? []}
             revealed
-            label={`Câu ${exam.questions.indexOf(q) + 1}`}
+            label={t('common.questionNumber', { number: exam.questions.indexOf(q) + 1 })}
           />
         ))}
       </div>
@@ -442,10 +463,14 @@ function ExamResult({
               : 'border-rose-500/40 bg-rose-500/5'
           }`}
         >
-          {attempt.passed ? <SummitArt /> : <RetryArt />}
+          {attempt.passed ? (
+            <SummitArt label={t('art.passed')} />
+          ) : (
+            <RetryArt label={t('art.failed')} />
+          )}
 
           <p className="mt-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">
-            {attempt.label}
+            {exam.label}
           </p>
           <p className="mt-3 text-5xl font-bold text-white tabular-nums">
             {attempt.score}
@@ -456,26 +481,32 @@ function ExamResult({
               attempt.passed ? 'text-emerald-400' : 'text-rose-400'
             }`}
           >
-            {pct}% — {attempt.passed ? 'ĐẠT' : 'CHƯA ĐẠT'}
+            {t('exam.resultScore', {
+              percent: pct,
+              verdict: t(attempt.passed ? 'exam.resultPassed' : 'exam.resultFailed'),
+            })}
           </p>
           <p className="mt-2 text-sm text-slate-400">
-            Cần ≥{attempt.passScore}/{attempt.total} · làm trong{' '}
-            {formatDuration(attempt.finishedAt - attempt.startedAt)}
+            {t('exam.resultNeeded', {
+              passScore: attempt.passScore,
+              total: attempt.total,
+              duration: formatDuration(attempt.finishedAt - attempt.startedAt),
+            })}
           </p>
 
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             <Button tone="secondary" onClick={onRetry}>
-              Làm lại
+              {t('common.retry')}
             </Button>
             {attempt.passed && exam.kind === 'gate' && nextPhase?.ready && (
               <ButtonLink to={url(`/phase/${nextPhase.id}/notes/${nextPhase.notes[0]?.id ?? ''}`)}>
-                Sang Phase {nextPhase.order}
+                {t('exam.toNextPhase', { order: nextPhase.order })}
                 <ArrowRightIcon width={16} height={16} />
               </ButtonLink>
             )}
-            {!attempt.passed && <ButtonLink to={url('/review')}>Ôn câu sai</ButtonLink>}
+            {!attempt.passed && <ButtonLink to={url('/review')}>{t('exam.toReview')}</ButtonLink>}
             <ButtonLink to={url()} tone="ghost">
-              Về tổng quan
+              {t('exam.toOverview')}
             </ButtonLink>
           </div>
         </Card>
@@ -483,16 +514,18 @@ function ExamResult({
 
       {byDomain.length > 1 && (
         <Card inset="md">
-          <p className="mb-4 text-sm font-semibold text-white">Phân tích theo domain</p>
+          <p className="mb-4 text-sm font-semibold text-white">{t('exam.domainHeading')}</p>
           <div className="space-y-3">
             {byDomain.map(([domain, stat]) => {
               const ratio = stat.correct / stat.total;
+              const row = t('exam.domainRow', {
+                domain,
+                label: domainLabel(course, domain, i18n),
+              });
               return (
                 <div key={domain}>
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <span className="text-slate-300">
-                      Domain {domain} — {domainLabel(course, domain)}
-                    </span>
+                    <span className="text-slate-300">{row}</span>
                     <span
                       className={
                         ratio >= 0.7
@@ -509,24 +542,26 @@ function ExamResult({
                     value={stat.correct}
                     max={stat.total}
                     tone={ratio >= 0.7 ? 'green' : 'amber'}
-                    label={`Domain ${domain}: ${domainLabel(course, domain)}`}
+                    label={row}
                   />
                 </div>
               );
             })}
           </div>
-          <p className="mt-4 text-xs text-slate-500">
-            Domain nào dưới 70% thì đọc lại notes của phase tương ứng trước khi thi thật.
-          </p>
+          <p className="mt-4 text-xs text-slate-500">{t('exam.domainHint')}</p>
         </Card>
       )}
 
       <div>
-        <h2 className="mb-4 text-lg font-bold text-white">Xem lại bài làm</h2>
+        <h2 className="mb-4 text-lg font-bold text-white">{t('exam.reviewHeading')}</h2>
         <Tabs defaultValue="wrong">
           <TabsList>
-            <TabsTrigger value="wrong">Câu sai ({wrongQuestions.length})</TabsTrigger>
-            <TabsTrigger value="all">Tất cả ({exam.questions.length})</TabsTrigger>
+            <TabsTrigger value="wrong">
+              {t('exam.tabWrong', { count: wrongQuestions.length })}
+            </TabsTrigger>
+            <TabsTrigger value="all">
+              {t('exam.tabAll', { count: exam.questions.length })}
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="wrong">{reviewList(wrongQuestions)}</TabsContent>
           <TabsContent value="all">{reviewList(exam.questions)}</TabsContent>

@@ -12,7 +12,8 @@ export interface ConfirmDialogProps {
   title: string;
   description: ReactNode;
   confirmLabel: string;
-  cancelLabel?: string;
+  /** Required like every other label: the design system holds no copy of its own to translate. */
+  cancelLabel: string;
   tone?: ButtonVariants['tone'];
   onConfirm: () => void;
 }
@@ -27,7 +28,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
-  cancelLabel = 'Huỷ',
+  cancelLabel,
   tone = 'danger',
   onConfirm,
 }: ConfirmDialogProps) {

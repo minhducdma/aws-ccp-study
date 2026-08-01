@@ -6,6 +6,8 @@ import { slugify, textFromChildren } from '../lib/slug';
 interface Props {
   children: string;
   className?: string;
+  /** Set when the body is not in the interface language, so a screen reader switches voice. */
+  lang?: string;
 }
 
 function heading(Tag: 'h2' | 'h3') {
@@ -25,9 +27,9 @@ const components = {
   ),
 };
 
-export default function Markdown({ children, className = '' }: Props) {
+export default function Markdown({ children, className = '', lang }: Props) {
   return (
-    <div className={`md ${className}`}>
+    <div className={`md ${className}`} lang={lang}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
         {children}
       </ReactMarkdown>
