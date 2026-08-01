@@ -67,7 +67,7 @@ function parseQuestions(markdown, { idPrefix, fileLabel, warn }) {
   const flush = () => {
     if (!current) return;
     if (current.options.length < 2) {
-      warn(`${fileLabel}: câu ${current.num} chỉ có ${current.options.length} lựa chọn, bỏ qua.`);
+      warn(`${fileLabel}: question ${current.num} has only ${current.options.length} option(s), skipped.`);
     } else {
       questions.push(current);
     }
@@ -193,7 +193,7 @@ function buildQuestionSet({ questionsMarkdown, answersMarkdown, idPrefix, fileLa
   const [questionPart] = splitAtAnswerBlock(questionsMarkdown);
   const parsed = parseQuestions(questionPart, { idPrefix, fileLabel, warn });
   if (parsed.length === 0) {
-    warn(`${fileLabel}: không tìm thấy câu hỏi nào.`);
+    warn(`${fileLabel}: no questions found.`);
     return null;
   }
 
@@ -208,21 +208,21 @@ function buildQuestionSet({ questionsMarkdown, answersMarkdown, idPrefix, fileLa
     const correct = fromQuick ?? fromExplanation?.letters ?? [];
 
     if (correct.length === 0) {
-      warn(`${fileLabel}: câu ${q.num} không tìm được đáp án.`);
+      warn(`${fileLabel}: question ${q.num} has no answer.`);
     } else if (
       fromQuick &&
       fromExplanation?.letters?.length &&
       fromQuick.join('') !== fromExplanation.letters.join('')
     ) {
       warn(
-        `${fileLabel}: câu ${q.num} lệch đáp án — bảng nhanh "${fromQuick.join('')}" vs giải thích "${fromExplanation.letters.join('')}".`,
+        `${fileLabel}: question ${q.num} disagrees — quick table says "${fromQuick.join('')}", explanation says "${fromExplanation.letters.join('')}".`,
       );
     }
 
     const validLetters = new Set(q.options.map((o) => o.letter));
     const unknown = correct.filter((l) => !validLetters.has(l));
     if (unknown.length) {
-      warn(`${fileLabel}: câu ${q.num} có đáp án ${unknown.join('')} không nằm trong lựa chọn.`);
+      warn(`${fileLabel}: question ${q.num} answers with ${unknown.join('')}, which is not among its options.`);
     }
 
     return {
@@ -244,7 +244,7 @@ function loadPhase(courseDir, courseId, phaseConfig, order, warn) {
   const label = `${courseId}/${phaseConfig.dir}`;
 
   if (!existsSync(dir)) {
-    warn(`${label}: thiếu thư mục phase, phase này sẽ hiện là "đang soạn".`);
+    warn(`${label}: phase directory is missing, the phase will show as unfinished.`);
     return { ...phaseConfig, order, notes: [], practice: null, gateQuiz: null, ready: false };
   }
 
@@ -258,7 +258,7 @@ function loadPhase(courseDir, courseId, phaseConfig, order, warn) {
         markdown,
       });
     } else {
-      warn(`${label}: thiếu ${note.file}.`);
+      warn(`${label}: ${note.file} is missing.`);
     }
   }
 
@@ -282,7 +282,7 @@ function loadPhase(courseDir, courseId, phaseConfig, order, warn) {
 
   const quiz = phaseConfig.quiz ?? {};
   if (quizQuestions && quiz.count && quizQuestions.length !== quiz.count) {
-    warn(`${label}: gate quiz có ${quizQuestions.length} câu, manifest khai báo ${quiz.count} câu.`);
+    warn(`${label}: gate quiz has ${quizQuestions.length} questions, the manifest declares ${quiz.count}.`);
   }
 
   return {
@@ -400,19 +400,19 @@ writeFileSync(join(OUT_DIR, 'content.json'), JSON.stringify(content, null, 2));
 
 const available = courses.filter((c) => c.status === 'available');
 console.log(
-  `content.json: ${courses.length} khoá học (${available.length} sẵn sàng, ${courses.length - available.length} sắp có).`,
+  `content.json: ${courses.length} courses (${available.length} available, ${courses.length - available.length} planned).`,
 );
 for (const course of available) {
   const ready = course.phases.filter((p) => p.ready).length;
   console.log(
-    `  ${course.id.padEnd(14)} ${ready}/${course.phases.length} phase · ${course.mockExams.length} mock exam · ${course.questionCount} câu`,
+    `  ${course.id.padEnd(14)} ${ready}/${course.phases.length} phases · ${course.mockExams.length} mock exams · ${course.questionCount} questions`,
   );
 }
 if (warnings.length) {
-  console.log(`\n${warnings.length} cảnh báo:`);
+  console.log(`\n${warnings.length} warning(s):`);
   const shown = VERBOSE ? warnings : warnings.slice(0, 12);
   for (const w of shown) console.log(`  - ${w}`);
   if (shown.length < warnings.length) {
-    console.log(`  ... còn ${warnings.length - shown.length} cảnh báo, chạy \`npm run check\` để xem hết.`);
+    console.log(`  ... ${warnings.length - shown.length} more, run \`npm run check\` to see them all.`);
   }
 }

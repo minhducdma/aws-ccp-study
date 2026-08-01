@@ -24,7 +24,7 @@ const server = createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
 
   if (!path.startsWith(BASE)) {
-    res.writeHead(404, { 'content-type': 'text/plain' }).end('Ngoai base path');
+    res.writeHead(404, { 'content-type': 'text/plain' }).end('Outside the base path');
     return;
   }
 

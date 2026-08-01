@@ -18,7 +18,7 @@ async function loadExam(upstream, cacheDir, num) {
 
   const file = upstream.filePattern.replace('{n}', String(num));
   const res = await fetch(`${upstream.rawBase}/${file}`);
-  if (!res.ok) throw new Error(`Không tải được exam ${num}: HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`Could not download exam ${num}: HTTP ${res.status}`);
   const text = await res.text();
   writeFileSync(cached, text);
   return text;
@@ -73,7 +73,7 @@ async function verifyCourse(course) {
   const manifestPath = join(COURSES_DIR, course.id, 'course.json');
   const upstream = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf8')).upstream : null;
   if (!upstream) {
-    console.log(`${course.id}: không khai báo nguồn đối chiếu, bỏ qua.\n`);
+    console.log(`${course.id}: no upstream source declared, skipped.\n`);
     return 0;
   }
 
@@ -87,8 +87,8 @@ async function verifyCourse(course) {
     ),
   ].sort((a, b) => a - b);
 
-  console.log(`${course.id} · nguồn: ${upstream.label ?? upstream.rawBase}`);
-  console.log(`Đối chiếu ${questions.length} câu với ${examNums.length} đề gốc: ${examNums.join(', ')}\n`);
+  console.log(`${course.id} · source: ${upstream.label ?? upstream.rawBase}`);
+  console.log(`Checking ${questions.length} questions against ${examNums.length} upstream exams: ${examNums.join(', ')}\n`);
 
   const cacheDir = join(PACKAGE_DIR, '.cache', course.id);
   const exams = new Map();
@@ -125,22 +125,22 @@ async function verifyCourse(course) {
     }
   }
 
-  console.log(`Đã đối chiếu: ${checked} câu`);
-  console.log(`Thiếu trích dẫn nguồn: ${missingCitation.length}`);
-  console.log(`Không tìm thấy câu gốc theo trích dẫn: ${notFoundUpstream.length}`);
-  console.log(`Lệch đáp án: ${mismatches.length}\n`);
+  console.log(`Checked: ${checked} questions`);
+  console.log(`Missing a source citation: ${missingCitation.length}`);
+  console.log(`Citation points at no upstream question: ${notFoundUpstream.length}`);
+  console.log(`Answer mismatches: ${mismatches.length}\n`);
 
   for (const item of mismatches) {
     console.log(`  ${item.where} · ${item.source}`);
-    console.log(`    tài liệu: ${item.ours}  |  đề gốc: ${item.theirs}`);
+    console.log(`    ours: ${item.ours}  |  upstream: ${item.theirs}`);
     console.log(`    "${item.text}…"\n`);
   }
   if (missingCitation.length) {
-    console.log('Thiếu trích dẫn:');
+    console.log('Missing citations:');
     for (const item of missingCitation.slice(0, 15)) console.log(`  - ${item}`);
   }
   if (notFoundUpstream.length) {
-    console.log('Trích dẫn không khớp câu nào trong đề gốc:');
+    console.log('Citations with no matching upstream question:');
     for (const item of notFoundUpstream.slice(0, 15)) console.log(`  - ${item}`);
   }
 

@@ -11,7 +11,7 @@ export const CourseContext = createContext<CourseContextValue | null>(null);
 
 export function useCourse(): CourseContextValue {
   const value = useContext(CourseContext);
-  if (!value) throw new Error('useCourse chỉ dùng được bên trong CourseLayout.');
+  if (!value) throw new Error('useCourse must be called inside CourseLayout.');
   return value;
 }
 

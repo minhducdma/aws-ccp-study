@@ -17,7 +17,7 @@ const routes = entry.routes();
 for (const route of routes) {
   try {
     const html = entry.render(route);
-    if (html.length < 200) throw new Error(`HTML quá ngắn (${html.length} ký tự)`);
+    if (html.length < 200) throw new Error(`HTML is suspiciously short (${html.length} chars)`);
     console.log(`  ok   ${route}`);
   } catch (error) {
     failed += 1;
@@ -26,5 +26,5 @@ for (const route of routes) {
 }
 
 await server.close();
-console.log(`\n${routes.length - failed}/${routes.length} route render thành công.`);
+console.log(`\n${routes.length - failed}/${routes.length} routes rendered successfully.`);
 process.exit(failed > 0 ? 1 : 0);

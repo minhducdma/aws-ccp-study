@@ -18,7 +18,7 @@ async function loadExam(upstream, cacheDir, num) {
   if (existsSync(cached)) return readFileSync(cached, 'utf8');
   const file = upstream.filePattern.replace('{n}', String(num));
   const res = await fetch(`${upstream.rawBase}/${file}`);
-  if (!res.ok) throw new Error(`Không tải được exam ${num}: HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`Could not download exam ${num}: HTTP ${res.status}`);
   const text = await res.text();
   writeFileSync(cached, text);
   return text;
@@ -189,7 +189,7 @@ async function generateForCourse(courseId) {
   if (plan.length === 0) return false;
 
   if (!course.upstream) {
-    console.log(`${courseId}: khai báo generateFrom nhưng thiếu "upstream", bỏ qua.`);
+    console.log(`${courseId}: declares generateFrom but has no "upstream" block, skipped.`);
     return false;
   }
 
@@ -222,22 +222,22 @@ async function generateForCourse(courseId) {
 
     const annotated = questions.filter((q) => annotations[q.num]?.domain).length;
     console.log(
-      `${courseId} · Mock Exam ${mockNum} (từ Exam ${examNum}): ${questions.length} câu, ${annotated} câu đã gán domain/giải thích.`,
+      `${courseId} · Mock Exam ${mockNum} (from Exam ${examNum}): ${questions.length} questions, ${annotated} annotated with a domain and explanation.`,
     );
     if (missingAnswers.length) {
-      console.log(`  ! thiếu đáp án ở câu: ${missingAnswers.map((q) => q.num).join(', ')}`);
+      console.log(`  ! no answer for question: ${missingAnswers.map((q) => q.num).join(', ')}`);
     }
     if (missingOptions.length) {
-      console.log(`  ! thiếu lựa chọn ở câu: ${missingOptions.map((q) => q.num).join(', ')}`);
+      console.log(`  ! no options for question: ${missingOptions.map((q) => q.num).join(', ')}`);
     }
     if (inconsistentMulti.length) {
       console.log(
-        `  ! đề gốc ghi "choose two" nhưng chỉ có 1 đáp án ở câu: ${inconsistentMulti.map((q) => q.num).join(', ')}`,
+        `  ! upstream says "choose two" but lists a single answer for question: ${inconsistentMulti.map((q) => q.num).join(', ')}`,
       );
     }
     const unannotated = questions.filter((q) => !annotations[q.num]?.explanation);
     if (unannotated.length) {
-      console.log(`  ! chưa có giải thích ở câu: ${unannotated.map((q) => q.num).join(', ')}`);
+      console.log(`  ! no explanation yet for question: ${unannotated.map((q) => q.num).join(', ')}`);
     }
   }
   return true;
@@ -256,5 +256,5 @@ for (const courseId of courseIds) {
   if (await generateForCourse(courseId)) generated += 1;
 }
 if (generated === 0) {
-  console.log('Không khoá học nào khai báo mockExams.generateFrom.');
+  console.log('No course declares mockExams.generateFrom.');
 }
