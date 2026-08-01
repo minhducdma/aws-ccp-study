@@ -7,7 +7,10 @@
   "level": "Professional",
   "levelOrder": 3,
   "status": "planned",
-  "summary": "Xây dựng ứng dụng generative AI production: RAG, agent, fine-tuning, đánh giá và vận hành trên Bedrock.",
+  "summary": {
+    "vi": "Xây dựng ứng dụng generative AI production: RAG, agent, fine-tuning, đánh giá và vận hành trên Bedrock.",
+    "en": "Building production generative AI applications: RAG, agents, fine-tuning, evaluation and day-to-day operation on Bedrock."
+  },
   "estimatedHours": 70,
   "exam": {
     "totalQuestions": 75,

@@ -7,7 +7,10 @@
   "level": "Associate",
   "levelOrder": 2,
   "status": "planned",
-  "summary": "Thiết kế kiến trúc chịu lỗi, hiệu năng cao và tối ưu chi phí trên AWS. Bước tiếp theo tự nhiên sau Cloud Practitioner.",
+  "summary": {
+    "vi": "Thiết kế kiến trúc chịu lỗi, hiệu năng cao và tối ưu chi phí trên AWS. Bước tiếp theo tự nhiên sau Cloud Practitioner.",
+    "en": "Designing fault-tolerant, high-performance and cost-effective architectures on AWS. The natural next step after Cloud Practitioner."
+  },
   "estimatedHours": 40,
   "exam": {
     "totalQuestions": 65,

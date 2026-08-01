@@ -7,7 +7,10 @@
   "level": "Foundational",
   "levelOrder": 1,
   "status": "available",
-  "summary": "Nền tảng điện toán đám mây, các dịch vụ AWS cốt lõi, mô hình bảo mật chia sẻ trách nhiệm và cách tính chi phí. Không đòi hỏi kinh nghiệm kỹ thuật sâu.",
+  "summary": {
+    "vi": "Nền tảng điện toán đám mây, các dịch vụ AWS cốt lõi, mô hình bảo mật chia sẻ trách nhiệm và cách tính chi phí. Không đòi hỏi kinh nghiệm kỹ thuật sâu.",
+    "en": "Cloud computing fundamentals, the core AWS services, the shared responsibility model for security and how billing works. No deep technical experience needed."
+  },
   "estimatedHours": 12,
   "exam": {
     "totalQuestions": 65,
@@ -43,7 +46,9 @@
       "domain": 1,
       "weight": 24,
       "estimatedHours": 2.9,
-      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
+      "notes": [
+        { "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }
+      ],
       "quiz": { "count": 20, "passScore": 16, "timeLimitMin": 30 }
     },
     {
@@ -53,7 +58,9 @@
       "domain": 2,
       "weight": 30,
       "estimatedHours": 3.6,
-      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
+      "notes": [
+        { "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }
+      ],
       "quiz": { "count": 25, "passScore": 20, "timeLimitMin": 35 }
     },
     {
@@ -64,8 +71,8 @@
       "weight": 34,
       "estimatedHours": 4.1,
       "notes": [
-        { "file": "notes.md", "title": "Kiến thức trọng tâm" },
-        { "file": "cheatsheet.md", "title": "Cheat sheet tra nhanh" }
+        { "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } },
+        { "file": "cheatsheet.md", "title": { "vi": "Cheat sheet tra nhanh", "en": "Quick-reference cheat sheet" } }
       ],
       "quiz": { "count": 30, "passScore": 24, "timeLimitMin": 45 }
     },
@@ -76,7 +83,9 @@
       "domain": 4,
       "weight": 12,
       "estimatedHours": 1.4,
-      "notes": [{ "file": "notes.md", "title": "Kiến thức trọng tâm" }],
+      "notes": [
+        { "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }
+      ],
       "quiz": { "count": 15, "passScore": 12, "timeLimitMin": 20 }
     }
   ]

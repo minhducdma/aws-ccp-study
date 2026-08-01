@@ -7,7 +7,10 @@
   "level": "Foundational",
   "levelOrder": 1,
   "status": "planned",
-  "summary": "Khái niệm AI/ML và generative AI trên AWS: Bedrock, SageMaker, prompt engineering và AI có trách nhiệm.",
+  "summary": {
+    "vi": "Khái niệm AI/ML và generative AI trên AWS: Bedrock, SageMaker, prompt engineering và AI có trách nhiệm.",
+    "en": "AI and machine learning concepts plus generative AI on AWS: Bedrock, SageMaker, prompt engineering and responsible AI."
+  },
   "estimatedHours": 14,
   "exam": {
     "totalQuestions": 85,

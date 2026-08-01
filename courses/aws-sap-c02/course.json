@@ -7,7 +7,10 @@
   "level": "Professional",
   "levelOrder": 3,
   "status": "planned",
-  "summary": "Kiến trúc phức tạp nhiều account và hybrid: chiến lược migration, tối ưu chi phí quy mô lớn, quản trị tập trung.",
+  "summary": {
+    "vi": "Kiến trúc phức tạp nhiều account và hybrid: chiến lược migration, tối ưu chi phí quy mô lớn, quản trị tập trung.",
+    "en": "Complex multi-account and hybrid architectures: migration strategy, cost optimisation at scale and central governance."
+  },
   "estimatedHours": 70,
   "exam": {
     "totalQuestions": 75,

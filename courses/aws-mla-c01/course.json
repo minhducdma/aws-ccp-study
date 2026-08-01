@@ -7,7 +7,10 @@
   "level": "Associate",
   "levelOrder": 2,
   "status": "planned",
-  "summary": "Đưa mô hình ML lên production: chuẩn bị dữ liệu, huấn luyện, triển khai và giám sát bằng SageMaker.",
+  "summary": {
+    "vi": "Đưa mô hình ML lên production: chuẩn bị dữ liệu, huấn luyện, triển khai và giám sát bằng SageMaker.",
+    "en": "Taking machine learning models to production: data preparation, training, deployment and monitoring with SageMaker."
+  },
   "estimatedHours": 45,
   "exam": {
     "totalQuestions": 65,

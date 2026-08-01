@@ -7,7 +7,10 @@
   "level": "Specialty",
   "levelOrder": 4,
   "status": "planned",
-  "summary": "Bảo mật chuyên sâu: quản lý danh tính, mã hoá, bảo vệ hạ tầng, phát hiện và ứng cứu sự cố.",
+  "summary": {
+    "vi": "Bảo mật chuyên sâu: quản lý danh tính, mã hoá, bảo vệ hạ tầng, phát hiện và ứng cứu sự cố.",
+    "en": "Security in depth: identity management, encryption, infrastructure protection, detection and incident response."
+  },
   "estimatedHours": 60,
   "exam": {
     "totalQuestions": 65,

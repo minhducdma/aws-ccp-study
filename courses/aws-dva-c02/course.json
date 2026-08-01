@@ -7,7 +7,10 @@
   "level": "Associate",
   "levelOrder": 2,
   "status": "planned",
-  "summary": "Phát triển, triển khai và gỡ lỗi ứng dụng cloud-native: Lambda, API Gateway, DynamoDB, CI/CD và SDK.",
+  "summary": {
+    "vi": "Phát triển, triển khai và gỡ lỗi ứng dụng cloud-native: Lambda, API Gateway, DynamoDB, CI/CD và SDK.",
+    "en": "Writing, deploying and debugging cloud-native applications: Lambda, API Gateway, DynamoDB, CI/CD and the SDKs."
+  },
   "estimatedHours": 40,
   "exam": {
     "totalQuestions": 65,

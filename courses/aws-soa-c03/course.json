@@ -7,7 +7,10 @@
   "level": "Associate",
   "levelOrder": 2,
   "status": "planned",
-  "summary": "Vận hành hệ thống trên AWS: giám sát, tự động hoá, khắc phục sự cố, quản lý mạng và bảo mật vận hành.",
+  "summary": {
+    "vi": "Vận hành hệ thống trên AWS: giám sát, tự động hoá, khắc phục sự cố, quản lý mạng và bảo mật vận hành.",
+    "en": "Running systems on AWS: monitoring, automation, troubleshooting, network management and operational security."
+  },
   "estimatedHours": 40,
   "exam": {
     "totalQuestions": 65,
