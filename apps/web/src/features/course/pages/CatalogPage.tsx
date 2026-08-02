@@ -1,19 +1,29 @@
 import {
   Badge,
+  BookIcon,
   Card,
   ChevronRightIcon,
+  ClipboardIcon,
   ClockIcon,
+  CountUp,
+  FeatureCard,
+  FlameIcon,
+  LayersIcon,
   LevelGlyph,
   LockIcon,
   Progress,
   ProgressRing,
   RoadmapArt,
+  SparkleIcon,
+  StatTile,
+  TargetIcon,
   fadeUp,
   hoverLift,
   m,
   stagger,
   type CourseLevel,
 } from '@study/ui';
+import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import AppHeader from '../../../app/components/AppHeader';
 import { useI18n, type I18n, type MessageKey } from '../../../i18n';
@@ -54,6 +64,38 @@ function courseStats(course: Course, progress: CourseProgress) {
       Object.keys(progress.practice).length > 0 ||
       Object.keys(progress.exams).length > 0,
   };
+}
+
+/** Floating card that hovers on top of the hero illustration, echoing a course's own readiness ring. */
+function HeroFloatCard({
+  icon,
+  value,
+  label,
+  className,
+}: {
+  icon: ReactNode;
+  value: ReactNode;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <m.div
+      className={[
+        'absolute flex items-center gap-3 rounded-2xl border border-line-strong bg-overlay/95 px-4 py-3 shadow-xl shadow-slate-900/10 backdrop-blur',
+        className ?? '',
+      ].join(' ')}
+      animate={{ y: [0, -6, 0] }}
+      transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+    >
+      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-brand-500/12 text-brand-600">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-sm font-bold text-slate-900 tabular-nums">{value}</p>
+        <p className="text-[11px] leading-tight whitespace-nowrap text-slate-500">{label}</p>
+      </div>
+    </m.div>
+  );
 }
 
 function AvailableCard({ course, progress }: { course: Course; progress: CourseProgress }) {
@@ -193,35 +235,163 @@ export default function CatalogPage() {
 
   const available = courses.filter((c) => c.status === 'available');
 
+  const totalQuestions = courses.reduce((sum, c) => sum + c.questionCount, 0);
+  const totalMocks = courses.reduce((sum, c) => sum + c.mockExams.length, 0);
+  const totalHours = courses.reduce((sum, c) => sum + c.estimatedHours, 0);
+  const totalGatedPhases = available.reduce(
+    (sum, c) => sum + c.phases.filter((p) => p.gateQuiz).length,
+    0,
+  );
+
+  const readinessValues = available.map((c) => courseStats(c, store.courses[c.id] ?? emptyCourseProgress).readiness);
+  const averageReadiness =
+    readinessValues.length > 0
+      ? Math.round(readinessValues.reduce((sum, v) => sum + v, 0) / readinessValues.length)
+      : 0;
+
+  const heroStats = [
+    { label: t('catalog.stats.certifications'), value: courses.length, icon: <SparkleIcon width={18} height={18} /> },
+    { label: t('catalog.stats.questions'), value: totalQuestions, icon: <BookIcon width={18} height={18} /> },
+    { label: t('catalog.stats.mockExams'), value: totalMocks, icon: <ClipboardIcon width={18} height={18} /> },
+    { label: t('catalog.stats.hours'), value: totalHours, suffix: 'h', icon: <ClockIcon width={18} height={18} /> },
+  ];
+
+  const features = [
+    {
+      title: t('catalog.features.phased.title'),
+      description: t('catalog.features.phased.description'),
+      icon: <LayersIcon width={20} height={20} />,
+      tone: 'bg-sky-500/12 text-sky-600',
+    },
+    {
+      title: t('catalog.features.practice.title'),
+      description: t('catalog.features.practice.description'),
+      icon: <BookIcon width={20} height={20} />,
+      tone: 'bg-emerald-500/12 text-emerald-600',
+    },
+    {
+      title: t('catalog.features.gate.title'),
+      description: t('catalog.features.gate.description'),
+      icon: <TargetIcon width={20} height={20} />,
+      tone: 'bg-brand-500/12 text-brand-600',
+    },
+    {
+      title: t('catalog.features.review.title'),
+      description: t('catalog.features.review.description'),
+      icon: <FlameIcon width={20} height={20} />,
+      tone: 'bg-rose-500/12 text-rose-600',
+    },
+  ];
+
   return (
     <>
       <AppHeader />
       <div className="mx-auto max-w-5xl px-4 pt-10 pb-28 sm:px-8 sm:pt-14 lg:pb-14">
 
       <m.header
-        className="mb-12 grid items-center gap-8 md:grid-cols-[1.1fr_0.9fr]"
+        className="relative mb-8 overflow-hidden rounded-3xl border border-line bg-gradient-to-br from-sky-100/70 via-surface to-brand-100/60 px-6 py-10 sm:px-10 sm:py-14"
         variants={stagger(0.08)}
         initial="hidden"
         animate="visible"
       >
-        <div>
-          <m.p
-            variants={fadeUp}
-            className="text-xs font-semibold tracking-widest text-brand-500 uppercase"
-          >
-            {t('catalog.eyebrow')}
-          </m.p>
-          <m.h1 variants={fadeUp} className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-            {t('catalog.heading')}
-          </m.h1>
-          <m.p variants={fadeUp} className="mt-3 text-sm leading-relaxed text-slate-500">
-            {t('catalog.intro')}
-          </m.p>
+        {/* Ambient glow blobs, purely decorative */}
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full bg-brand-400/20 blur-3xl"
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-20 -left-10 size-64 rounded-full bg-sky-400/20 blur-3xl"
+        />
+
+        <div className="relative grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <m.span
+              variants={fadeUp}
+              className="inline-flex items-center gap-1.5 rounded-full border border-line-strong bg-overlay/80 px-3 py-1 text-[11px] font-semibold text-slate-600"
+            >
+              <SparkleIcon width={13} height={13} className="text-brand-500" />
+              {t('catalog.heroKicker')}
+            </m.span>
+            <m.p
+              variants={fadeUp}
+              className="mt-4 text-xs font-semibold tracking-widest text-brand-600 uppercase"
+            >
+              {t('catalog.eyebrow')}
+            </m.p>
+            <m.h1 variants={fadeUp} className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
+              {t('catalog.heading')}
+            </m.h1>
+            <m.p variants={fadeUp} className="mt-3 max-w-md text-sm leading-relaxed text-slate-600">
+              {t('catalog.intro')}
+            </m.p>
+          </div>
+
+          <m.div variants={fadeUp} className="relative hidden md:block">
+            <RoadmapArt label={t('art.roadmap')} />
+            {averageReadiness > 0 && (
+              <HeroFloatCard
+                icon={<TargetIcon width={18} height={18} />}
+                value={`${averageReadiness}%`}
+                label={t('catalog.heroFloatReadiness')}
+                className="-top-2 -left-4"
+              />
+            )}
+            {totalGatedPhases > 0 && (
+              <HeroFloatCard
+                icon={<LayersIcon width={18} height={18} />}
+                value={totalGatedPhases}
+                label={t('catalog.heroFloatPhases')}
+                className="-bottom-2 -right-2"
+              />
+            )}
+          </m.div>
         </div>
-        <m.div variants={fadeUp} className="hidden md:block">
-          <RoadmapArt label={t('art.roadmap')} />
-        </m.div>
       </m.header>
+
+      <m.div
+        className="mb-12 grid grid-cols-2 gap-3 sm:grid-cols-4"
+        variants={stagger(0.06)}
+        initial="hidden"
+        animate="visible"
+      >
+        {heroStats.map((stat) => (
+          <m.div key={stat.label} variants={fadeUp}>
+            <StatTile
+              label={stat.label}
+              value={<CountUp value={stat.value} suffix={stat.suffix} />}
+              icon={stat.icon}
+            />
+          </m.div>
+        ))}
+      </m.div>
+
+      <section className="mb-14">
+        <p className="text-xs font-semibold tracking-widest text-brand-600 uppercase">
+          {t('catalog.features.eyebrow')}
+        </p>
+        <h2 className="mt-1.5 text-xl font-bold text-slate-900 sm:text-2xl">
+          {t('catalog.features.heading')}
+        </h2>
+        <m.div
+          className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          variants={stagger(0.06)}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+        >
+          {features.map((feature) => (
+            <m.div key={feature.title} variants={fadeUp}>
+              <FeatureCard
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                tone={feature.tone}
+              />
+            </m.div>
+          ))}
+        </m.div>
+      </section>
 
       {available.length === 0 && (
         <Card inset="md" className="mb-10 border-rose-500/30 bg-rose-500/5 text-sm text-slate-600">
