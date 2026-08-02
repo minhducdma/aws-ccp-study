@@ -30,6 +30,21 @@ function NavItem({
   locked?: boolean;
   end?: boolean;
 }) {
+  if (locked) {
+    return (
+      <span
+        aria-disabled="true"
+        className={[
+          'relative flex cursor-not-allowed items-center justify-between gap-2 rounded-lg px-3 py-1.5 text-sm text-slate-400',
+          depth > 0 ? 'ml-3 pl-3' : '',
+        ].join(' ')}
+      >
+        <span className="truncate">{children}</span>
+        <LockIcon width={13} height={13} className="shrink-0 text-slate-400" />
+      </span>
+    );
+  }
+
   return (
     <NavLink
       to={to}
@@ -37,12 +52,10 @@ function NavItem({
       className={({ isActive }) =>
         [
           'focus-ring relative block rounded-lg px-3 py-1.5 text-sm transition-colors duration-200',
-          depth > 0 ? 'ml-3 border-l border-line pl-3' : '',
+          depth > 0 ? 'ml-3 pl-3' : '',
           isActive
             ? 'bg-brand-500/12 font-medium text-brand-700'
-            : locked
-              ? 'text-slate-400 hover:text-slate-500'
-              : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900',
+            : 'text-slate-600 hover:bg-slate-200/70 hover:text-slate-900',
         ].join(' ')
       }
     >

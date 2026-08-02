@@ -65,6 +65,18 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
           else if (revealed && picked) markerStyle = 'border-rose-400 bg-rose-500 text-slate-900';
           else if (picked) markerStyle = 'border-brand-400 bg-brand-500 text-slate-950';
 
+          /* Answer text colour follows the same correct/incorrect logic as the border and
+             marker above, so the verdict is legible at a glance instead of relying only on
+             the surrounding box colour. */
+          let textStyle = 'text-slate-700';
+          if (revealed) {
+            if (isAnswer) textStyle = 'font-semibold text-emerald-700';
+            else if (picked) textStyle = 'font-semibold text-rose-700';
+            else textStyle = 'text-slate-500';
+          } else if (picked) {
+            textStyle = 'font-medium text-brand-800';
+          }
+
           /* Revealed answers are stated in text as well as in colour, so the result is
              still readable without colour vision. */
           const revealedNote = revealed
@@ -94,7 +106,7 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
               >
                 {option.letter}
               </span>
-              <span className="text-sm leading-relaxed text-slate-700">
+              <span className={`text-sm leading-relaxed transition-colors duration-200 ${textStyle}`}>
                 {option.text}
                 {revealedNote && <span className="sr-only">{revealedNote}</span>}
               </span>
@@ -110,7 +122,7 @@ export default function QuestionCard({ question, selected, onToggle, revealed = 
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
         >
-          <p className="mb-1.5 text-xs font-semibold tracking-wide text-brand-300 uppercase">
+          <p className="mb-1.5 text-xs font-semibold tracking-wide text-brand-700 uppercase">
             {t('question.answerIs', { letters: question.correct.join(', ') })}
           </p>
           {question.explanation ? (

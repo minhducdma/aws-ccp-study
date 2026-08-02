@@ -5,6 +5,7 @@ import {
   ButtonLink,
   Card,
   CheckIcon,
+  ClockIcon,
   ConfirmDialog,
   FlameIcon,
   LayersIcon,
@@ -209,7 +210,8 @@ export default function Dashboard() {
                         )}
                         {!phase.ready && <Badge tone="slate">{t('phase.draft')}</Badge>}
                           </div>
-                          <span className="shrink-0 rounded-lg bg-surface/70 px-2 py-1 text-xs font-bold text-slate-700 tabular-nums">
+                          <span className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-brand-500/15 px-2 py-1 text-xs font-bold text-brand-800 tabular-nums">
+                            <ClockIcon width={13} height={13} className="shrink-0" />
                             ~{phase.estimatedHours}h
                           </span>
                         </div>
@@ -220,7 +222,9 @@ export default function Dashboard() {
                           <div className="flex items-center justify-between gap-4">
                             <dt className="text-slate-600">{t('dashboard.practice')}</dt>
                             <dd className="font-bold text-slate-800 tabular-nums">
-                              {practiceDone}/{practiceTotal}
+                              {practiceDone > 0
+                                ? `${practiceDone}/${practiceTotal}`
+                                : t('dashboard.gateQuizNotTaken')}
                             </dd>
                           </div>
                           <div className="flex items-center justify-between gap-4">
@@ -246,17 +250,20 @@ export default function Dashboard() {
                       </div>
                     </div>
 
-                    <div className="grid gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                    {/* Always a single vertical column of buttons — on mobile it fills the
+                        card width, on tablet/desktop it becomes a narrow stack next to the
+                        phase info instead of wrapping into a horizontal row. */}
+                    <div className="grid gap-2 sm:w-48 sm:shrink-0 sm:justify-self-end">
                       {phase.notes.length > 0 && (
                         <ButtonLink
                           to={url(`/phase/${phase.id}/notes/${phase.notes[0].id}`)}
                           tone="secondary"
                           size="sm"
                           icon={<BookIcon width={15} height={15} />}
-                          className="min-h-10 w-full justify-start sm:min-h-0 sm:w-auto"
+                          className="min-h-10 w-full justify-start"
                         >
                           {t('dashboard.notes')}
-                          <span className="ml-auto text-[11px] opacity-70 tabular-nums sm:ml-1">
+                          <span className="ml-auto text-[11px] opacity-70 tabular-nums">
                             {notesPercent}%
                           </span>
                         </ButtonLink>
@@ -267,10 +274,10 @@ export default function Dashboard() {
                           tone="secondary"
                           size="sm"
                           icon={<LayersIcon width={15} height={15} />}
-                          className="min-h-10 w-full justify-start sm:min-h-0 sm:w-auto"
+                          className="min-h-10 w-full justify-start"
                         >
                           {t('dashboard.practice')}
-                          <span className="ml-auto text-[11px] opacity-70 tabular-nums sm:ml-1">
+                          <span className="ml-auto text-[11px] opacity-70 tabular-nums">
                             {practicePercent}%
                           </span>
                         </ButtonLink>
@@ -281,10 +288,10 @@ export default function Dashboard() {
                           tone={passed ? 'secondary' : 'primary'}
                           size="sm"
                           icon={<TargetIcon width={15} height={15} />}
-                          className="min-h-10 w-full justify-start sm:min-h-0 sm:w-auto"
+                          className="min-h-10 w-full justify-start"
                         >
                           {t('dashboard.gateQuiz')}
-                          <span className="ml-auto text-[11px] opacity-70 tabular-nums sm:ml-1">
+                          <span className="ml-auto text-[11px] opacity-70 tabular-nums">
                             {gatePercent}%
                           </span>
                         </ButtonLink>
