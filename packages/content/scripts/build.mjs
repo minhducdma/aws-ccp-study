@@ -214,7 +214,7 @@ function parseExplanations(markdown) {
 function parseDomainMap(markdown) {
   const map = new Map();
   for (const line of markdown.split('\n')) {
-    const m = line.match(/^\|\s*(\d+)\s*\|\s*(?:Domain\s*)?([1-4])\b/i);
+    const m = line.match(/^\|\s*(\d+)\s*\|\s*(?:Domain\s*)?([1-9])\b/i);
     if (m) map.set(Number(m[1]), Number(m[2]));
   }
   return map;
