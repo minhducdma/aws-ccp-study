@@ -30,13 +30,11 @@ import {
   subscribeToPractice,
   subscribeToWrong,
 } from '../../services/firebase/collections/userProgress';
-
-const STORAGE_KEY = 'study-progress-v2';
-
-// Progress written before the app supported multiple courses. It held a single course's
-// data at the top level, which is now stored under this id.
-const LEGACY_STORAGE_KEY = 'aws-ccp-progress-v1';
-const LEGACY_COURSE_ID = 'aws-clf-c02';
+import {
+  LEGACY_COURSE_ID,
+  LEGACY_PROGRESS_STORAGE_KEY,
+  PROGRESS_STORAGE_KEY,
+} from '../../utils/constants';
 
 export const emptyCourseProgress: CourseProgress = {
   notesRead: {},
@@ -63,7 +61,7 @@ function normalizeCourseProgress(progress: Partial<CourseProgress>): CourseProgr
 }
 
 function migrateLegacy(): ProgressStore | null {
-  const raw = localStorage.getItem(LEGACY_STORAGE_KEY);
+  const raw = localStorage.getItem(LEGACY_PROGRESS_STORAGE_KEY);
   if (!raw) return null;
   const legacy = JSON.parse(raw) as Partial<CourseProgress>;
   return {
@@ -74,7 +72,7 @@ function migrateLegacy(): ProgressStore | null {
 
 function load(): ProgressStore {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(PROGRESS_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as ProgressStore;
       return {
@@ -90,7 +88,7 @@ function load(): ProgressStore {
     // The legacy entry is left in place so downgrading does not lose anything.
     const migrated = migrateLegacy();
     if (migrated) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(migrated));
+      localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(migrated));
       return migrated;
     }
     return emptyStore;
@@ -111,7 +109,7 @@ function reportPersistenceError(operation: string, error: unknown) {
 function applyRemote(next: ProgressStore) {
   store = next;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    localStorage.setItem(PROGRESS_STORAGE_KEY, JSON.stringify(next));
   } catch (error) {
     reportPersistenceError('synchronization', error);
     // Ignore writes rejected when localStorage is unavailable (private mode).
@@ -122,7 +120,7 @@ function applyRemote(next: ProgressStore) {
 function clearLocalProgress() {
   store = emptyStore;
   try {
-    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(PROGRESS_STORAGE_KEY);
   } catch {
     // Ignore removals rejected when localStorage is unavailable (private mode).
   }

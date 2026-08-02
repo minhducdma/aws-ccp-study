@@ -18,6 +18,7 @@ import type {
   PracticeState,
 } from '../../../types';
 import { db } from '../config';
+import { USER_PROGRESS_COLLECTION } from '../../../utils/constants';
 
 /**
  * The `userProgress` collection, one document per signed-in user (keyed by uid):
@@ -36,19 +37,19 @@ import { db } from '../config';
  */
 
 export function coursesCollectionRef(uid: string) {
-  return collection(db, 'userProgress', uid, 'courses');
+  return collection(db, USER_PROGRESS_COLLECTION, uid, 'courses');
 }
 
 function userProgressDocRef(uid: string) {
-  return doc(db, 'userProgress', uid);
+  return doc(db, USER_PROGRESS_COLLECTION, uid);
 }
 
 export function courseDocRef(uid: string, courseId: string) {
-  return doc(db, 'userProgress', uid, 'courses', courseId);
+  return doc(db, USER_PROGRESS_COLLECTION, uid, 'courses', courseId);
 }
 
 export function attemptsCollectionRef(uid: string, courseId: string) {
-  return collection(db, 'userProgress', uid, 'courses', courseId, 'attempts');
+  return collection(db, USER_PROGRESS_COLLECTION, uid, 'courses', courseId, 'attempts');
 }
 
 function notesCollectionRef(uid: string, courseId: string) {
@@ -102,7 +103,7 @@ interface WrongProgressDocument {
 }
 
 export function attemptDocRef(uid: string, courseId: string, attemptId: string) {
-  return doc(db, 'userProgress', uid, 'courses', courseId, 'attempts', attemptId);
+  return doc(db, USER_PROGRESS_COLLECTION, uid, 'courses', courseId, 'attempts', attemptId);
 }
 
 /** Subscribes to the list of course documents under a user. Fires once per change, with the
