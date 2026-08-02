@@ -6,7 +6,7 @@
   "provider": "AWS",
   "level": "Foundational",
   "levelOrder": 1,
-  "status": "planned",
+  "status": "available",
   "summary": {
     "vi": "Khái niệm AI/ML và generative AI trên AWS: Bedrock, SageMaker, prompt engineering và AI có trách nhiệm.",
     "en": "AI and machine learning concepts plus generative AI on AWS: Bedrock, SageMaker, prompt engineering and responsible AI."
@@ -18,5 +18,77 @@
     "durationMin": 90,
     "passScore": 700,
     "maxScore": 1000
-  }
+  },
+  "domainLabels": {
+    "1": { "vi": "Nền tảng AI và ML", "en": "Fundamentals of AI and ML" },
+    "2": { "vi": "Nền tảng AI tạo sinh", "en": "Fundamentals of Generative AI" },
+    "3": { "vi": "Ứng dụng mô hình nền tảng", "en": "Applications of Foundation Models" },
+    "4": { "vi": "Nguyên tắc AI có trách nhiệm", "en": "Guidelines for Responsible AI" },
+    "5": { "vi": "Bảo mật, tuân thủ và quản trị", "en": "Security, Compliance, and Governance" }
+  },
+  "upstream": {
+    "label": "kananinirav AWS Certified AI Practitioner practice tests",
+    "rawBase": "https://raw.githubusercontent.com/kananinirav/aws-certified-ai-practitioner-study-notes/master/practice-test",
+    "filePattern": "practice-test-{n}.md"
+  },
+  "mockExams": {
+    "passRatio": 0.7,
+    "timeLimitMin": 90,
+    "generateFrom": [
+      { "mock": 1, "upstreamExam": 1 },
+      { "mock": 2, "upstreamExam": 2 }
+    ]
+  },
+  "phases": [
+    {
+      "id": "phase-1",
+      "dir": "1-ai-ml-fundamentals",
+      "title": { "vi": "Nền tảng AI và ML", "en": "Fundamentals of AI and ML" },
+      "domain": 1,
+      "weight": 20,
+      "estimatedHours": 2.8,
+      "notes": [{ "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }],
+      "quiz": { "count": 5, "passScore": 4, "timeLimitMin": 10 }
+    },
+    {
+      "id": "phase-2",
+      "dir": "2-generative-ai",
+      "title": { "vi": "Nền tảng AI tạo sinh", "en": "Fundamentals of Generative AI" },
+      "domain": 2,
+      "weight": 24,
+      "estimatedHours": 3.4,
+      "notes": [{ "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }],
+      "quiz": { "count": 5, "passScore": 4, "timeLimitMin": 10 }
+    },
+    {
+      "id": "phase-3",
+      "dir": "3-foundation-models",
+      "title": { "vi": "Ứng dụng mô hình nền tảng", "en": "Applications of Foundation Models" },
+      "domain": 3,
+      "weight": 28,
+      "estimatedHours": 3.9,
+      "notes": [{ "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }],
+      "quiz": { "count": 5, "passScore": 4, "timeLimitMin": 10 }
+    },
+    {
+      "id": "phase-4",
+      "dir": "4-responsible-ai",
+      "title": { "vi": "Nguyên tắc AI có trách nhiệm", "en": "Guidelines for Responsible AI" },
+      "domain": 4,
+      "weight": 14,
+      "estimatedHours": 2,
+      "notes": [{ "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }],
+      "quiz": { "count": 5, "passScore": 4, "timeLimitMin": 10 }
+    },
+    {
+      "id": "phase-5",
+      "dir": "5-security-governance",
+      "title": { "vi": "Bảo mật, tuân thủ và quản trị", "en": "Security, Compliance, and Governance" },
+      "domain": 5,
+      "weight": 14,
+      "estimatedHours": 1.9,
+      "notes": [{ "file": "notes.md", "title": { "vi": "Kiến thức trọng tâm", "en": "Core concepts" } }],
+      "quiz": { "count": 5, "passScore": 4, "timeLimitMin": 10 }
+    }
+  ]
 }

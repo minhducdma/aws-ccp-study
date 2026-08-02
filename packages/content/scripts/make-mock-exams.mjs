@@ -39,12 +39,14 @@ async function loadExam(upstream, cacheDir, num) {
 function parseExam(markdown) {
   const questions = [];
   let current = null;
+  let readingExplanation = false;
 
   for (const line of markdown.split('\n')) {
     const header = line.match(/^\d+\.\s+(\S.*)$/);
     if (header) {
-      current = { text: header[1].trim(), options: [], correct: null };
+      current = { text: header[1].trim(), options: [], correct: null, explanation: '' };
       questions.push(current);
+      readingExplanation = false;
       continue;
     }
     if (!current) continue;
@@ -59,10 +61,56 @@ function parseExam(markdown) {
     const answer = line.match(/Correct\s*answer:\s*([A-E](?:\s*[,&]?\s*[A-E])*)/i);
     if (answer && !current.correct) {
       current.correct = answer[1].match(/[A-E]/gi)?.map((l) => l.toUpperCase()) ?? null;
+      continue;
+    }
+
+    const explanation = line.match(/^\s*Explanation:\s*(.*)$/i);
+    if (explanation) {
+      current.explanation = explanation[1].trim();
+      readingExplanation = true;
+      continue;
+    }
+    if (readingExplanation && line.trim() && !/<\/details>/.test(line)) {
+      current.explanation += `${current.explanation ? ' ' : ''}${line.trim()}`;
     }
   }
 
   return questions.map((q, i) => ({ ...q, num: i + 1 }));
+}
+
+const AIF_DOMAIN_RULES = [
+  [
+    5,
+    /\b(?:secure|compliance|governance|iam|permission|unauthorized|encrypt|privateLink|cloudtrail|artifact|audit manager|macie|data lineage|regulatory|prompt injection|jailbreak)\b/i,
+    'Bảo mật, tuân thủ và quản trị',
+  ],
+  [
+    4,
+    /\b(?:responsible|bias|fairness|transparent|transparency|explainab|interpretability|toxic|plagiarism|environmental|human-in-the-loop|ground truth|clarify|guardrail|inappropriate|trust)\b/i,
+    'AI có trách nhiệm',
+  ],
+  [
+    3,
+    /\b(?:rag|retrieval.augmented|fine-tun|foundation model|prompt engineering|few-shot|zero-shot|temperature|top k|context window|embedding|vector database|knowledge base|agents? for amazon bedrock|model evaluation|rouge|bleu|bertscore|transfer learning)\b/i,
+    'Ứng dụng mô hình nền tảng',
+  ],
+  [
+    2,
+    /\b(?:generative ai|genai|large language model|llm|amazon bedrock|foundation model lifecycle|amazon q|partyrock|token|diffusion|multimodal|synthetic data|gan|image generation|content generation)\b/i,
+    'Nền tảng AI tạo sinh',
+  ],
+];
+
+function inferredAnnotation(course, question) {
+  if (course.id !== 'aws-aif-c01') return null;
+  const correctOptions = question.options
+    .filter((option) => question.correct?.includes(option.letter))
+    .map((option) => option.text)
+    .join(' ');
+  const searchable = `${question.text} ${correctOptions}`;
+  const match = AIF_DOMAIN_RULES.find(([, pattern]) => pattern.test(searchable));
+  const [domain, , topic] = match ?? [1, null, 'Nền tảng AI và ML'];
+  return { domain, topic };
 }
 
 const MULTI_RE = /\((?:choose|select)\s+(?:two|three)\.?\)/i;
@@ -128,7 +176,7 @@ function renderAnswers({ mockNum, examNum, questions, annotations, course }) {
 
   const domainCounts = new Map();
   for (const q of questions) {
-    const domain = annotations[q.num]?.domain;
+    const domain = (annotations[q.num] ?? inferredAnnotation(course, q))?.domain;
     if (domain) domainCounts.set(domain, (domainCounts.get(domain) ?? 0) + 1);
   }
 
@@ -153,7 +201,7 @@ function renderAnswers({ mockNum, examNum, questions, annotations, course }) {
   ];
 
   for (const q of questions) {
-    const a = annotations[q.num];
+    const a = annotations[q.num] ?? inferredAnnotation(course, q);
     lines.push(`| ${q.num} | ${a?.domain ?? '—'} | ${a?.topic ?? '—'} |`);
   }
 
@@ -169,7 +217,7 @@ function renderAnswers({ mockNum, examNum, questions, annotations, course }) {
   lines.push(
     '',
     '> Domain nào bạn làm đúng dưới 70% thì đọc lại notes của phase tương ứng trước khi thi thật.',
-    `> Nếu tổng điểm dưới 70%, làm tiếp Practice Exam ${examNum === 20 ? '21, 22, 23' : '22, 23'} trong repo gốc.`,
+    '> Nếu tổng điểm dưới 70%, làm tiếp các Practice Exam khác trong repo gốc.',
     '>',
     '> Lưu ý: tỉ lệ domain của đề luyện này không trùng khớp tỉ lệ đề thi thật (đề gốc vốn không được',
     '> soạn theo đúng trọng số). Vì vậy hãy đọc kết quả theo **tỉ lệ đúng trong từng domain**, đừng suy',
@@ -180,10 +228,10 @@ function renderAnswers({ mockNum, examNum, questions, annotations, course }) {
   );
 
   for (const q of questions) {
-    const a = annotations[q.num];
+    const a = annotations[q.num] ?? inferredAnnotation(course, q);
     lines.push(`### Câu ${q.num} — Đáp án: ${(q.correct ?? []).join(', ')}`, '');
     lines.push(`> ${q.text}  \`(Exam ${examNum} - Q${q.num})\``, '');
-    lines.push(a?.explanation ?? '_Chưa có giải thích._', '');
+    lines.push(a?.explanation ?? q.explanation ?? '_Chưa có giải thích._', '');
   }
 
   return lines.join('\n');
@@ -227,7 +275,7 @@ async function generateForCourse(courseId) {
       renderAnswers({ mockNum, examNum, questions, annotations, course }),
     );
 
-    const annotated = questions.filter((q) => annotations[q.num]?.domain).length;
+    const annotated = questions.filter((q) => (annotations[q.num] ?? inferredAnnotation(course, q))?.domain).length;
     console.log(
       `${courseId} · Mock Exam ${mockNum} (from Exam ${examNum}): ${questions.length} questions, ${annotated} annotated with a domain and explanation.`,
     );
@@ -242,7 +290,7 @@ async function generateForCourse(courseId) {
         `  ! upstream says "choose two" but lists a single answer for question: ${inconsistentMulti.map((q) => q.num).join(', ')}`,
       );
     }
-    const unannotated = questions.filter((q) => !annotations[q.num]?.explanation);
+    const unannotated = questions.filter((q) => !annotations[q.num]?.explanation && !q.explanation);
     if (unannotated.length) {
       console.log(`  ! no explanation yet for question: ${unannotated.map((q) => q.num).join(', ')}`);
     }
