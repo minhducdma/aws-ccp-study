@@ -84,6 +84,29 @@ export const vi = {
   'catalog.courseMeta': '{questions} câu · {mocks} đề thử · ~{hours} giờ',
   'catalog.plannedMeta': 'Chưa mở vì nội dung đang được soạn · {questions} câu · {minutes} phút',
   'catalog.empty': 'Chưa có khoá học nào sẵn sàng. Thêm nội dung vào {path} rồi chạy lại {command}.',
+  'catalog.heroKicker': 'Miễn phí · Không quảng cáo · Lưu tiến độ theo tài khoản',
+  'catalog.heroFloatReadiness': 'Mức sẵn sàng trung bình',
+  'catalog.heroFloatPhases': 'chặng học có gate quiz chặn',
+
+  'catalog.stats.certifications': 'Chứng chỉ',
+  'catalog.stats.questions': 'Câu hỏi thực tế',
+  'catalog.stats.mockExams': 'Đề thi thử',
+  'catalog.stats.hours': 'Giờ học ước tính',
+
+  'catalog.features.eyebrow': 'Cách lộ trình hoạt động',
+  'catalog.features.heading': 'Học đúng trọng số đề thi, không học lan man',
+  'catalog.features.phased.title': 'Chia theo domain thật',
+  'catalog.features.phased.description':
+    'Mỗi phase ứng với một domain trong đề thi chính thức, xếp theo đúng trọng số phần trăm.',
+  'catalog.features.practice.title': 'Câu hỏi lấy từ đề gốc',
+  'catalog.features.practice.description':
+    'Ngân hàng câu hỏi luyện tập được trích từ các đề thi thử thật, có giải thích chi tiết từng câu.',
+  'catalog.features.gate.title': 'Gate Quiz chặn giữa chặng',
+  'catalog.features.gate.description':
+    'Phải đạt ngưỡng điểm của gate quiz mới mở phase tiếp theo, tránh học nhảy cóc.',
+  'catalog.features.review.title': 'Sổ tay câu sai tự động',
+  'catalog.features.review.description':
+    'Mọi câu trả lời sai ở bất kỳ đâu đều được gom lại để ôn tập trước ngày thi thật.',
 
   'dashboard.eyebrow': 'Lộ trình ~{hours} giờ · {code}',
   'dashboard.intro':

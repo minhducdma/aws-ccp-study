@@ -91,6 +91,29 @@ export const en: Catalog = {
   'catalog.plannedMeta':
     'Locked while the content is being written · {questions} questions · {minutes} minutes',
   'catalog.empty': 'No course is ready yet. Add content under {path}, then run {command} again.',
+  'catalog.heroKicker': 'Free · No ads · Progress saved to your account',
+  'catalog.heroFloatReadiness': 'Average readiness',
+  'catalog.heroFloatPhases': 'gated phases',
+
+  'catalog.stats.certifications': 'Certifications',
+  'catalog.stats.questions': 'Real practice questions',
+  'catalog.stats.mockExams': 'Mock exams',
+  'catalog.stats.hours': 'Estimated study hours',
+
+  'catalog.features.eyebrow': 'How the roadmap works',
+  'catalog.features.heading': 'Study the exam weight, not a random order',
+  'catalog.features.phased.title': 'Split by real domains',
+  'catalog.features.phased.description':
+    'Each phase maps to a domain from the official exam guide, weighted by its real percentage.',
+  'catalog.features.practice.title': 'Questions from real exams',
+  'catalog.features.practice.description':
+    'The practice bank is drawn from real mock exams, with a detailed explanation for every question.',
+  'catalog.features.gate.title': 'Gate quizzes between phases',
+  'catalog.features.gate.description':
+    'You need to clear a gate quiz to unlock the next phase, so nothing gets skipped.',
+  'catalog.features.review.title': 'Automatic wrong-answer review',
+  'catalog.features.review.description':
+    'Every question you get wrong, anywhere in the app, is collected here for review before the real exam.',
 
   'dashboard.eyebrow': '~{hours} h of study · {code}',
   'dashboard.intro': {
